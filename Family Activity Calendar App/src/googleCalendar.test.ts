@@ -3,10 +3,11 @@ import { afterEach, test } from "node:test"
 import {
   GoogleAccessError,
   fetchCalendarList,
-  fetchWeek,
-  loadSavedCalendar,
+  fetchWeeks,
+  loadSavedCalendars,
+  mergeWeeks,
   parseEvents,
-  saveCalendar,
+  saveCalendars,
 } from "./googleCalendar.ts"
 
 const DATES = [
@@ -25,13 +26,13 @@ function at(day: number, hour: number, minute = 0) {
 }
 
 function parse(raw: Parameters<typeof parseEvents>[0]) {
-  return parseEvents(raw, DATES, 7, 21, 123)
+  return parseEvents(raw, DATES, 7, 21, "family", 123)
 }
 
-test("parseEvents places a timed event on its day with person, time and length", () => {
+test("parseEvents places a timed event on its day with calendar, time and length", () => {
   const week = parse([
     {
-      summary: "Mia: Piano",
+      summary: "Piano",
       location: "Music school",
       start: { dateTime: at(6, 16) },
       end: { dateTime: at(6, 17, 30) },
@@ -42,7 +43,7 @@ test("parseEvents places a timed event on its day with person, time and length",
       title: "Piano",
       start: 16,
       duration: 1.5,
-      person: "Mia",
+      calendarId: "family",
       note: "Music school",
     },
   ])
@@ -120,15 +121,15 @@ test("parseEvents does not put an event ending at midnight on the next day", () 
 test("parseEvents lists all-day events on each day they cover", () => {
   const week = parse([
     // Google's end date is the day after the last day.
-    { summary: "Dad: Conference", start: { date: "2026-10-07" }, end: { date: "2026-10-09" } },
+    { summary: "Conference", start: { date: "2026-10-07" }, end: { date: "2026-10-09" } },
     { summary: "Holiday", start: { date: "2026-10-11" }, end: { date: "2026-10-12" } },
     // Started before this week.
     { summary: "Camp", start: { date: "2026-10-02" }, end: { date: "2026-10-06" } },
   ])
-  assert.deepEqual(week.allDay["2026-10-07"], [{ title: "Conference", person: "Dad" }])
-  assert.deepEqual(week.allDay["2026-10-08"], [{ title: "Conference", person: "Dad" }])
+  assert.deepEqual(week.allDay["2026-10-07"], [{ title: "Conference", calendarId: "family" }])
+  assert.deepEqual(week.allDay["2026-10-08"], [{ title: "Conference", calendarId: "family" }])
   assert.equal(week.allDay["2026-10-09"].length, 0)
-  assert.deepEqual(week.allDay["2026-10-11"], [{ title: "Holiday", person: "Family" }])
+  assert.deepEqual(week.allDay["2026-10-11"], [{ title: "Holiday", calendarId: "family" }])
   assert.deepEqual(
     week.allDay["2026-10-05"].map((e) => e.title),
     ["Camp"],
@@ -195,7 +196,10 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status })
 }
 
-test("fetchWeek reads every page and sends the token", async () => {
+const FAMILY = { id: "family@group.calendar.google.com", name: "Family", color: "#9fe1e7", textColor: "#000000" }
+const MIA = { id: "mia@example.com", name: "Mia", color: "#7a48c7", textColor: "#ffffff" }
+
+test("fetchWeeks reads every page and sends the token", async () => {
   let authorization = ""
   const urls = stubFetch((url, init) => {
     authorization = new Headers(init?.headers).get("Authorization") ?? ""
@@ -209,7 +213,7 @@ test("fetchWeek reads every page and sends the token", async () => {
         })
   })
 
-  const week = await fetchWeek("token-123", "family@group.calendar.google.com", DATES, 7, 21)
+  const week = await fetchWeeks("token-123", [FAMILY], DATES, 7, 21)
 
   assert.equal(authorization, "Bearer token-123")
   assert.equal(urls.length, 2)
@@ -218,66 +222,122 @@ test("fetchWeek reads every page and sends the token", async () => {
   assert.equal(urls[0].searchParams.get("timeMin"), new Date(2026, 9, 5).toISOString())
   assert.equal(urls[0].searchParams.get("timeMax"), new Date(2026, 9, 12).toISOString())
   assert.deepEqual(
-    week.timed["2026-10-06"].map((e) => e.title),
-    ["One", "Two"],
+    week.timed["2026-10-06"].map((e) => [e.title, e.calendarId]),
+    [
+      ["One", FAMILY.id],
+      ["Two", FAMILY.id],
+    ],
   )
 })
 
-test("fetchWeek reports an expired sign-in separately from other errors", async () => {
+test("fetchWeeks puts several calendars together and keeps track of each event's calendar", async () => {
+  stubFetch((url) =>
+    url.pathname.includes("mia%40example.com")
+      ? json({
+          items: [
+            { summary: "Piano", start: { dateTime: at(6, 8) }, end: { dateTime: at(6, 9) } },
+            { summary: "Camp", start: { date: "2026-10-06" }, end: { date: "2026-10-07" } },
+            { summary: "Early", start: { dateTime: at(6, 5) }, end: { dateTime: at(6, 6) } },
+          ],
+        })
+      : json({
+          items: [
+            { summary: "Dinner", start: { dateTime: at(6, 18) }, end: { dateTime: at(6, 19) } },
+            { summary: "Dentist", start: { dateTime: at(6, 7, 30) }, end: { dateTime: at(6, 8, 30) } },
+            { summary: "Late", start: { dateTime: at(6, 22) }, end: { dateTime: at(6, 23) } },
+          ],
+        }),
+  )
+
+  const week = await fetchWeeks("token", [FAMILY, MIA], DATES, 7, 21)
+
+  assert.deepEqual(
+    week.timed["2026-10-06"].map((e) => [e.title, e.calendarId]),
+    [
+      ["Dentist", FAMILY.id],
+      ["Piano", MIA.id],
+      ["Dinner", FAMILY.id],
+    ],
+  )
+  assert.deepEqual(week.allDay["2026-10-06"], [{ title: "Camp", calendarId: MIA.id }])
+  assert.equal(week.outsideHours["2026-10-06"], 2)
+})
+
+test("mergeWeeks of nothing is an empty week", () => {
+  const week = mergeWeeks([], DATES)
+  assert.equal(week.timed["2026-10-06"].length, 0)
+  assert.equal(week.allDay["2026-10-06"].length, 0)
+})
+
+test("fetchWeeks reports an expired sign-in separately from other errors", async () => {
   stubFetch(() => json({}, 401))
-  await assert.rejects(fetchWeek("old", "primary", DATES, 7, 21), GoogleAccessError)
+  await assert.rejects(fetchWeeks("old", [FAMILY], DATES, 7, 21), GoogleAccessError)
 
   stubFetch(() => json({}, 500))
   await assert.rejects(
-    fetchWeek("token", "primary", DATES, 7, 21),
+    fetchWeeks("token", [FAMILY], DATES, 7, 21),
     (error: Error) => !(error instanceof GoogleAccessError) && /500/.test(error.message),
   )
 })
 
-test("fetchCalendarList names calendars and puts the main one first", async () => {
+test("fetchCalendarList names calendars, adds Google's colours and puts the main one first", async () => {
   stubFetch(() =>
     json({
       items: [
-        { id: "family", summary: "Family", summaryOverride: "Our family" },
+        { id: "family", summary: "Family", summaryOverride: "Our family", backgroundColor: "#9fe1e7", foregroundColor: "#000000" },
         { id: "me@example.com", summary: "me@example.com", primary: true },
-        { id: "holidays", summary: "Holidays" },
+        { id: "holidays", summary: "Holidays", backgroundColor: "#16a765", foregroundColor: "#ffffff" },
         { summary: "No id" },
       ],
     }),
   )
   assert.deepEqual(await fetchCalendarList("token"), [
-    { id: "me@example.com", name: "me@example.com", primary: true },
-    { id: "family", name: "Our family", primary: false },
-    { id: "holidays", name: "Holidays", primary: false },
+    { id: "me@example.com", name: "me@example.com", color: "#4f5b6b", textColor: "#ffffff", primary: true },
+    { id: "family", name: "Our family", color: "#9fe1e7", textColor: "#000000", primary: false },
+    { id: "holidays", name: "Holidays", color: "#16a765", textColor: "#ffffff", primary: false },
   ])
 })
 
-function memoryStorage(initial?: string) {
-  let value = initial ?? null
+function memoryStorage(initial: Record<string, string> = {}) {
+  const values = new Map(Object.entries(initial))
   return {
-    getItem: () => value,
-    setItem: (_key: string, next: string) => {
-      value = next
+    getItem: (key: string) => values.get(key) ?? null,
+    setItem: (key: string, next: string) => {
+      values.set(key, next)
     },
-    removeItem: () => {
-      value = null
+    removeItem: (key: string) => {
+      values.delete(key)
     },
   }
 }
 
-test("the chosen calendar is saved, loaded and forgotten", () => {
+test("the chosen calendars are saved, loaded and forgotten", () => {
   const storage = memoryStorage()
-  assert.equal(loadSavedCalendar(storage), null)
+  assert.deepEqual(loadSavedCalendars(storage), [])
 
-  saveCalendar({ id: "family", name: "Our family" }, storage)
-  assert.deepEqual(loadSavedCalendar(storage), { id: "family", name: "Our family" })
+  saveCalendars([FAMILY, MIA], storage)
+  assert.deepEqual(loadSavedCalendars(storage), [FAMILY, MIA])
 
-  saveCalendar(null, storage)
-  assert.equal(loadSavedCalendar(storage), null)
+  saveCalendars([], storage)
+  assert.deepEqual(loadSavedCalendars(storage), [])
 })
 
-test("loadSavedCalendar ignores broken or missing storage", () => {
-  assert.equal(loadSavedCalendar(memoryStorage("not json")), null)
-  assert.equal(loadSavedCalendar(memoryStorage('{"id":5}')), null)
-  assert.equal(loadSavedCalendar(null), null)
+test("a calendar saved by the older version is still found, in a neutral colour", () => {
+  const storage = memoryStorage({
+    "familyflow.googleCalendar": JSON.stringify({ id: "family", name: "Our family" }),
+  })
+  assert.deepEqual(loadSavedCalendars(storage), [
+    { id: "family", name: "Our family", color: "#4f5b6b", textColor: "#ffffff" },
+  ])
+
+  // Saving a new choice replaces the old entry.
+  saveCalendars([MIA], storage)
+  assert.deepEqual(loadSavedCalendars(storage), [MIA])
+  assert.equal(storage.getItem("familyflow.googleCalendar"), null)
+})
+
+test("loadSavedCalendars ignores broken or missing storage", () => {
+  assert.deepEqual(loadSavedCalendars(memoryStorage({ "familyflow.googleCalendars": "not json" })), [])
+  assert.deepEqual(loadSavedCalendars(memoryStorage({ "familyflow.googleCalendars": '[{"id":5},null]' })), [])
+  assert.deepEqual(loadSavedCalendars(null), [])
 })

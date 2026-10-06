@@ -1,6 +1,6 @@
 # Week at a Glance – Family Activity Calendar
 
-A family activity calendar for phones and tablets, showing each family member's events alongside hourly
+A family activity calendar for phones and tablets, showing the family's events alongside hourly
 weather and electricity prices. The UI was designed and exported from Figma Make.
 
 The calendar follows the real date. The weather and the electricity prices are real (see below). Events are real
@@ -14,8 +14,9 @@ current week when the app opens), and changes to them are kept in memory and res
 - Real hourly weather (temperature and sunny/cloudy/rain/snow) for a location you choose, from Open-Meteo
 - Real hourly electricity prices in c/kWh including VAT, for the days the Nord Pool market has published
 - Weather and Electricity toggles to show or hide hourly weather and prices
-- Real events from a Google Calendar (read-only), with all-day events and overlapping events shown
-- Add, edit and delete sample events (name, day, family member, start time, duration, notes)
+- Real events from one or more Google calendars (read-only), each in its Google colour, with a legend of the
+  calendars; all-day events and overlapping events are shown
+- Add, edit and delete sample events (name, day, start time, duration, notes)
 - Layouts for phones, tablets and desktops
 
 ## Running locally
@@ -48,7 +49,7 @@ Other commands:
 ## Project structure
 
 - `src/App.tsx` – the calendar UI and sample data
-- `src/events.ts` – event types, working out the family member from an event title, and laying out overlapping events (tested in `src/events.test.ts`)
+- `src/events.ts` – event and calendar types, and laying out overlapping events (tested in `src/events.test.ts`)
 - `src/googleCalendar.ts` – reads events from Google Calendar and turns them into calendar events (tested in `src/googleCalendar.test.ts`)
 - `src/googleAuth.ts` – signing in to Google (read-only access)
 - `src/useGoogleCalendar.ts` – keeps the chosen calendar's events for the week on screen up to date
@@ -153,11 +154,14 @@ Google needs to know which app is asking for access, so you create a free "OAuth
 
 ### Using it
 
-- Press **Connect calendar** (or the link under the calendar), sign in, and choose the calendar to show.
-- **Who an event is for:** the first family member named in the title wins: "Mia: Piano" or "Dentist for Dad"
-  are shown in Mia's and Dad's colours (a leading "Mia:" is dropped from the title). Events that name nobody
-  (or only "Family") are shown as Family. The names are Mum (or Mom), Dad, Mia and Leo; change them in
-  `src/events.ts` and the colours in `src/index.css`.
+- Press **Connect calendar** (or the link under the calendar), sign in, and tick the calendars to show. You can
+  change the choice later from the same button.
+- **The legend is the list of calendars:** each calendar keeps the name and colour it has in Google Calendar, and
+  its events use that colour. A family with one shared calendar sees one legend entry; a family with a calendar
+  for each person (Mum, Dad, Mia, Leo…) sees them all, so the calendars are the family members. The sample
+  events, shown before anything is connected, belong to one made-up "Sample events" calendar.
+- **If you connected before this change:** the calendar you chose then is found again, but in a neutral colour
+  until you open **Change calendars** and choose it again, which also fetches its Google colour.
 - **What is shown:** timed events in the hours 07:00–21:00 on the device's clock (events that cross midnight are
   split over both days), all-day and multi-day events in an "All day" row, and overlapping events side by side.
   Events completely outside 07:00–21:00 are counted in a note under the calendar but not drawn. Cancelled events

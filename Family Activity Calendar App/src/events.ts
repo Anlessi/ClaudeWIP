@@ -1,9 +1,15 @@
 // Event types and helpers shared by the sample events and the Google Calendar events.
 // Plain logic with no React, so it can be tested on its own.
 
-export type Person = "Mum" | "Dad" | "Mia" | "Leo" | "Family"
-
-export const PEOPLE: Person[] = ["Mum", "Dad", "Mia", "Leo", "Family"]
+/** A calendar that events come from. Its name and colour are what the legend shows. */
+export type CalendarSource = {
+  id: string
+  name: string
+  /** Background colour of its events, any CSS colour. */
+  color: string
+  /** Text colour that is readable on `color`. */
+  textColor: string
+}
 
 export type Event = {
   title: string
@@ -11,44 +17,15 @@ export type Event = {
   start: number
   /** Length in hours. */
   duration: number
-  person: Person
+  /** The `id` of the calendar the event belongs to. */
+  calendarId: string
   note?: string
 }
 
 /** An event that lasts the whole day (or several days); it has no time of day. */
 export type AllDayEvent = {
   title: string
-  person: Person
-}
-
-// What people call each family member in an event title. "Mom" is accepted as well as "Mum".
-const NAME_PATTERN = /\b(mum|mom|dad|mia|leo)\b/gi
-
-const NAME_TO_PERSON: Record<string, Person> = {
-  mum: "Mum",
-  mom: "Mum",
-  dad: "Dad",
-  mia: "Mia",
-  leo: "Leo",
-}
-
-/**
- * Works out who an event is for from its title. The first family member named wins ("Mia: Piano",
- * "Piano for Mia & Leo" is Mia's); an event that names nobody is a Family event. A leading
- * "Name:" or "Name -" is dropped from the title, because the colour already says who it is.
- */
-export function personFromTitle(rawTitle: string): {
-  person: Person
-  title: string
-} {
-  const title = rawTitle.trim()
-  NAME_PATTERN.lastIndex = 0
-  const match = NAME_PATTERN.exec(title)
-  if (!match) return { person: "Family", title }
-
-  const person = NAME_TO_PERSON[match[1].toLowerCase()]
-  const prefix = /^(mum|mom|dad|mia|leo)\s*[:\-–]\s*(.+)$/i.exec(title)
-  return { person, title: prefix ? prefix[2].trim() : title }
+  calendarId: string
 }
 
 /** Where an event sits when overlapping events share the width of a day: lane 0 of 2, lane 1 of 2, … */
