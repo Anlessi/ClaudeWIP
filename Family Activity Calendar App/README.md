@@ -82,9 +82,8 @@ screen like a normal app, and keeps working without a connection once it has bee
 The hourly weather comes from [Open-Meteo](https://open-meteo.com/), which needs no account or API key and is
 free for non-commercial use; the app shows the required credit under the calendar.
 
-- **Choosing a location:** the first time the app opens it asks for one. Search for a city or town, or use
-  "Use my current location" (only offered on secure `https://` or `localhost` connections). The button showing
-  the place name at the top changes it later.
+- **Choosing a location:** the first time the app opens it asks for one. Search for a city or town; the button
+  showing the place name at the top changes it later.
 - **What is sent where:** the place you search for and the approximate coordinates of the chosen place
   (rounded to about 1 km) are sent to Open-Meteo. The choice itself is saved only in this browser
   (`localStorage`); it is never part of the repository.
