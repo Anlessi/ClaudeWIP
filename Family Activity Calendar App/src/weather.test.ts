@@ -186,6 +186,35 @@ test("the saved location is stored and validated", () => {
   assert.equal(loadSavedLocation(null), null)
 })
 
+test("a saved forecast in an unexpected shape is ignored", () => {
+  const storage = fakeStorage()
+  const helsinki = { name: "Helsinki", latitude: 60.17, longitude: 24.94 }
+  const forecast = parseForecast(rawForecast(), week, 7, 21, 5)
+  const key = `${helsinki.latitude},${helsinki.longitude},${week[0]}..${week[2]}`
+  const save = (value: unknown) =>
+    storage.setItem(
+      "familyflow.forecast",
+      JSON.stringify({ key, forecast: value }),
+    )
+
+  save(forecast)
+  assert.deepEqual(loadCachedForecast(helsinki, week, storage), forecast)
+
+  const { dates: _dates, ...withoutDates } = forecast
+  save(withoutDates)
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+  save({ ...forecast, dates: ["2026-10-05", "2026-10-06", "2026-10-08"] })
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+  save({ ...forecast, days: [null] })
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+  save({ ...forecast, days: [1, 2, 3] })
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+  save({ ...forecast, fetchedAt: "yesterday" })
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+  save("nonsense")
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+})
+
 test("the cached forecast is only used for the same place and week", () => {
   const storage = fakeStorage()
   const helsinki = { name: "Helsinki", latitude: 60.17, longitude: 24.94 }

@@ -365,13 +365,34 @@ export function loadCachedForecast(
 ): Forecast | null {
   try {
     const value = JSON.parse(storage?.getItem(FORECAST_CACHE_KEY) ?? "null")
-    if (value?.key === forecastKey(location, weekDates) && value.forecast) {
-      return value.forecast as Forecast
+    if (
+      value?.key === forecastKey(location, weekDates) &&
+      isForecastFor(value.forecast, weekDates)
+    ) {
+      return value.forecast
     }
   } catch {
     // Treat unreadable data as no cache.
   }
   return null
+}
+
+/** Guards against saved data from an older version or damaged data, which would otherwise break the calendar. */
+function isForecastFor(value: unknown, weekDates: string[]): value is Forecast {
+  const forecast = value as Partial<Forecast> | null
+  return (
+    !!forecast &&
+    Array.isArray(forecast.dates) &&
+    forecast.dates.length === weekDates.length &&
+    forecast.dates.every((date, index) => date === weekDates[index]) &&
+    Array.isArray(forecast.days) &&
+    forecast.days.length === weekDates.length &&
+    forecast.days.every(
+      (day) => day === null || (typeof day === "object" && !!day.hours),
+    ) &&
+    typeof forecast.fetchedAt === "number" &&
+    typeof forecast.utcOffsetSeconds === "number"
+  )
 }
 
 export function saveCachedForecast(
