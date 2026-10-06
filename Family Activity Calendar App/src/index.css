@@ -522,8 +522,15 @@ h1 {
   top: 0.45rem;
   left: 0.45rem;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.15rem 0.45rem;
+  /* Stay clear of the event cards, which start at 47% of the column (38% in the day view). */
+  max-width: calc(47% - 0.7rem);
+}
+
+.days-grid--day .cell-data {
+  max-width: calc(38% - 0.7rem);
 }
 
 .weather-reading,
@@ -852,7 +859,7 @@ h1 {
   text-overflow: ellipsis;
 }
 
-.weather-status {
+.data-status {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -862,11 +869,15 @@ h1 {
   font-size: 0.74rem;
 }
 
-.weather-status a {
+.data-status + .data-status {
+  margin-top: 0.3rem;
+}
+
+.data-status a {
   color: inherit;
 }
 
-.weather-status__error {
+.data-status__error {
   color: #b73a2d;
   font-weight: 650;
 }

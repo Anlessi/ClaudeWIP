@@ -13,7 +13,9 @@ import {
   weekdayIndex,
   yearOf,
 } from "./dates"
+import { HIGH_PRICE, LOW_PRICE, formatPrice, priceLevel } from "./electricity"
 import useForecast from "./useForecast"
+import usePrices from "./usePrices"
 import useToday from "./useToday"
 import {
   formatUtcOffset,
@@ -143,8 +145,6 @@ const PERSON_COLORS: Record<Person, string> = {
   Family: "var(--family)",
 }
 
-const PRICES = [11, 14, 12, 9, 7, 6, 5, 5, 6, 9, 13, 15, 12, 9]
-
 function Button({
   children,
   className = "",
@@ -215,6 +215,13 @@ function WeatherIcon({
   return <Icon name={iconName} size={size} />
 }
 
+function clockTime(timestamp: number) {
+  return new Date(timestamp).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
 function WeatherStatus({
   hasLocation,
   noForecastInView,
@@ -235,15 +242,10 @@ function WeatherStatus({
   onSetLocation: () => void
   onRetry: () => void
 }) {
-  const time = fetchedAt
-    ? new Date(fetchedAt).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : ""
+  const time = fetchedAt ? clockTime(fetchedAt) : ""
 
   return (
-    <p className="weather-status" role="status">
+    <p className="data-status" role="status">
       {!hasLocation && (
         <>
           Set your location to see the hourly weather.
@@ -261,7 +263,7 @@ function WeatherStatus({
       )}
       {hasLocation && error && (
         <>
-          <span className="weather-status__error">
+          <span className="data-status__error">
             {error}
             {saved && ` Showing the forecast saved at ${time}.`}
           </span>
@@ -275,6 +277,58 @@ function WeatherStatus({
           {!error && `Updated ${time} · `}Weather data by{" "}
           <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">
             Open-Meteo.com
+          </a>
+        </span>
+      )}
+    </p>
+  )
+}
+
+function PriceStatus({
+  loading,
+  noPricesInView,
+  error,
+  saved,
+  fetchedAt,
+  onRetry,
+}: {
+  loading: boolean
+  /** Prices are loaded, but none of the days on screen have any. */
+  noPricesInView: boolean
+  error: string
+  saved: boolean
+  fetchedAt: number | null
+  onRetry: () => void
+}) {
+  const time = fetchedAt ? clockTime(fetchedAt) : ""
+
+  return (
+    <p className="data-status" role="status">
+      {loading && fetchedAt === null && "Loading electricity prices…"}
+      {noPricesInView && (
+        <span>
+          No electricity prices for these dates. They are shown for this week,
+          up to the latest day Nord Pool has published (tomorrow, from early
+          afternoon).
+        </span>
+      )}
+      {error && (
+        <>
+          <span className="data-status__error">
+            {error}
+            {saved && ` Showing the prices saved at ${time}.`}
+          </span>
+          <button type="button" className="weather-link" onClick={onRetry}>
+            Try again
+          </button>
+        </>
+      )}
+      {fetchedAt !== null && (
+        <span>
+          {!error && `Updated ${time} · `}Electricity prices for Finland incl.
+          VAT: Nord Pool day-ahead via{" "}
+          <a href="https://sahkotin.fi/" target="_blank" rel="noreferrer">
+            sahkotin.fi
           </a>
         </span>
       )}
@@ -313,6 +367,7 @@ function DayColumn({
   day,
   events,
   weather,
+  prices,
   showWeather,
   showPrices,
   isToday,
@@ -323,6 +378,8 @@ function DayColumn({
   day: CalendarDay
   events: Event[]
   weather: DayWeather | null
+  /** Cents per kWh by hour, or undefined when there are no prices for this day. */
+  prices: Record<number, number> | undefined
   showWeather: boolean
   showPrices: boolean
   isToday: boolean
@@ -355,9 +412,10 @@ function DayColumn({
       </Button>
 
       <div className="day-body">
-        {HOURS.map((hour, rowIndex) => {
+        {HOURS.map((hour) => {
           const hourWeather = weather?.hours[hour]
-          const price = Math.max(1, PRICES[rowIndex] - (day.index % 3))
+          const price = prices?.[hour]
+          const level = price === undefined ? "normal" : priceLevel(price)
           return (
             <div
               className={`hour-cell ${
@@ -376,31 +434,31 @@ function DayColumn({
                     {hourWeather.temp}°
                   </span>
                 )}
-                {showPrices && (
+                {showPrices && price !== undefined && (
                   <span
                     className={`price-reading ${
-                      price >= 15
+                      level === "high"
                         ? "price-reading--high"
-                        : price <= 3
+                        : level === "low"
                           ? "price-reading--low"
                           : ""
                     }`}
-                    aria-label={`${price} cents per kilowatt hour${
-                      price >= 15
+                    aria-label={`${formatPrice(price)} cents per kilowatt hour${
+                      level === "high"
                         ? ", high price"
-                        : price <= 3
+                        : level === "low"
                           ? ", low price"
                           : ""
                     }`}
                   >
                     <Icon name="bolt" size={11} />
-                    {price}
-                    {price >= 15 && (
+                    {formatPrice(price)}
+                    {level === "high" && (
                       <span className="price-trend price-trend--high">
                         <Icon name="arrow-up" size={10} />
                       </span>
                     )}
-                    {price <= 3 && (
+                    {level === "low" && (
                       <span className="price-trend price-trend--low">
                         <Icon name="arrow-down" size={10} />
                       </span>
@@ -453,6 +511,11 @@ export default function App() {
   const windowStart = mondayOf(today)
   const forecastDates = useMemo(() => forecastWindow(windowStart), [windowStart])
   const weather = useForecast(location, forecastDates, START_HOUR, END_HOUR)
+  // Prices only exist for days Nord Pool has published: past days, today and, from early afternoon, tomorrow.
+  const electricity = usePrices(
+    forecastDates[0],
+    forecastDates[forecastDates.length - 1],
+  )
 
   const chooseLocation = (next: SavedLocation) => {
     saveLocation(next)
@@ -486,6 +549,10 @@ export default function App() {
   const noForecastInView =
     weather.forecast !== null &&
     visibleDays.every((day) => !weatherByDate.has(day.iso))
+
+  const noPricesInView =
+    electricity.prices !== null &&
+    visibleDays.every((day) => !electricity.prices?.byDate[day.iso])
 
   // Arrows move by a week in the week view and by a day in the day view.
   const step = view === "week" ? 7 : 1
@@ -691,16 +758,16 @@ export default function App() {
             <>
               <span className="price-legend-label">
                 <Icon name="bolt" size={12} />
-                Price c/kWh
+                Price c/kWh incl. VAT
               </span>
               <b className="price-low">
-                3 or below
+                {LOW_PRICE} or below
                 <span className="price-trend price-trend--low">
                   <Icon name="arrow-down" size={10} />
                 </span>
               </b>
               <b className="price-high">
-                15+
+                {HIGH_PRICE}+
                 <span className="price-trend price-trend--high">
                   <Icon name="arrow-up" size={10} />
                 </span>
@@ -725,6 +792,7 @@ export default function App() {
               day={day}
               events={calendarEvents[day.iso] ?? []}
               weather={weatherByDate.get(day.iso) ?? null}
+              prices={electricity.prices?.byDate[day.iso]}
               key={day.iso}
               onEditEvent={(eventIndex) =>
                 openExistingEvent(day.iso, eventIndex)
@@ -752,6 +820,17 @@ export default function App() {
         onSetLocation={() => setLocationDialogOpen(true)}
         onRetry={weather.reload}
       />
+
+      {showPrices && (
+        <PriceStatus
+          loading={electricity.status === "loading"}
+          noPricesInView={noPricesInView}
+          error={electricity.error}
+          saved={electricity.saved}
+          fetchedAt={electricity.prices?.fetchedAt ?? null}
+          onRetry={electricity.reload}
+        />
+      )}
 
       {locationDialogOpen && (
         <LocationDialog
