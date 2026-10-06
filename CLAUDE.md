@@ -15,6 +15,11 @@ Instructions for Claude Code when working in this repository.
   `git switch main`, `git pull`, `git switch -c <type>/<short-description>`
 - Branch names: `feat/...`, `fix/...`, `docs/...`, `chore/...`, `refactor/...`, `test/...` (lowercase, hyphenated).
 - Keep each branch focused on one change. Unrelated changes go on separate branches.
+- Do not stack pull requests (a pull request whose base is another open pull request's branch). Merging the
+  base with `--delete-branch` makes GitHub close the dependent pull request, and squash merges leave the
+  branch history conflicting with `main`. If a change depends on one that is still open, ask the owner to
+  approve and merge the first one, then branch from the updated `main`. If it happens anyway, start a fresh
+  branch from `main` and `git cherry-pick` the commits, then open a new pull request.
 - When the change is ready, push the branch (`git push -u origin <branch>`) and open a pull request into `main`
   with the GitHub CLI: `gh pr create --base main --title "<conventional commit summary>" --body-file <file>`.
   Write the description (what and why) to a file in the scratchpad directory first: Windows PowerShell 5.1
