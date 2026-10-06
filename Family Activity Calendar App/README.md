@@ -36,7 +36,8 @@ Other commands:
 
 - `npx pnpm@10.34.3 run build` – production build into `dist/`
 - `npx tsc --noEmit` – type-check
-- `npx pnpm@10.34.3 run preview` – serve the production build, including the installable/offline version
+- `npx pnpm@10.34.3 run preview` – serve the production build (run `build` first), including the
+  installable/offline version
 
 ## Project structure
 
