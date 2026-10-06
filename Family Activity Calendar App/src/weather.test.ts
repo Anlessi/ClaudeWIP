@@ -1,7 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 import {
-  addDays,
   classifyWeather,
   dominantKind,
   formatUtcOffset,
@@ -88,12 +87,10 @@ test("dominantKind picks one category for the day", () => {
   assert.equal(dominantKind(["cloudy", "cloudy", "sunny"]), "cloudy")
 })
 
-test("formatUtcOffset and addDays", () => {
+test("formatUtcOffset", () => {
   assert.equal(formatUtcOffset(10800), "GMT+3")
   assert.equal(formatUtcOffset(-12600), "GMT-3:30")
   assert.equal(formatUtcOffset(0), "GMT+0")
-  assert.equal(addDays("2026-10-05", 6), "2026-10-11")
-  assert.equal(addDays("2026-10-30", 3), "2026-11-02")
 })
 
 function rawForecast() {
@@ -129,6 +126,7 @@ test("parseForecast keeps the visible hours and converts the values", () => {
 
   assert.equal(forecast.utcOffsetSeconds, 10800)
   assert.equal(forecast.fetchedAt, 1000)
+  assert.deepEqual(forecast.dates, week)
   assert.equal(forecast.days.length, 3)
 
   const monday = forecast.days[0]!
@@ -186,6 +184,35 @@ test("the saved location is stored and validated", () => {
   )
   assert.equal(loadSavedLocation(storage), null)
   assert.equal(loadSavedLocation(null), null)
+})
+
+test("a saved forecast in an unexpected shape is ignored", () => {
+  const storage = fakeStorage()
+  const helsinki = { name: "Helsinki", latitude: 60.17, longitude: 24.94 }
+  const forecast = parseForecast(rawForecast(), week, 7, 21, 5)
+  const key = `${helsinki.latitude},${helsinki.longitude},${week[0]}..${week[2]}`
+  const save = (value: unknown) =>
+    storage.setItem(
+      "familyflow.forecast",
+      JSON.stringify({ key, forecast: value }),
+    )
+
+  save(forecast)
+  assert.deepEqual(loadCachedForecast(helsinki, week, storage), forecast)
+
+  const { dates: _dates, ...withoutDates } = forecast
+  save(withoutDates)
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+  save({ ...forecast, dates: ["2026-10-05", "2026-10-06", "2026-10-08"] })
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+  save({ ...forecast, days: [null] })
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+  save({ ...forecast, days: [1, 2, 3] })
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+  save({ ...forecast, fetchedAt: "yesterday" })
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
+  save("nonsense")
+  assert.equal(loadCachedForecast(helsinki, week, storage), null)
 })
 
 test("the cached forecast is only used for the same place and week", () => {

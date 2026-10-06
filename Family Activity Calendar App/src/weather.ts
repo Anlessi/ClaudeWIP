@@ -18,7 +18,9 @@ export type DayWeather = {
 }
 
 export type Forecast = {
-  /** One entry per calendar day; null when the service returned nothing for that day. */
+  /** The ISO dates the forecast was requested for; `days` has one entry for each. */
+  dates: string[]
+  /** Null when the service returned nothing for that day. */
   days: (DayWeather | null)[]
   utcOffsetSeconds: number
   fetchedAt: number
@@ -139,13 +141,6 @@ export function formatUtcOffset(seconds: number) {
   return `GMT${sign}${hours}${minutes ? `:${pad(minutes)}` : ""}`
 }
 
-/** Adds days to an ISO date ("2026-10-05" + 1 = "2026-10-06"). */
-export function addDays(isoDate: string, days: number) {
-  const [year, month, day] = isoDate.split("-").map(Number)
-  return new Date(Date.UTC(year, month - 1, day + days))
-    .toISOString()
-    .slice(0, 10)
-}
 
 function roundTemp(value: number) {
   return Math.round(value) || 0
@@ -231,6 +226,7 @@ export function parseForecast(
   })
 
   return {
+    dates: [...weekDates],
     days,
     utcOffsetSeconds:
       typeof data?.utc_offset_seconds === "number" ? data.utc_offset_seconds : 0,
@@ -358,7 +354,7 @@ export function saveLocation(
 }
 
 function forecastKey(location: SavedLocation, weekDates: string[]) {
-  return `${location.latitude},${location.longitude},${weekDates[0]}`
+  return `${location.latitude},${location.longitude},${weekDates[0]}..${weekDates[weekDates.length - 1]}`
 }
 
 /** The last forecast downloaded for this location and week, for use when the service can't be reached. */
@@ -369,13 +365,34 @@ export function loadCachedForecast(
 ): Forecast | null {
   try {
     const value = JSON.parse(storage?.getItem(FORECAST_CACHE_KEY) ?? "null")
-    if (value?.key === forecastKey(location, weekDates) && value.forecast) {
-      return value.forecast as Forecast
+    if (
+      value?.key === forecastKey(location, weekDates) &&
+      isForecastFor(value.forecast, weekDates)
+    ) {
+      return value.forecast
     }
   } catch {
     // Treat unreadable data as no cache.
   }
   return null
+}
+
+/** Guards against saved data from an older version or damaged data, which would otherwise break the calendar. */
+function isForecastFor(value: unknown, weekDates: string[]): value is Forecast {
+  const forecast = value as Partial<Forecast> | null
+  return (
+    !!forecast &&
+    Array.isArray(forecast.dates) &&
+    forecast.dates.length === weekDates.length &&
+    forecast.dates.every((date, index) => date === weekDates[index]) &&
+    Array.isArray(forecast.days) &&
+    forecast.days.length === weekDates.length &&
+    forecast.days.every(
+      (day) => day === null || (typeof day === "object" && !!day.hours),
+    ) &&
+    typeof forecast.fetchedAt === "number" &&
+    typeof forecast.utcOffsetSeconds === "number"
+  )
 }
 
 export function saveCachedForecast(

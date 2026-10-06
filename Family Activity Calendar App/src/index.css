@@ -439,9 +439,15 @@ h1 {
   background: #f8faf8;
 }
 
-.day-column--selected .day-heading {
+.day-column--today .day-heading {
   background: var(--ink);
   color: white;
+}
+
+/* The day picked in the week view, when it is not today. */
+.day-column--selected:not(.day-column--today) .day-heading {
+  background: var(--accent-soft);
+  box-shadow: inset 0 -3px 0 var(--accent);
 }
 
 .day-name,
@@ -454,8 +460,8 @@ h1 {
   color: var(--muted);
 }
 
-.day-column--selected .day-date,
-.day-column--selected .day-summary {
+.day-column--today .day-date,
+.day-column--today .day-summary {
   color: #cbd3ce;
 }
 
