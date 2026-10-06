@@ -494,6 +494,48 @@ h1 {
   position: relative;
 }
 
+/* All-day events sit between the day heading and the hours. Every day has the same number of rows
+   (--allday-rows, set on the schedule), and the time column keeps the same space, so the hour lines
+   stay aligned. */
+.allday-row,
+.time-allday {
+  height: calc(var(--allday-rows) * 1.5rem + 0.25rem);
+  border-top: 1px solid var(--line);
+}
+
+.allday-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.25rem 0.25rem 0;
+  overflow: hidden;
+}
+
+.allday-chip {
+  flex: 0 0 1.3rem;
+  padding: 0 0.45rem;
+  color: white;
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 1.3rem;
+  border-radius: 0.35rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.allday-chip--more {
+  color: var(--muted);
+  background: transparent !important;
+}
+
+.time-allday {
+  padding: 0.35rem 0.65rem 0 0;
+  text-align: right;
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
 .hour-cell {
   position: relative;
   height: 4rem;
@@ -553,6 +595,9 @@ h1 {
 }
 
 .events-layer {
+  /* The cards use the right part of the day; overlapping events share it side by side. */
+  --lane-left: 47%;
+  --lane-right: 0%;
   position: absolute;
   inset: 0 0.25rem;
   pointer-events: none;
@@ -561,8 +606,14 @@ h1 {
 .event-card {
   position: absolute;
   top: var(--event-top);
-  right: 0;
-  left: 47%;
+  left: calc(
+    var(--lane-left) + (100% - var(--lane-left) - var(--lane-right)) *
+      var(--event-lane, 0) / var(--event-lanes, 1)
+  );
+  width: calc(
+    (100% - var(--lane-left) - var(--lane-right)) / var(--event-lanes, 1) -
+      0.15rem
+  );
   z-index: 5;
   min-height: 2.3rem;
   height: var(--event-height);
@@ -578,6 +629,10 @@ h1 {
   overflow: hidden;
   cursor: pointer;
   pointer-events: auto;
+}
+
+.event-card--readonly {
+  cursor: default;
 }
 
 .event-card:hover {
@@ -606,9 +661,12 @@ h1 {
   padding-left: 1.2rem;
 }
 
+.days-grid--day .events-layer {
+  --lane-left: 38%;
+  --lane-right: 1rem;
+}
+
 .days-grid--day .event-card {
-  right: 1rem;
-  left: 38%;
   padding: 0.55rem 0.7rem;
 }
 
@@ -765,6 +823,11 @@ h1 {
   color: white;
   border: 1px solid var(--accent);
   background: var(--accent);
+}
+
+.save-event-button:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .delete-event-button {

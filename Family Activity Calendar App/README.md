@@ -3,9 +3,9 @@
 A family activity calendar for phones and tablets, showing each family member's events alongside hourly
 weather and electricity prices. The UI was designed and exported from Figma Make.
 
-The calendar follows the real date. The weather and the electricity prices are real (see below); events are still
-built-in sample data (the sample events are placed in the current week when the app opens), and event changes
-are kept in memory and reset when the page reloads.
+The calendar follows the real date. The weather and the electricity prices are real (see below). Events are real
+once you connect your Google Calendar (see below); until then they are built-in sample data (placed in the
+current week when the app opens), and changes to them are kept in memory and reset when the page reloads.
 
 ## Features
 
@@ -14,7 +14,8 @@ are kept in memory and reset when the page reloads.
 - Real hourly weather (temperature and sunny/cloudy/rain/snow) for a location you choose, from Open-Meteo
 - Real hourly electricity prices in c/kWh including VAT, for the days the Nord Pool market has published
 - Weather and Electricity toggles to show or hide hourly weather and prices
-- Add, edit and delete events (name, day, family member, start time, duration, notes)
+- Real events from a Google Calendar (read-only), with all-day events and overlapping events shown
+- Add, edit and delete sample events (name, day, family member, start time, duration, notes)
 - Layouts for phones, tablets and desktops
 
 ## Running locally
@@ -40,13 +41,18 @@ Other commands:
 
 - `npx pnpm@10.34.3 run build` – production build into `dist/`
 - `npx tsc --noEmit` – type-check
-- `npx pnpm@10.34.3 run test` – run the tests for the weather logic
+- `npx pnpm@10.34.3 run test` – run the tests for the calendar logic (weather, prices, events)
 - `npx pnpm@10.34.3 run preview` – serve the production build (run `build` first), including the
   installable/offline version
 
 ## Project structure
 
 - `src/App.tsx` – the calendar UI and sample data
+- `src/events.ts` – event types, working out the family member from an event title, and laying out overlapping events (tested in `src/events.test.ts`)
+- `src/googleCalendar.ts` – reads events from Google Calendar and turns them into calendar events (tested in `src/googleCalendar.test.ts`)
+- `src/googleAuth.ts` – signing in to Google (read-only access)
+- `src/useGoogleCalendar.ts` – keeps the chosen calendar's events for the week on screen up to date
+- `src/CalendarDialog.tsx` – the dialog for connecting Google Calendar and choosing the calendar
 - `src/dates.ts` – calendar date helpers (today, weeks, the forecast window; tested in `src/dates.test.ts`)
 - `src/useToday.ts` – keeps today's date up to date while the app is open
 - `src/weather.ts` – weather and place lookups from Open-Meteo, and turning them into calendar data (tested in `src/weather.test.ts`)
@@ -117,3 +123,51 @@ offer from any supplier, only the market price.
   that saved copy with a note and a "Try again" button.
 - **Assumption:** prices are always for Finland, whatever place is chosen for the weather. Other countries or
   price areas would need another source.
+
+## Google Calendar
+
+The app can show the real events of a Google Calendar instead of the sample events. It only **reads** the
+calendar: it can't add, change or delete anything, so Add event and editing are turned off while Google
+Calendar is connected (change events in Google Calendar itself). There is no server: the browser talks to Google
+directly.
+
+### One-time setup (about 10 minutes)
+
+Google needs to know which app is asking for access, so you create a free "OAuth client" once:
+
+1. Go to the [Google Cloud console](https://console.cloud.google.com/), create a project (for example
+   "Family Flow") and open **APIs & Services**.
+2. **Library**: search for **Google Calendar API** and click **Enable**.
+3. **OAuth consent screen** (also called Google Auth Platform): choose **External**, fill in the app name and your
+   email, and under **Audience**/**Test users** add the Google account(s) that own or can see the family
+   calendar. Leave the app in **Testing** mode: that is fine for family use. (Google then shows an "unverified
+   app" warning when you sign in; choose to continue.)
+4. **Data access / Scopes**: add `.../auth/calendar.calendarlist.readonly` and `.../auth/calendar.events.readonly`.
+5. **Credentials** → **Create credentials** → **OAuth client ID** → type **Web application**. Under **Authorized
+   JavaScript origins** add every address the app is opened from, for example `http://localhost:8443` and, for
+   your phone or tablet, the `https://` address where the built app is hosted. (Plain `http://192.168.x.x`
+   addresses are not accepted by Google.)
+6. Copy the **Client ID** (it ends in `.apps.googleusercontent.com`) into `.env.local` as
+   `VITE_GOOGLE_CLIENT_ID=...` and restart the dev server. The client ID is not a secret, but keep it out of
+   the repository like the other settings. If the app is hosted, set the same variable when building it.
+
+### Using it
+
+- Press **Connect calendar** (or the link under the calendar), sign in, and choose the calendar to show.
+- **Who an event is for:** the first family member named in the title wins: "Mia: Piano" or "Dentist for Dad"
+  are shown in Mia's and Dad's colours (a leading "Mia:" is dropped from the title). Events that name nobody
+  (or only "Family") are shown as Family. The names are Mum (or Mom), Dad, Mia and Leo; change them in
+  `src/events.ts` and the colours in `src/index.css`.
+- **What is shown:** timed events in the hours 07:00–21:00 on the device's clock (events that cross midnight are
+  split over both days), all-day and multi-day events in an "All day" row, and overlapping events side by side.
+  Events completely outside 07:00–21:00 are counted in a note under the calendar but not drawn. Cancelled events
+  and events you have declined are left out. The location and description show as the event's note.
+- **Signing in again:** Google's sign-in lasts about an hour and is deliberately never saved in the browser. When
+  you open the app, and again after an hour, the line under the calendar asks you to **Sign in**; one tap
+  renews it (Google only shows a short window, because the app is already allowed). Only the name of the chosen
+  calendar is remembered in this browser. Staying signed in without tapping would need a small server to keep
+  a long-lived key safe, which this app doesn't have.
+- **Updates:** the week on screen reloads when the app comes back into view after 5 minutes, every 10 minutes
+  while it is open, and when the connection returns after a failure.
+- **Disconnecting:** open the calendar button and choose **Disconnect**: the sign-in is revoked and the app goes
+  back to the sample events. You can also remove the app's access in your [Google account settings](https://myaccount.google.com/permissions).

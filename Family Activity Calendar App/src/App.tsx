@@ -14,7 +14,16 @@ import {
   yearOf,
 } from "./dates"
 import { HIGH_PRICE, LOW_PRICE, formatPrice, priceLevel } from "./electricity"
+import CalendarDialog from "./CalendarDialog"
+import {
+  layoutLanes,
+  type AllDayEvent,
+  type Event,
+  type Lane,
+  type Person,
+} from "./events"
 import useForecast from "./useForecast"
+import useGoogleCalendar from "./useGoogleCalendar"
 import usePrices from "./usePrices"
 import useToday from "./useToday"
 import {
@@ -27,15 +36,6 @@ import {
 } from "./weather"
 
 type ViewMode = "day" | "week"
-type Person = "Mum" | "Dad" | "Mia" | "Leo" | "Family"
-
-type Event = {
-  title: string
-  start: number
-  duration: number
-  person: Person
-  note?: string
-}
 
 type EventDraft = Event & {
   date: string
@@ -336,12 +336,150 @@ function PriceStatus({
   )
 }
 
-function EventCard({ event, onClick }: { event: Event; onClick: () => void }) {
+function GoogleStatus({
+  configured,
+  calendarName,
+  loading,
+  hasEvents,
+  error,
+  needsSignIn,
+  fetchedAt,
+  outsideHours,
+  onOpenSettings,
+  onReconnect,
+  onRetry,
+}: {
+  configured: boolean
+  /** Null when Google Calendar isn't connected. */
+  calendarName: string | null
+  loading: boolean
+  /** Events for the week on screen have been loaded. */
+  hasEvents: boolean
+  error: string
+  needsSignIn: boolean
+  fetchedAt: number | null
+  /** Events on screen that fall outside the hours the calendar shows. */
+  outsideHours: number
+  onOpenSettings: () => void
+  onReconnect: () => Promise<void>
+  onRetry: () => void
+}) {
+  const [signInMessage, setSignInMessage] = useState("")
+  const time = fetchedAt ? clockTime(fetchedAt) : ""
+
+  if (calendarName === null) {
+    return (
+      <p className="data-status" role="status">
+        These are sample events.
+        {configured && (
+          <button type="button" className="weather-link" onClick={onOpenSettings}>
+            Connect Google Calendar
+          </button>
+        )}
+      </p>
+    )
+  }
+
+  return (
+    <p className="data-status" role="status">
+      {loading && !hasEvents && "Loading Google Calendar…"}
+      {needsSignIn && (
+        <>
+          <span className="data-status__error">
+            {signInMessage || "Sign in to Google again to load your events."}
+          </span>
+          <button
+            type="button"
+            className="weather-link"
+            onClick={() => {
+              setSignInMessage("")
+              onReconnect().catch(() =>
+                setSignInMessage("Couldn't sign in to Google. Try again."),
+              )
+            }}
+          >
+            Sign in
+          </button>
+        </>
+      )}
+      {error && (
+        <>
+          <span className="data-status__error">{error}</span>
+          <button type="button" className="weather-link" onClick={onRetry}>
+            Try again
+          </button>
+        </>
+      )}
+      {outsideHours > 0 && (
+        <span>
+          {outsideHours} {outsideHours === 1 ? "event is" : "events are"}{" "}
+          outside {formatTime(START_HOUR)}–{formatTime(END_HOUR)} and not
+          shown.
+        </span>
+      )}
+      <span>
+        {fetchedAt !== null && !error && `Updated ${time} · `}Events from
+        Google Calendar &quot;{calendarName}&quot; (read-only: change them in
+        Google Calendar)
+      </span>
+    </p>
+  )
+}
+
+/** An hour such as 17.25 as "17:15". */
+function formatTime(hour: number) {
+  const totalMinutes = Math.round(hour * 60)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
+}
+
+/** `onClick` is missing for events that can't be edited here (the ones from Google Calendar). */
+function EventCard({
+  event,
+  lane,
+  onClick,
+}: {
+  event: Event
+  lane: Lane
+  onClick?: () => void
+}) {
   const style = {
     "--event-top": `${(event.start - START_HOUR) * 64 + 4}px`,
     "--event-height": `${event.duration * 64 - 8}px`,
     "--event-color": PERSON_COLORS[event.person],
+    "--event-lane": lane.lane,
+    "--event-lanes": lane.lanes,
+    // Events that share the width take more of the column (over the weather and price readings),
+    // otherwise each one is too narrow to read.
+    ...(lane.lanes > 1 && { "--lane-left": lane.lanes === 2 ? "30%" : "10%" }),
   } as React.CSSProperties
+
+  const content = (
+    <>
+      <strong>{event.title}</strong>
+      <span>{formatTime(event.start)}</span>
+      {event.note && <small>{event.note}</small>}
+    </>
+  )
+
+  if (!onClick) {
+    return (
+      <div
+        className="event-card event-card--readonly"
+        style={style}
+        title={[
+          `${event.title} (${event.person})`,
+          `${formatTime(event.start)}–${formatTime(event.start + event.duration)}`,
+          event.note,
+        ]
+          .filter(Boolean)
+          .join("\n")}
+      >
+        {content}
+      </div>
+    )
+  }
 
   return (
     <Button
@@ -350,22 +488,53 @@ function EventCard({ event, onClick }: { event: Event; onClick: () => void }) {
       label={`Edit ${event.title} at ${formatTime(event.start)}`}
       onClick={onClick}
     >
-      <strong>{event.title}</strong>
-      <span>{formatTime(event.start)}</span>
-      {event.note && <small>{event.note}</small>}
+      {content}
     </Button>
   )
 }
 
-function formatTime(hour: number) {
-  const whole = Math.floor(hour)
-  const minutes = hour % 1 === 0 ? "00" : "30"
-  return `${String(whole).padStart(2, "0")}:${minutes}`
+function AllDayRow({
+  events,
+  rows,
+}: {
+  events: AllDayEvent[]
+  rows: number
+}) {
+  // When there are more than fit, the last row says how many more there are.
+  const hidden = events.length > rows ? events.length - rows + 1 : 0
+  const shown = hidden ? events.slice(0, rows - 1) : events
+  return (
+    <div className="allday-row">
+      {shown.map((event, index) => (
+        <span
+          className="allday-chip"
+          key={`${event.title}-${index}`}
+          style={{ background: PERSON_COLORS[event.person] }}
+          title={`${event.title} (${event.person}, all day)`}
+        >
+          {event.title}
+        </span>
+      ))}
+      {hidden > 0 && (
+        <span
+          className="allday-chip allday-chip--more"
+          title={events
+            .slice(rows - 1)
+            .map((event) => event.title)
+            .join("\n")}
+        >
+          +{hidden} more
+        </span>
+      )}
+    </div>
+  )
 }
 
 function DayColumn({
   day,
   events,
+  allDay,
+  allDayRows,
   weather,
   prices,
   showWeather,
@@ -377,6 +546,10 @@ function DayColumn({
 }: {
   day: CalendarDay
   events: Event[]
+  /** All-day events of this day; only shown when `allDayRows` is above zero. */
+  allDay: AllDayEvent[]
+  /** How many rows the all-day area has, the same for every day on screen so the hours line up. */
+  allDayRows: number
   weather: DayWeather | null
   /** Cents per kWh by hour, or undefined when there are no prices for this day. */
   prices: Record<number, number> | undefined
@@ -384,9 +557,12 @@ function DayColumn({
   showPrices: boolean
   isToday: boolean
   selected: boolean
-  onEditEvent: (eventIndex: number) => void
+  /** Missing when the events can't be edited here. */
+  onEditEvent?: (eventIndex: number) => void
   onSelect: () => void
 }) {
+  const lanes = layoutLanes(events)
+
   return (
     <section
       className={`day-column ${isToday ? "day-column--today" : ""} ${
@@ -410,6 +586,8 @@ function DayColumn({
           )}
         </span>
       </Button>
+
+      {allDayRows > 0 && <AllDayRow events={allDay} rows={allDayRows} />}
 
       <div className="day-body">
         {HOURS.map((hour) => {
@@ -473,8 +651,9 @@ function DayColumn({
           {events.map((event, eventIndex) => (
             <EventCard
               event={event}
+              lane={lanes[eventIndex]}
               key={`${event.title}-${event.start}-${eventIndex}`}
-              onClick={() => onEditEvent(eventIndex)}
+              onClick={onEditEvent && (() => onEditEvent(eventIndex))}
             />
           ))}
         </div>
@@ -499,6 +678,7 @@ export default function App() {
     eventIndex: number
   } | null>(null)
   const [draft, setDraft] = useState<EventDraft | null>(null)
+  const [calendarDialogOpen, setCalendarDialogOpen] = useState(false)
   const [location, setLocation] = useState<SavedLocation | null>(
     loadSavedLocation,
   )
@@ -546,6 +726,26 @@ export default function App() {
     })
     return byDate
   }, [weather.forecast])
+  // Once Google Calendar is connected its events replace the sample events, and they can't be edited here.
+  const google = useGoogleCalendar(weekDates, START_HOUR, END_HOUR)
+  const googleConnected = google.calendar !== null
+  const eventsOn = (iso: string): Event[] =>
+    googleConnected
+      ? (google.week?.timed[iso] ?? [])
+      : (calendarEvents[iso] ?? [])
+  const allDayOn = (iso: string): AllDayEvent[] =>
+    googleConnected ? (google.week?.allDay[iso] ?? []) : []
+  const allDayRows = Math.min(
+    3,
+    Math.max(0, ...visibleDays.map((day) => allDayOn(day.iso).length)),
+  )
+  const outsideHours = googleConnected
+    ? visibleDays.reduce(
+        (sum, day) => sum + (google.week?.outsideHours[day.iso] ?? 0),
+        0,
+      )
+    : 0
+
   const noForecastInView =
     weather.forecast !== null &&
     visibleDays.every((day) => !weatherByDate.has(day.iso))
@@ -715,9 +915,25 @@ export default function App() {
             >
               <Icon name="bolt" size={16} /> Electricity
             </Toggle>
-            <Button className="add-event-button" onClick={openNewEvent}>
-              <Icon name="plus" size={16} /> Add event
+            <Button
+              className="filter-toggle location-button"
+              label={
+                google.calendar
+                  ? `Google Calendar settings, currently ${google.calendar.name}`
+                  : "Connect Google Calendar"
+              }
+              onClick={() => setCalendarDialogOpen(true)}
+            >
+              <Icon name="calendar" size={16} />
+              <span>
+                {google.calendar ? google.calendar.name : "Connect calendar"}
+              </span>
             </Button>
+            {!googleConnected && (
+              <Button className="add-event-button" onClick={openNewEvent}>
+                <Icon name="plus" size={16} /> Add event
+              </Button>
+            )}
           </div>
         </div>
       </section>
@@ -777,9 +993,17 @@ export default function App() {
         </div>
       </section>
 
-      <section className="schedule-frame">
+      <section
+        className="schedule-frame"
+        style={{ "--allday-rows": allDayRows } as React.CSSProperties}
+      >
         <div className="time-column">
           <div className="time-heading">{timeZoneLabel}</div>
+          {allDayRows > 0 && (
+            <div className="time-allday">
+              <span>All day</span>
+            </div>
+          )}
           {HOURS.map((hour) => (
             <div className="time-label" key={hour}>
               {formatTime(hour)}
@@ -790,12 +1014,16 @@ export default function App() {
           {visibleDays.map((day) => (
             <DayColumn
               day={day}
-              events={calendarEvents[day.iso] ?? []}
+              events={eventsOn(day.iso)}
+              allDay={allDayOn(day.iso)}
+              allDayRows={allDayRows}
               weather={weatherByDate.get(day.iso) ?? null}
               prices={electricity.prices?.byDate[day.iso]}
               key={day.iso}
-              onEditEvent={(eventIndex) =>
-                openExistingEvent(day.iso, eventIndex)
+              onEditEvent={
+                googleConnected
+                  ? undefined
+                  : (eventIndex) => openExistingEvent(day.iso, eventIndex)
               }
               onSelect={() => {
                 setPickedDate(day.iso)
@@ -821,6 +1049,20 @@ export default function App() {
         onRetry={weather.reload}
       />
 
+      <GoogleStatus
+        configured={google.configured}
+        calendarName={google.calendar?.name ?? null}
+        loading={google.loading}
+        hasEvents={google.week !== null}
+        error={google.error}
+        needsSignIn={google.needsSignIn}
+        fetchedAt={google.week?.fetchedAt ?? null}
+        outsideHours={outsideHours}
+        onOpenSettings={() => setCalendarDialogOpen(true)}
+        onReconnect={google.reconnect}
+        onRetry={google.reload}
+      />
+
       {showPrices && (
         <PriceStatus
           loading={electricity.status === "loading"}
@@ -837,6 +1079,17 @@ export default function App() {
           current={location}
           onSelect={chooseLocation}
           onClose={() => setLocationDialogOpen(false)}
+        />
+      )}
+
+      {calendarDialogOpen && (
+        <CalendarDialog
+          configured={google.configured}
+          current={google.calendar}
+          ensureToken={google.ensureToken}
+          onSelect={google.selectCalendar}
+          onDisconnect={google.disconnect}
+          onClose={() => setCalendarDialogOpen(false)}
         />
       )}
 
