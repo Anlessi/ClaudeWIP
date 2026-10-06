@@ -20,6 +20,7 @@ build/
 # Environment and secrets
 .env
 .env.*
+!.env.example
 *.log
 
 # Claude Code local settings
