@@ -3,7 +3,7 @@
 A family activity calendar for phones and tablets, showing each family member's events alongside hourly
 weather and electricity prices. The UI was designed and exported from Figma Make.
 
-The calendar follows the real date. The weather is real (see below); events and electricity prices are still
+The calendar follows the real date. The weather and the electricity prices are real (see below); events are still
 built-in sample data (the sample events are placed in the current week when the app opens), and event changes
 are kept in memory and reset when the page reloads.
 
@@ -12,6 +12,7 @@ are kept in memory and reset when the page reloads.
 - Week and Day views that follow the real date: the arrows move by a week (week view) or a day (day view), and
   Today jumps back to the current date. Today is marked automatically, also after midnight
 - Real hourly weather (temperature and sunny/cloudy/rain/snow) for a location you choose, from Open-Meteo
+- Real hourly electricity prices in c/kWh including VAT, for the days the Nord Pool market has published
 - Weather and Electricity toggles to show or hide hourly weather and prices
 - Add, edit and delete events (name, day, family member, start time, duration, notes)
 - Layouts for phones, tablets and desktops
@@ -49,6 +50,8 @@ Other commands:
 - `src/dates.ts` – calendar date helpers (today, weeks, the forecast window; tested in `src/dates.test.ts`)
 - `src/useToday.ts` – keeps today's date up to date while the app is open
 - `src/weather.ts` – weather and place lookups from Open-Meteo, and turning them into calendar data (tested in `src/weather.test.ts`)
+- `src/electricity.ts` – electricity price lookups from sahkotin.fi and turning them into hourly prices (tested in `src/electricity.test.ts`)
+- `src/usePrices.ts` – loads the prices and keeps them fresh
 - `src/useForecast.ts` – loads the forecast and keeps it fresh
 - `src/LocationDialog.tsx` – the dialog for choosing the weather location
 - `src/Icon.tsx` – the icons
@@ -93,3 +96,24 @@ free for non-commercial use; the app shows the required credit under the calenda
 - **Dates:** one request covers the current week (Monday to Sunday) and the next week, counted from today's
   date on the device, so it never goes more than 13 days ahead (Open-Meteo allows 15). Days outside that
   window (older weeks, or more than a week ahead) show no weather, and the line under the calendar says so.
+
+## Electricity prices
+
+The prices are Finnish day-ahead spot prices from the Nord Pool market, read from [sahkotin.fi](https://sahkotin.fi/)
+(an independent Finnish service; Nord Pool owns the price data). The calendar's own electricity prices are not an
+offer from any supplier, only the market price.
+
+- **Why not Nord Pool directly:** its official data API is a paid service, and the free public price services
+  (Nord Pool's own site, Elering, porssisahko.net) do not allow requests from a web page. sahkotin.fi does.
+- **What is shown:** the price for each hour in cents per kWh *including* Finnish VAT (currently 25.5 %, added by
+  the service). Each hourly price is the average of Nord Pool's four 15-minute prices in that hour. Prices of 10
+  cents and above are shown without a decimal. Negative prices are possible (and are shown), with VAT applied to
+  them in the same way. Hours at or below 3 c/kWh are marked low (green arrow down), at or above 15 high (red
+  arrow up); the limits are `LOW_PRICE` and `HIGH_PRICE` in `src/electricity.ts`.
+- **Which days:** only days Nord Pool has published prices for have any: earlier days of the current week, today
+  and, from early afternoon, tomorrow. Other days stay empty, and the line under the calendar says so.
+- **Updates and offline:** the app looks again every 30 minutes while it is open and when it is opened again after
+  30 minutes or more. The last prices are kept in the browser, so if the service can't be reached the app shows
+  that saved copy with a note and a "Try again" button.
+- **Assumption:** prices are always for Finland, whatever place is chosen for the weather. Other countries or
+  price areas would need another source.
