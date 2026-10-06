@@ -303,7 +303,7 @@ export async function searchPlaces(
 }
 
 /** About 1 km precision: plenty for weather, and no more exact than needed. */
-export function roundCoordinate(value: number) {
+function roundCoordinate(value: number) {
   return Math.round(value * 100) / 100
 }
 
