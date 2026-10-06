@@ -3,12 +3,13 @@
 A family activity calendar for phones and tablets, showing each family member's events alongside hourly
 weather and electricity prices. The UI was designed and exported from Figma Make.
 
-This first version only implements what the design shows, using built-in sample data for the week of
-5–11 October 2026. Changes are kept in memory and reset when the page reloads.
+The calendar shows a fixed week, 5–11 October 2026. The weather is real (see below); events and electricity
+prices are still built-in sample data, and event changes are kept in memory and reset when the page reloads.
 
 ## Features
 
 - Week and Day views, with previous day, Today and next day navigation
+- Real hourly weather (temperature and sunny/cloudy/rain/snow) for a location you choose, from Open-Meteo
 - Weather and Electricity toggles to show or hide hourly weather and prices
 - Add, edit and delete events (name, day, family member, start time, duration, notes)
 - Layouts for phones, tablets and desktops
@@ -36,12 +37,17 @@ Other commands:
 
 - `npx pnpm@10.34.3 run build` – production build into `dist/`
 - `npx tsc --noEmit` – type-check
+- `npx pnpm@10.34.3 run test` – run the tests for the weather logic
 - `npx pnpm@10.34.3 run preview` – serve the production build (run `build` first), including the
   installable/offline version
 
 ## Project structure
 
 - `src/App.tsx` – the calendar UI and sample data
+- `src/weather.ts` – weather and place lookups from Open-Meteo, and turning them into calendar data (tested in `src/weather.test.ts`)
+- `src/useForecast.ts` – loads the forecast and keeps it fresh
+- `src/LocationDialog.tsx` – the dialog for choosing the weather location
+- `src/Icon.tsx` – the icons
 - `src/PinLock.tsx` – the PIN screen shown before the calendar
 - `src/index.css` – styles, including the phone and tablet layouts
 - `src/imports/` – the original Figma design image
@@ -63,3 +69,23 @@ screen like a normal app, and keeps working without a connection once it has bee
   iPhone/iPad (Safari) use Share, then "Add to Home Screen".
 - **Updates:** the app updates itself in the background; the new version is used the next time it is opened.
 - The app icons are generated from `public/icon.svg` at build time.
+
+## Weather and location
+
+The hourly weather comes from [Open-Meteo](https://open-meteo.com/), which needs no account or API key and is
+free for non-commercial use; the app shows the required credit under the calendar.
+
+- **Choosing a location:** the first time the app opens it asks for one. Search for a city or town, or use
+  "Use my current location" (only offered on secure `https://` or `localhost` connections). The button showing
+  the place name at the top changes it later.
+- **What is sent where:** the place you search for and the approximate coordinates of the chosen place
+  (rounded to about 1 km) are sent to Open-Meteo. The choice itself is saved only in this browser
+  (`localStorage`); it is never part of the repository.
+- **What is shown:** temperature and a sunny/cloudy/rain/snow category for each hour from 07:00 to 21:00, plus a
+  daily high, low and short summary such as "Rain from 17:00". Clear hours after dark show a moon. The time
+  column shows the time zone of the chosen place.
+- **Updates and offline:** the forecast reloads when the app is opened after 30 minutes or more, and when the
+  connection returns after a failure. The last forecast is kept in the browser, so if the service can't be
+  reached the app shows that saved copy with a note and a "Try again" button.
+- **Dates:** the calendar is fixed to 5–11 October 2026 for now, so only that week's forecast is requested.
+  Open-Meteo can provide dates from about three months back to 16 days ahead.
