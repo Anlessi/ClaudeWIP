@@ -259,13 +259,14 @@ export async function fetchForecast(
   if (!response.ok) {
     throw new Error(`The weather service answered with an error (${response.status}).`)
   }
-  return parseForecast(
-    await response.json(),
-    weekDates,
-    firstHour,
-    endHour,
-    Date.now(),
-  )
+  let data: unknown
+  try {
+    data = await response.json()
+  } catch {
+    // For example a sign-in page from public Wi-Fi instead of weather data.
+    throw new Error("Unexpected response from the weather service.")
+  }
+  return parseForecast(data, weekDates, firstHour, endHour, Date.now())
 }
 
 /** Looks up places by name, e.g. "Helsinki". */
