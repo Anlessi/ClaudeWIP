@@ -19,9 +19,9 @@ import CalendarDialog from "./CalendarDialog"
 import {
   layoutLanes,
   type AllDayEvent,
+  type CalendarSource,
   type Event,
   type Lane,
-  type Person,
 } from "./events"
 import useForecast from "./useForecast"
 import useGoogleCalendar from "./useGoogleCalendar"
@@ -84,67 +84,67 @@ const HOURS = Array.from(
   (_, index) => START_HOUR + index,
 )
 
+// The sample events all belong to one made-up calendar.
+const SAMPLE_CALENDAR: CalendarSource = {
+  id: "sample",
+  name: "Sample events",
+  color: "var(--family)",
+  textColor: "white",
+}
+
 // Sample events for each weekday (Monday first). They are placed in the current week when the app opens.
 const SAMPLE_WEEK_EVENTS: Event[][] = [
   [
-    { title: "Dentist", start: 8, duration: 1, person: "Dad" },
-    { title: "Team meeting", start: 9, duration: 1, person: "Mum" },
-    { title: "Piano", start: 16, duration: 1, person: "Mia" },
+    { title: "Dentist", start: 8, duration: 1, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Team meeting", start: 9, duration: 1, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Piano", start: 16, duration: 1, calendarId: SAMPLE_CALENDAR.id },
     {
       title: "Football",
       start: 17,
       duration: 1.5,
-      person: "Leo",
+      calendarId: SAMPLE_CALENDAR.id,
       note: "Bring raincoat",
     },
   ],
   [
-    { title: "Pick up Leo", start: 15, duration: 1, person: "Mum" },
-    { title: "Late shift", start: 17, duration: 3, person: "Dad" },
+    { title: "Pick up Leo", start: 15, duration: 1, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Late shift", start: 17, duration: 3, calendarId: SAMPLE_CALENDAR.id },
   ],
   [
-    { title: "Dentist", start: 9, duration: 1, person: "Leo" },
-    { title: "Swim", start: 17, duration: 1, person: "Mia" },
-    { title: "Yoga", start: 18, duration: 1, person: "Mum" },
+    { title: "Dentist", start: 9, duration: 1, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Swim", start: 17, duration: 1, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Yoga", start: 18, duration: 1, calendarId: SAMPLE_CALENDAR.id },
   ],
   [
     {
       title: "Choir",
       start: 16,
       duration: 1,
-      person: "Mia",
+      calendarId: SAMPLE_CALENDAR.id,
       note: "Heavy rain",
     },
-    { title: "Football", start: 17, duration: 1.5, person: "Leo" },
-    { title: "Parent meeting", start: 18.5, duration: 1.5, person: "Dad" },
+    { title: "Football", start: 17, duration: 1.5, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Parent meeting", start: 18.5, duration: 1.5, calendarId: SAMPLE_CALENDAR.id },
   ],
   [
-    { title: "Gym", start: 7, duration: 1, person: "Dad" },
-    { title: "Sleepover", start: 17, duration: 2, person: "Mia" },
-    { title: "Book club", start: 19, duration: 2, person: "Mum" },
+    { title: "Gym", start: 7, duration: 1, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Sleepover", start: 17, duration: 2, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Book club", start: 19, duration: 2, calendarId: SAMPLE_CALENDAR.id },
   ],
   [
-    { title: "Market", start: 8, duration: 1.5, person: "Mum" },
-    { title: "Match", start: 10, duration: 2, person: "Leo" },
-    { title: "Party", start: 11, duration: 2, person: "Mia" },
+    { title: "Market", start: 8, duration: 1.5, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Match", start: 10, duration: 2, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Party", start: 11, duration: 2, calendarId: SAMPLE_CALENDAR.id },
   ],
   [
-    { title: "Run", start: 9, duration: 1, person: "Dad" },
-    { title: "Family lunch", start: 13, duration: 2, person: "Family" },
-    { title: "Meal prep", start: 17, duration: 1, person: "Mum" },
+    { title: "Run", start: 9, duration: 1, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Family lunch", start: 13, duration: 2, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Meal prep", start: 17, duration: 1, calendarId: SAMPLE_CALENDAR.id },
   ],
 ]
 
 // Shown in the time column until a forecast tells us the time zone of the chosen location.
 const DEFAULT_TIME_ZONE_LABEL = "GMT+2"
-
-const PERSON_COLORS: Record<Person, string> = {
-  Mum: "var(--mum)",
-  Dad: "var(--dad)",
-  Mia: "var(--mia)",
-  Leo: "var(--leo)",
-  Family: "var(--family)",
-}
 
 function Button({
   children,
@@ -339,7 +339,7 @@ function PriceStatus({
 
 function GoogleStatus({
   configured,
-  calendarName,
+  calendarNames,
   loading,
   hasEvents,
   error,
@@ -351,8 +351,8 @@ function GoogleStatus({
   onRetry,
 }: {
   configured: boolean
-  /** Null when Google Calendar isn't connected. */
-  calendarName: string | null
+  /** Empty when Google Calendar isn't connected. */
+  calendarNames: string[]
   loading: boolean
   /** Events for the week on screen have been loaded. */
   hasEvents: boolean
@@ -368,7 +368,7 @@ function GoogleStatus({
   const [signInMessage, setSignInMessage] = useState("")
   const time = fetchedAt ? clockTime(fetchedAt) : ""
 
-  if (calendarName === null) {
+  if (calendarNames.length === 0) {
     return (
       <p className="data-status" role="status">
         These are sample events.
@@ -420,8 +420,9 @@ function GoogleStatus({
       )}
       <span>
         {fetchedAt !== null && !error && `Updated ${time} · `}Events from
-        Google Calendar &quot;{calendarName}&quot; (read-only: change them in
-        Google Calendar)
+        Google Calendar{" "}
+        {calendarNames.map((name) => `"${name}"`).join(", ")} (read-only:
+        change them in Google Calendar)
       </span>
     </p>
   )
@@ -438,17 +439,20 @@ function formatTime(hour: number) {
 /** `onClick` is missing for events that can't be edited here (the ones from Google Calendar). */
 function EventCard({
   event,
+  calendar,
   lane,
   onClick,
 }: {
   event: Event
+  calendar: CalendarSource
   lane: Lane
   onClick?: () => void
 }) {
   const style = {
     "--event-top": `${(event.start - START_HOUR) * 64 + 4}px`,
     "--event-height": `${event.duration * 64 - 8}px`,
-    "--event-color": PERSON_COLORS[event.person],
+    "--event-color": calendar.color,
+    "--event-text": calendar.textColor,
     "--event-lane": lane.lane,
     "--event-lanes": lane.lanes,
     // Events that share the width take more of the column (over the weather and price readings),
@@ -470,7 +474,7 @@ function EventCard({
         className="event-card event-card--readonly"
         style={style}
         title={[
-          `${event.title} (${event.person})`,
+          `${event.title} (${calendar.name})`,
           `${formatTime(event.start)}–${formatTime(event.start + event.duration)}`,
           event.note,
         ]
@@ -497,25 +501,30 @@ function EventCard({
 function AllDayRow({
   events,
   rows,
+  calendars,
 }: {
   events: AllDayEvent[]
   rows: number
+  calendars: Map<string, CalendarSource>
 }) {
   // When there are more than fit, the last row says how many more there are.
   const hidden = events.length > rows ? events.length - rows + 1 : 0
   const shown = hidden ? events.slice(0, rows - 1) : events
   return (
     <div className="allday-row">
-      {shown.map((event, index) => (
-        <span
-          className="allday-chip"
-          key={`${event.title}-${index}`}
-          style={{ background: PERSON_COLORS[event.person] }}
-          title={`${event.title} (${event.person}, all day)`}
-        >
-          {event.title}
-        </span>
-      ))}
+      {shown.map((event, index) => {
+        const calendar = calendars.get(event.calendarId) ?? SAMPLE_CALENDAR
+        return (
+          <span
+            className="allday-chip"
+            key={`${event.title}-${index}`}
+            style={{ background: calendar.color, color: calendar.textColor }}
+            title={`${event.title} (${calendar.name}, all day)`}
+          >
+            {event.title}
+          </span>
+        )
+      })}
       {hidden > 0 && (
         <span
           className="allday-chip allday-chip--more"
@@ -536,6 +545,7 @@ function DayColumn({
   events,
   allDay,
   allDayRows,
+  calendars,
   weather,
   prices,
   showWeather,
@@ -551,6 +561,8 @@ function DayColumn({
   allDay: AllDayEvent[]
   /** How many rows the all-day area has, the same for every day on screen so the hours line up. */
   allDayRows: number
+  /** The calendars events can belong to, by id. */
+  calendars: Map<string, CalendarSource>
   weather: DayWeather | null
   /** Cents per kWh by hour, or undefined when there are no prices for this day. */
   prices: Record<number, number> | undefined
@@ -588,7 +600,7 @@ function DayColumn({
         </span>
       </Button>
 
-      {allDayRows > 0 && <AllDayRow events={allDay} rows={allDayRows} />}
+      {allDayRows > 0 && <AllDayRow events={allDay} rows={allDayRows} calendars={calendars} />}
 
       <div className="day-body">
         {HOURS.map((hour) => {
@@ -652,6 +664,7 @@ function DayColumn({
           {events.map((event, eventIndex) => (
             <EventCard
               event={event}
+              calendar={calendars.get(event.calendarId) ?? SAMPLE_CALENDAR}
               lane={lanes[eventIndex]}
               key={`${event.title}-${event.start}-${eventIndex}`}
               onClick={onEditEvent && (() => onEditEvent(eventIndex))}
@@ -729,7 +742,17 @@ export default function App() {
   }, [weather.forecast])
   // Once Google Calendar is connected its events replace the sample events, and they can't be edited here.
   const google = useGoogleCalendar(weekDates, START_HOUR, END_HOUR)
-  const googleConnected = google.calendar !== null
+  const googleConnected = google.calendars.length > 0
+  // The legend lists the calendars the events come from.
+  const calendarSummary =
+    google.calendars.length === 1
+      ? google.calendars[0].name
+      : `${google.calendars.length} calendars`
+  const legendCalendars = googleConnected ? google.calendars : [SAMPLE_CALENDAR]
+  const calendarsById = useMemo(
+    () => new Map(legendCalendars.map((calendar) => [calendar.id, calendar])),
+    [googleConnected, google.calendars],
+  )
   const eventsOn = (iso: string): Event[] =>
     googleConnected
       ? (google.week?.timed[iso] ?? [])
@@ -767,7 +790,7 @@ export default function App() {
       date: selectedDate,
       start: 9,
       duration: 1,
-      person: "Mum",
+      calendarId: SAMPLE_CALENDAR.id,
       note: "",
     })
   }
@@ -792,7 +815,7 @@ export default function App() {
       title: draft.title.trim(),
       start,
       duration: Math.min(Math.max(draft.duration, 0.5), 4, END_HOUR - start),
-      person: draft.person,
+      calendarId: SAMPLE_CALENDAR.id,
       note: draft.note?.trim(),
     }
 
@@ -914,15 +937,15 @@ export default function App() {
             <Button
               className="filter-toggle location-button"
               label={
-                google.calendar
-                  ? `Google Calendar settings, currently ${google.calendar.name}`
+                googleConnected
+                  ? `Google Calendar settings, showing ${calendarSummary}`
                   : "Connect Google Calendar"
               }
               onClick={() => setCalendarDialogOpen(true)}
             >
               <Icon name="calendar" size={16} />
               <span>
-                {google.calendar ? google.calendar.name : "Connect calendar"}
+                {googleConnected ? calendarSummary : "Connect calendar"}
               </span>
             </Button>
             {!googleConnected && (
@@ -935,11 +958,11 @@ export default function App() {
       </section>
 
       <section className="legend-bar">
-        <div className="people-legend">
-          {(Object.keys(PERSON_COLORS) as Person[]).map((person) => (
-            <span className="legend-item" key={person}>
-              <i style={{ background: PERSON_COLORS[person] }} />
-              {person}
+        <div className="calendar-legend">
+          {legendCalendars.map((calendar) => (
+            <span className="legend-item" key={calendar.id}>
+              <i style={{ background: calendar.color }} />
+              {calendar.name}
             </span>
           ))}
         </div>
@@ -1013,6 +1036,7 @@ export default function App() {
               events={eventsOn(day.iso)}
               allDay={allDayOn(day.iso)}
               allDayRows={allDayRows}
+              calendars={calendarsById}
               weather={weatherByDate.get(day.iso) ?? null}
               prices={electricity.prices?.byDate[day.iso]}
               key={day.iso}
@@ -1047,7 +1071,7 @@ export default function App() {
 
       <GoogleStatus
         configured={google.configured}
-        calendarName={google.calendar?.name ?? null}
+        calendarNames={google.calendars.map((calendar) => calendar.name)}
         loading={google.loading}
         hasEvents={google.week !== null}
         error={google.error}
@@ -1081,9 +1105,9 @@ export default function App() {
       {calendarDialogOpen && (
         <CalendarDialog
           configured={google.configured}
-          current={google.calendar}
+          current={google.calendars}
           ensureToken={google.ensureToken}
-          onSelect={google.selectCalendar}
+          onSelect={google.selectCalendars}
           onDisconnect={google.disconnect}
           onClose={() => setCalendarDialogOpen(false)}
         />
@@ -1148,25 +1172,6 @@ export default function App() {
                   {weekDays.map((day) => (
                     <option value={day.iso} key={day.iso}>
                       {day.short}, {day.month} {day.date}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="field">
-                <span>Family member</span>
-                <select
-                  value={draft.person}
-                  onChange={(event) =>
-                    setDraft({
-                      ...draft,
-                      person: event.target.value as Person,
-                    })
-                  }
-                >
-                  {(Object.keys(PERSON_COLORS) as Person[]).map((person) => (
-                    <option value={person} key={person}>
-                      {person}
                     </option>
                   ))}
                 </select>

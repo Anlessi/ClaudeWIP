@@ -1,36 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { layoutLanes, personFromTitle } from "./events.ts"
-
-test("personFromTitle finds the family member in the title", () => {
-  assert.deepEqual(personFromTitle("Mia: Piano"), {
-    person: "Mia",
-    title: "Piano",
-  })
-  assert.deepEqual(personFromTitle("leo - Football"), {
-    person: "Leo",
-    title: "Football",
-  })
-  assert.deepEqual(personFromTitle("Dentist for Dad"), {
-    person: "Dad",
-    title: "Dentist for Dad",
-  })
-  assert.equal(personFromTitle("Mom's late shift").person, "Mum")
-})
-
-test("personFromTitle uses the first name mentioned", () => {
-  assert.equal(personFromTitle("Swimming Leo & Mia").person, "Leo")
-})
-
-test("personFromTitle treats events that name nobody as Family", () => {
-  assert.deepEqual(personFromTitle("  Family lunch "), {
-    person: "Family",
-    title: "Family lunch",
-  })
-  // Names inside other words don't count.
-  assert.equal(personFromTitle("Leopard exhibition").person, "Family")
-  assert.equal(personFromTitle("Miami trip").person, "Family")
-})
+import { layoutLanes } from "./events.ts"
 
 test("layoutLanes gives lone events the whole width", () => {
   assert.deepEqual(

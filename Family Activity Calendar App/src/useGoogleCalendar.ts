@@ -6,13 +6,13 @@ import {
   revokeAccessToken,
   type AccessToken,
 } from "./googleAuth"
+import type { CalendarSource } from "./events"
 import {
   GoogleAccessError,
-  fetchWeek,
-  loadSavedCalendar,
-  saveCalendar,
+  fetchWeeks,
+  loadSavedCalendars,
+  saveCalendars,
   type GoogleWeek,
-  type SavedCalendar,
 } from "./googleCalendar"
 
 type Status = "idle" | "loading" | "ready" | "error"
@@ -24,7 +24,7 @@ const REFRESH_EVERY_MS = 10 * 60 * 1000
 const TOKEN_MARGIN_MS = 60 * 1000
 
 /**
- * Loads the events of the chosen Google calendar for the week on screen. Until a calendar has been
+ * Loads the events of the chosen Google calendars for the week on screen. Until a calendar has been
  * chosen nothing is loaded. The Google sign-in only lasts about an hour and is never saved, so after the
  * app is reopened, and again an hour later, `needsSignIn` is true and the person has to press a button
  * (`reconnect`).
@@ -34,8 +34,8 @@ export default function useGoogleCalendar(
   firstHour: number,
   endHour: number,
 ) {
-  const [calendar, setCalendar] = useState<SavedCalendar | null>(() =>
-    GOOGLE_CLIENT_ID ? loadSavedCalendar() : null,
+  const [calendars, setCalendars] = useState<CalendarSource[]>(() =>
+    GOOGLE_CLIENT_ID ? loadSavedCalendars() : [],
   )
   const [weeks, setWeeks] = useState<Record<string, GoogleWeek>>({})
   const [status, setStatus] = useState<Status>("idle")
@@ -69,7 +69,7 @@ export default function useGoogleCalendar(
   }, [])
 
   useEffect(() => {
-    if (!calendar) {
+    if (calendars.length === 0) {
       setStatus("idle")
       return
     }
@@ -89,9 +89,9 @@ export default function useGoogleCalendar(
       }
 
       try {
-        const week = await fetchWeek(
+        const week = await fetchWeeks(
           accessToken,
-          calendar.id,
+          calendars,
           weekDates,
           firstHour,
           endHour,
@@ -121,13 +121,13 @@ export default function useGoogleCalendar(
     void load()
 
     return () => controller.abort()
-  }, [calendar, weekDates, weekKey, firstHour, endHour, attempt, ensureToken])
+  }, [calendars, weekDates, weekKey, firstHour, endHour, attempt, ensureToken])
 
   const week = weeks[weekKey] ?? null
   const fetchedAt = week?.fetchedAt ?? null
 
   useEffect(() => {
-    if (!calendar) return
+    if (calendars.length === 0) return
     const reload = () => setAttempt((count) => count + 1)
     const isStale = () =>
       status === "error" ||
@@ -150,20 +150,20 @@ export default function useGoogleCalendar(
       document.removeEventListener("visibilitychange", onVisible)
       window.removeEventListener("online", onOnline)
     }
-  }, [calendar, status, fetchedAt])
+  }, [calendars, status, fetchedAt])
 
-  const selectCalendar = (next: SavedCalendar) => {
-    saveCalendar(next)
+  const selectCalendars = (next: CalendarSource[]) => {
+    saveCalendars(next)
     setWeeks({})
     setError("")
-    setCalendar(next)
+    setCalendars(next)
   }
 
   const disconnect = () => {
     if (tokenRef.current) revokeAccessToken(tokenRef.current.accessToken)
     tokenRef.current = null
-    saveCalendar(null)
-    setCalendar(null)
+    saveCalendars([])
+    setCalendars([])
     setWeeks({})
     setError("")
     setNeedsSignIn(false)
@@ -178,13 +178,14 @@ export default function useGoogleCalendar(
   return {
     /** False when the app has no Google client ID, so Google Calendar can't be connected at all. */
     configured: GOOGLE_CLIENT_ID !== "",
-    calendar,
+    /** The calendars being shown; empty when Google Calendar isn't connected. */
+    calendars,
     week,
     loading: status === "loading",
     error,
     needsSignIn,
     ensureToken,
-    selectCalendar,
+    selectCalendars,
     disconnect,
     reconnect,
     reload: () => setAttempt((count) => count + 1),

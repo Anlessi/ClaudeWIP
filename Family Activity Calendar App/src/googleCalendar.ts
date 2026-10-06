@@ -2,18 +2,11 @@
 // Plain logic with no React, so it can be tested on its own. Signing in is in googleAuth.ts.
 
 import { addDays } from "./dates.ts"
-import { personFromTitle, type AllDayEvent, type Event } from "./events.ts"
+import type { AllDayEvent, CalendarSource, Event } from "./events.ts"
 
-export type GoogleCalendarInfo = {
-  id: string
-  name: string
+/** A calendar the Google account can read. */
+export type GoogleCalendarInfo = CalendarSource & {
   primary: boolean
-}
-
-/** The chosen calendar, remembered in this browser. */
-export type SavedCalendar = {
-  id: string
-  name: string
 }
 
 /** One week of events from Google, by ISO date. */
@@ -46,13 +39,22 @@ type RawCalendarList = {
     summary?: string
     summaryOverride?: string
     primary?: boolean
+    backgroundColor?: string
+    foregroundColor?: string
   }[]
 }
 
 const API_URL = "https://www.googleapis.com/calendar/v3"
-const CALENDAR_KEY = "familyflow.googleCalendar"
+// The calendars chosen in the app, remembered in this browser.
+const CALENDARS_KEY = "familyflow.googleCalendars"
+// Older versions remembered a single calendar (id and name only).
+const OLD_CALENDAR_KEY = "familyflow.googleCalendar"
 
-/** Thrown when Google says the sign-in has expired or doesn't allow this request. */
+// Used when Google doesn't say what colour a calendar has.
+const FALLBACK_COLOR = "#4f5b6b"
+const FALLBACK_TEXT_COLOR = "#ffffff"
+
+/** Thrown when Google says the sign-in has expired, so signing in again can help. */
 export class GoogleAccessError extends Error {}
 
 const MAX_NOTE_LENGTH = 140
@@ -78,7 +80,7 @@ function noteFor(event: RawEvent) {
 
 /**
  * Turns the raw events Google sent into events by day for the calendar. Times are shown on the device's
- * clock. An event that crosses midnight is split into one piece for each day, and each piece is cut to
+ * clock. Every event is marked with the calendar it came from (`calendarId`). An event that crosses midnight is split into one piece for each day, and each piece is cut to
  * the hours the calendar shows (`firstHour` to `endHour`). Events outside those hours are counted, not
  * drawn. Events you have declined or that were cancelled are left out.
  */
@@ -87,6 +89,7 @@ export function parseEvents(
   dates: string[],
   firstHour: number,
   endHour: number,
+  calendarId: string,
   fetchedAt: number,
 ): GoogleWeek {
   const week: GoogleWeek = {
@@ -102,15 +105,14 @@ export function parseEvents(
       continue
     }
 
-    const { person, title } = personFromTitle(event.summary ?? "")
-    const shownTitle = title || "(No title)"
+    const shownTitle = event.summary?.trim() || "(No title)"
 
     if (event.start?.date) {
       // All-day events: `end.date` is the day after the last day.
       const last = event.end?.date ? addDays(event.end.date, -1) : event.start.date
       for (const date of dates) {
         if (date >= event.start.date && date <= last) {
-          week.allDay[date].push({ title: shownTitle, person })
+          week.allDay[date].push({ title: shownTitle, calendarId })
         }
       }
       continue
@@ -146,7 +148,7 @@ export function parseEvents(
         title: shownTitle,
         start: shownStart,
         duration: shownEnd - shownStart,
-        person,
+        calendarId,
         note,
       })
     }
@@ -169,7 +171,9 @@ async function googleGet<T>(
     headers: { Authorization: `Bearer ${accessToken}` },
     signal,
   })
-  if (response.status === 401 || response.status === 403) {
+  // Only 401 means the sign-in has run out. Other refusals (403, 404: a calendar that is no longer shared
+  // or was deleted) would fail again after signing in, so they are reported as ordinary errors.
+  if (response.status === 401) {
     throw new GoogleAccessError("Google Calendar access has expired.")
   }
   if (!response.ok) {
@@ -187,7 +191,8 @@ export async function fetchCalendarList(
     "/users/me/calendarList",
     {
       minAccessRole: "reader",
-      fields: "items(id,summary,summaryOverride,primary)",
+      fields:
+        "items(id,summary,summaryOverride,primary,backgroundColor,foregroundColor)",
     },
     accessToken,
     signal,
@@ -197,13 +202,15 @@ export async function fetchCalendarList(
     .map((item) => ({
       id: item.id,
       name: item.summaryOverride || item.summary || item.id,
+      color: item.backgroundColor || FALLBACK_COLOR,
+      textColor: item.foregroundColor || FALLBACK_TEXT_COLOR,
       primary: !!item.primary,
     }))
     .sort((a, b) => Number(b.primary) - Number(a.primary))
 }
 
 /** Loads one calendar's events for the given consecutive dates and turns them into calendar events. */
-export async function fetchWeek(
+async function fetchWeek(
   accessToken: string,
   calendarId: string,
   dates: string[],
@@ -241,7 +248,61 @@ export async function fetchWeek(
     pageToken = page.nextPageToken ?? ""
   } while (pageToken)
 
-  return parseEvents(raw, dates, firstHour, endHour, Date.now())
+  return parseEvents(raw, dates, firstHour, endHour, calendarId, Date.now())
+}
+
+/** Puts the weeks of several calendars together into one. */
+export function mergeWeeks(weeks: GoogleWeek[], dates: string[]): GoogleWeek {
+  const merged: GoogleWeek = {
+    timed: Object.fromEntries(dates.map((date) => [date, []])),
+    allDay: Object.fromEntries(dates.map((date) => [date, []])),
+    outsideHours: {},
+    fetchedAt: weeks.length ? Math.min(...weeks.map((week) => week.fetchedAt)) : Date.now(),
+  }
+  for (const week of weeks) {
+    for (const date of dates) {
+      merged.timed[date].push(...(week.timed[date] ?? []))
+      merged.allDay[date].push(...(week.allDay[date] ?? []))
+      if (week.outsideHours[date]) {
+        merged.outsideHours[date] =
+          (merged.outsideHours[date] ?? 0) + week.outsideHours[date]
+      }
+    }
+  }
+  for (const date of dates) {
+    merged.timed[date].sort((a, b) => a.start - b.start)
+  }
+  return merged
+}
+
+/** Loads the events of all the chosen calendars for the given consecutive dates. */
+export async function fetchWeeks(
+  accessToken: string,
+  calendars: CalendarSource[],
+  dates: string[],
+  firstHour: number,
+  endHour: number,
+  signal?: AbortSignal,
+): Promise<GoogleWeek> {
+  const weeks = await Promise.all(
+    calendars.map((calendar) =>
+      fetchWeek(accessToken, calendar.id, dates, firstHour, endHour, signal).catch(
+        (error: unknown) => {
+          // Say which calendar failed; sign-in and connection problems keep their own handling.
+          if (
+            error instanceof GoogleAccessError ||
+            error instanceof TypeError ||
+            !(error instanceof Error) ||
+            signal?.aborted
+          ) {
+            throw error
+          }
+          throw new Error(`Couldn't load "${calendar.name}". ${error.message}`)
+        },
+      ),
+    ),
+  )
+  return mergeWeeks(weeks, dates)
 }
 
 type SimpleStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">
@@ -254,28 +315,49 @@ function defaultStorage(): SimpleStorage | null {
   }
 }
 
-/** The calendar chosen on an earlier visit, or null if Google Calendar was never connected. */
-export function loadSavedCalendar(
+function asCalendar(value: unknown): CalendarSource | null {
+  const item = value as Partial<CalendarSource> | null
+  if (!item || typeof item.id !== "string" || typeof item.name !== "string") {
+    return null
+  }
+  return {
+    id: item.id,
+    name: item.name,
+    color: typeof item.color === "string" ? item.color : FALLBACK_COLOR,
+    textColor:
+      typeof item.textColor === "string" ? item.textColor : FALLBACK_TEXT_COLOR,
+  }
+}
+
+/** The calendars chosen on an earlier visit; empty if Google Calendar was never connected. */
+export function loadSavedCalendars(
   storage: SimpleStorage | null = defaultStorage(),
-): SavedCalendar | null {
+): CalendarSource[] {
   try {
-    const value = JSON.parse(storage?.getItem(CALENDAR_KEY) ?? "null")
-    if (value && typeof value.id === "string" && typeof value.name === "string") {
-      return { id: value.id, name: value.name }
+    const value = JSON.parse(storage?.getItem(CALENDARS_KEY) ?? "null")
+    if (Array.isArray(value)) {
+      return value.map(asCalendar).filter((c): c is CalendarSource => c !== null)
     }
+    // A single calendar saved by an older version.
+    const old = asCalendar(JSON.parse(storage?.getItem(OLD_CALENDAR_KEY) ?? "null"))
+    if (old) return [old]
   } catch {
     // Unreadable or blocked storage: behave as if nothing was saved.
   }
-  return null
+  return []
 }
 
-export function saveCalendar(
-  calendar: SavedCalendar | null,
+export function saveCalendars(
+  calendars: CalendarSource[],
   storage: SimpleStorage | null = defaultStorage(),
 ) {
   try {
-    if (calendar) storage?.setItem(CALENDAR_KEY, JSON.stringify(calendar))
-    else storage?.removeItem(CALENDAR_KEY)
+    if (calendars.length > 0) {
+      storage?.setItem(CALENDARS_KEY, JSON.stringify(calendars))
+    } else {
+      storage?.removeItem(CALENDARS_KEY)
+    }
+    storage?.removeItem(OLD_CALENDAR_KEY)
   } catch {
     // Storage full or blocked: the choice just isn't remembered.
   }

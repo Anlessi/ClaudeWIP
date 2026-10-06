@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react"
 import Icon from "./Icon"
 import { GoogleAuthError } from "./googleAuth"
-import {
-  fetchCalendarList,
-  type GoogleCalendarInfo,
-  type SavedCalendar,
-} from "./googleCalendar"
+import type { CalendarSource } from "./events"
+import { fetchCalendarList, type GoogleCalendarInfo } from "./googleCalendar"
 
 function describeFailure(failure: unknown) {
   if (failure instanceof GoogleAuthError) {
@@ -37,14 +34,19 @@ export default function CalendarDialog({
 }: {
   /** False when the app has no Google client ID. */
   configured: boolean
-  current: SavedCalendar | null
+  /** The calendars being shown now; empty when nothing is connected. */
+  current: CalendarSource[]
   /** Signs in to Google if needed (this runs from a click, so Google may open its window). */
   ensureToken: (interactive: boolean) => Promise<string>
-  onSelect: (calendar: SavedCalendar) => void
+  onSelect: (calendars: CalendarSource[]) => void
   onDisconnect: () => void
   onClose: () => void
 }) {
   const [calendars, setCalendars] = useState<GoogleCalendarInfo[] | null>(null)
+  const [chosen, setChosen] = useState<Set<string>>(
+    () => new Set(current.map((calendar) => calendar.id)),
+  )
+  const connected = current.length > 0
   const [working, setWorking] = useState(false)
   const [message, setMessage] = useState("")
 
@@ -87,7 +89,7 @@ export default function CalendarDialog({
           <div>
             <p className="eyebrow">Google Calendar</p>
             <h2 id="calendar-dialog-title">
-              {current ? "Your family calendar" : "Connect your calendar"}
+              {connected ? "Your calendars" : "Connect your calendar"}
             </h2>
           </div>
           <button
@@ -112,15 +114,14 @@ export default function CalendarDialog({
           {configured && calendars === null && (
             <>
               <p className="location-note">
-                {current
-                  ? `Showing events from "${current.name}".`
-                  : "Show the real events from your Google family calendar instead of the sample events."}
+                {connected
+                  ? `Showing events from ${current.map((c) => `"${c.name}"`).join(", ")}.`
+                  : "Show the real events from your Google calendars instead of the sample events."}
               </p>
               <p className="location-note">
-                The app can only read your calendar; it can&apos;t add, change or
-                delete anything. Events are named after the family member in the
-                title, e.g. &quot;Mia: Piano&quot;. Events that name nobody are
-                shown as Family.
+                The app can only read your calendars; it can&apos;t add, change
+                or delete anything. Each calendar keeps its Google name and
+                colour.
               </p>
             </>
           )}
@@ -134,49 +135,60 @@ export default function CalendarDialog({
           {calendars !== null && (
             <>
               <p className="location-note">
-                Choose the calendar to show
-                {calendars.length === 0 ? "" : ":"}
+                {calendars.length === 0
+                  ? "This Google account has no calendars to show."
+                  : "Choose the calendars to show:"}
               </p>
-              {calendars.length === 0 && (
-                <p className="location-note">
-                  This Google account has no calendars to show.
-                </p>
-              )}
               <ul className="location-results">
-                {calendars.map((calendar) => (
-                  <li key={calendar.id}>
-                    <button
-                      type="button"
-                      className="location-result"
-                      onClick={() => {
-                        onSelect({ id: calendar.id, name: calendar.name })
-                        onClose()
-                      }}
-                    >
-                      <Icon
-                        name={calendar.id === current?.id ? "check" : "calendar"}
-                        size={17}
-                      />
-                      <span>
-                        <strong>{calendar.name}</strong>
-                        {calendar.primary && <small>Your main calendar</small>}
-                      </span>
-                    </button>
-                  </li>
-                ))}
+                {calendars.map((calendar) => {
+                  const checked = chosen.has(calendar.id)
+                  return (
+                    <li key={calendar.id}>
+                      <button
+                        type="button"
+                        className="location-result"
+                        role="checkbox"
+                        aria-checked={checked}
+                        onClick={() =>
+                          setChosen((previous) => {
+                            const next = new Set(previous)
+                            if (checked) next.delete(calendar.id)
+                            else next.add(calendar.id)
+                            return next
+                          })
+                        }
+                      >
+                        <span
+                          className="calendar-swatch"
+                          style={{
+                            background: checked ? calendar.color : "transparent",
+                            borderColor: calendar.color,
+                            color: calendar.textColor,
+                          }}
+                        >
+                          {checked && <Icon name="check" size={13} />}
+                        </span>
+                        <span>
+                          <strong>{calendar.name}</strong>
+                          {calendar.primary && <small>Your main calendar</small>}
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
               </ul>
             </>
           )}
 
           <p className="location-privacy">
             Events are loaded straight from Google into this browser. The
-            Google sign-in is never saved, and only your choice of calendar is
+            Google sign-in is never saved, and only your choice of calendars is
             remembered in this browser.
           </p>
         </div>
 
         <div className="editor-actions">
-          {current ? (
+          {connected ? (
             <button
               type="button"
               className="delete-event-button"
@@ -203,9 +215,31 @@ export default function CalendarDialog({
               >
                 {working
                   ? "Connecting…"
-                  : current
-                    ? "Change calendar"
+                  : connected
+                    ? "Change calendars"
                     : "Connect Google Calendar"}
+              </button>
+            )}
+            {calendars !== null && (
+              <button
+                type="button"
+                className="save-event-button"
+                disabled={chosen.size === 0}
+                onClick={() => {
+                  onSelect(
+                    calendars
+                      .filter(({ id }) => chosen.has(id))
+                      .map(({ id, name, color, textColor }) => ({
+                        id,
+                        name,
+                        color,
+                        textColor,
+                      })),
+                  )
+                  onClose()
+                }}
+              >
+                Show these calendars
               </button>
             )}
           </div>
