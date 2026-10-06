@@ -6,6 +6,12 @@
       "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
       "runtimeArgs": ["Family Activity Calendar App/node_modules/vite/bin/vite.js", "Family Activity Calendar App"],
       "port": 8443
+    },
+    {
+      "name": "family-calendar-installable",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": ["Family Activity Calendar App/node_modules/vite/bin/vite.js", "preview", "Family Activity Calendar App", "--port", "4173"],
+      "port": 4173
     }
   ]
 }
