@@ -1,4 +1,4 @@
-# Family Flow – Family Activity Calendar
+# Week at a Glance – Family Activity Calendar
 
 A family activity calendar for phones and tablets, showing each family member's events alongside hourly
 weather and electricity prices. The UI was designed and exported from Figma Make.
@@ -69,7 +69,7 @@ Other commands:
 
 ## Installing as an app (PWA)
 
-Family Flow is a Progressive Web App: it can be added to a phone's or tablet's home screen, opens full
+Week at a Glance is a Progressive Web App: it can be added to a phone's or tablet's home screen, opens full
 screen like a normal app, and keeps working without a connection once it has been opened once.
 
 - **Service worker and offline use** only work in a production build (`build` then `preview`), not in the
@@ -136,7 +136,7 @@ directly.
 Google needs to know which app is asking for access, so you create a free "OAuth client" once:
 
 1. Go to the [Google Cloud console](https://console.cloud.google.com/), create a project (for example
-   "Family Flow") and open **APIs & Services**.
+   "Week at a Glance") and open **APIs & Services**.
 2. **Library**: search for **Google Calendar API** and click **Enable**.
 3. **OAuth consent screen** (also called Google Auth Platform): choose **External**, fill in the app name and your
    email, and under **Audience**/**Test users** add the Google account(s) that own or can see the family

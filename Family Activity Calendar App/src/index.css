@@ -68,14 +68,9 @@ button:focus-visible {
   letter-spacing: -0.02em;
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 2.25rem;
+.brand-logo {
+  width: auto;
   height: 2.25rem;
-  color: white;
-  background: var(--accent);
-  border-radius: 0.7rem;
 }
 
 .view-switcher {
@@ -857,7 +852,10 @@ h1 {
 }
 
 .pin-mark {
-  margin-bottom: 1rem;
+  display: block;
+  height: 3.5rem;
+  width: auto;
+  margin: 0 auto 1rem;
 }
 
 .pin-card h1 {

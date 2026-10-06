@@ -3,7 +3,7 @@ import {
   minimal2023Preset,
 } from "@vite-pwa/assets-generator/config"
 
-const background = "#245e46"
+const background = "#ffffff"
 
 // Generates the app icons (favicon, 64/192/512 px, maskable and Apple touch icons) from public/icon.svg.
 export default defineConfig({
