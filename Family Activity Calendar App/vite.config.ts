@@ -1,6 +1,7 @@
 import { defineConfig, type HtmlTagDescriptor, type Plugin } from "vite"
 import react from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
+import { VitePWA } from "vite-plugin-pwa"
 import path from "node:path"
 
 import siteConfiguration from "./.figma/make/site.json"
@@ -25,6 +26,28 @@ export default defineConfig(({ mode }) => {
       figmaErrorOverlayReplay(),
       figmaReactRefreshBoundaryFallback(),
       figmaMakeKitPlugin({ storiesGlob: "/src/**/*.stories.{ts,tsx,js,jsx}" }),
+      // Makes the app installable and lets it open offline. The service worker only runs in
+      // production builds (`build` + `preview`), not in the dev server.
+      VitePWA({
+        registerType: "autoUpdate",
+        pwaAssets: { config: true },
+        manifest: {
+          name: "Family Flow",
+          short_name: "Family Flow",
+          description:
+            "Family activity calendar with hourly weather and electricity prices.",
+          theme_color: "#245e46",
+          background_color: "#f3f6f2",
+          display: "standalone",
+          orientation: "any",
+        },
+        workbox: {
+          // The plugin adds the manifest itself; listing it here too creates a duplicate entry
+          // that makes the service worker skip caching entirely.
+          globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
+          navigateFallback: "index.html",
+        },
+      }),
     ],
     resolve: {
       alias: {
