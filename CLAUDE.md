@@ -15,14 +15,12 @@ Instructions for Claude Code when working in this repository.
   `git switch main`, `git pull`, `git switch -c <type>/<short-description>`
 - Branch names: `feat/...`, `fix/...`, `docs/...`, `chore/...`, `refactor/...`, `test/...` (lowercase, hyphenated).
 - Keep each branch focused on one change. Unrelated changes go on separate branches.
-- When the change is ready, push the branch (`git push -u origin <branch>`) and open a pull request into `main`.
-  The GitHub CLI (`gh`) is not installed; until it is, give the owner the compare link
-  `https://github.com/Anlessi/ClaudeWIP/compare/main...<branch>?expand=1` to open the PR.
-- Review the full diff (`git diff main...<branch>`) before merging, and fix problems on the branch first.
-- Merge only after the owner approves. Prefer squash merges, then delete the branch locally and on GitHub.
-  Without `gh`, squash-merge locally (`git switch main`, `git pull`, `git merge --squash <branch>`,
-  commit with a Conventional Commit message, `git push`), then delete the branch with
-  `git branch -D <branch>` and `git push origin --delete <branch>`.
+- When the change is ready, push the branch (`git push -u origin <branch>`) and open a pull request into `main`
+  with the GitHub CLI: `gh pr create --base main --title "<conventional commit summary>" --body "<what and why>"`.
+  The GitHub CLI is signed in as Anlessi. If `gh` is not on PATH, call it in PowerShell as `& "C:\Program Files\GitHub CLI\gh.exe"`.
+- Review the full diff (`gh pr diff <number>`) before merging, and fix problems on the branch first.
+- Merge only after the owner approves: `gh pr merge <number> --squash --delete-branch`, then
+  `git switch main` and `git pull` to update the local copy.
 - Never force-push to `main`, rewrite published history, or use `--no-verify`, unless the owner explicitly asks.
 
 ## Commits
