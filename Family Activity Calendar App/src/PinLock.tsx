@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react"
+import logo from "./assets/logo.png"
 
 const PIN_LENGTH = 6
 const ACCESS_PIN = import.meta.env.VITE_ACCESS_PIN?.trim() ?? ""
@@ -30,20 +31,7 @@ export default function PinLock({ children }: { children: ReactNode }) {
           if (pin.length === PIN_LENGTH) submit(pin)
         }}
       >
-        <span className="brand-mark pin-mark" aria-hidden="true">
-          <svg
-            width={21}
-            height={21}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" />
-          </svg>
-        </span>
+        <img className="pin-mark" src={logo} alt="" />
         <p className="eyebrow">Week at a Glance</p>
         <h1>Enter PIN</h1>
 
