@@ -1,9 +1,21 @@
 import { useMemo, useState, type ReactNode } from "react"
 import Icon from "./Icon"
 import LocationDialog from "./LocationDialog"
-import useForecast from "./useForecast"
 import {
+  WEEKDAY_NAMES,
   addDays,
+  dayNumber,
+  forecastWindow,
+  formatWeekRange,
+  mondayOf,
+  monthName,
+  weekOf,
+  weekdayIndex,
+  yearOf,
+} from "./dates"
+import useForecast from "./useForecast"
+import useToday from "./useToday"
+import {
   formatUtcOffset,
   loadSavedLocation,
   saveLocation,
@@ -24,13 +36,42 @@ type Event = {
 }
 
 type EventDraft = Event & {
-  dayIndex: number
+  date: string
 }
 
-type Day = {
+type CalendarDay = {
+  /** ISO date, e.g. "2026-10-06". */
+  iso: string
   short: string
   date: number
-  events: Event[]
+  month: string
+  /** 0 for Monday up to 6 for Sunday. */
+  index: number
+}
+
+/** Events by ISO date. */
+type EventsByDate = Record<string, Event[]>
+
+function calendarDay(iso: string): CalendarDay {
+  const index = weekdayIndex(iso)
+  return {
+    iso,
+    short: WEEKDAY_NAMES[index],
+    date: dayNumber(iso),
+    month: monthName(iso),
+    index,
+  }
+}
+
+/** Puts the sample events into the week that contains `today`. */
+function sampleEvents(today: string): EventsByDate {
+  const monday = mondayOf(today)
+  return Object.fromEntries(
+    SAMPLE_WEEK_EVENTS.map((events, index) => [
+      addDays(monday, index),
+      events.map((event) => ({ ...event })),
+    ]),
+  )
 }
 
 const START_HOUR = 7
@@ -40,87 +81,56 @@ const HOURS = Array.from(
   (_, index) => START_HOUR + index,
 )
 
-const DAYS: Day[] = [
-  {
-    short: "Mon",
-    date: 5,
-    events: [
-      { title: "Dentist", start: 8, duration: 1, person: "Dad" },
-      { title: "Team meeting", start: 9, duration: 1, person: "Mum" },
-      { title: "Piano", start: 16, duration: 1, person: "Mia" },
-      {
-        title: "Football",
-        start: 17,
-        duration: 1.5,
-        person: "Leo",
-        note: "Bring raincoat",
-      },
-    ],
-  },
-  {
-    short: "Tue",
-    date: 6,
-    events: [
-      { title: "Pick up Leo", start: 15, duration: 1, person: "Mum" },
-      { title: "Late shift", start: 17, duration: 3, person: "Dad" },
-    ],
-  },
-  {
-    short: "Wed",
-    date: 7,
-    events: [
-      { title: "Dentist", start: 9, duration: 1, person: "Leo" },
-      { title: "Swim", start: 17, duration: 1, person: "Mia" },
-      { title: "Yoga", start: 18, duration: 1, person: "Mum" },
-    ],
-  },
-  {
-    short: "Thu",
-    date: 8,
-    events: [
-      {
-        title: "Choir",
-        start: 16,
-        duration: 1,
-        person: "Mia",
-        note: "Heavy rain",
-      },
-      { title: "Football", start: 17, duration: 1.5, person: "Leo" },
-      { title: "Parent meeting", start: 18.5, duration: 1.5, person: "Dad" },
-    ],
-  },
-  {
-    short: "Fri",
-    date: 9,
-    events: [
-      { title: "Gym", start: 7, duration: 1, person: "Dad" },
-      { title: "Sleepover", start: 17, duration: 2, person: "Mia" },
-      { title: "Book club", start: 19, duration: 2, person: "Mum" },
-    ],
-  },
-  {
-    short: "Sat",
-    date: 10,
-    events: [
-      { title: "Market", start: 8, duration: 1.5, person: "Mum" },
-      { title: "Match", start: 10, duration: 2, person: "Leo" },
-      { title: "Party", start: 11, duration: 2, person: "Mia" },
-    ],
-  },
-  {
-    short: "Sun",
-    date: 11,
-    events: [
-      { title: "Run", start: 9, duration: 1, person: "Dad" },
-      { title: "Family lunch", start: 13, duration: 2, person: "Family" },
-      { title: "Meal prep", start: 17, duration: 1, person: "Mum" },
-    ],
-  },
+// Sample events for each weekday (Monday first). They are placed in the current week when the app opens.
+const SAMPLE_WEEK_EVENTS: Event[][] = [
+  [
+    { title: "Dentist", start: 8, duration: 1, person: "Dad" },
+    { title: "Team meeting", start: 9, duration: 1, person: "Mum" },
+    { title: "Piano", start: 16, duration: 1, person: "Mia" },
+    {
+      title: "Football",
+      start: 17,
+      duration: 1.5,
+      person: "Leo",
+      note: "Bring raincoat",
+    },
+  ],
+  [
+    { title: "Pick up Leo", start: 15, duration: 1, person: "Mum" },
+    { title: "Late shift", start: 17, duration: 3, person: "Dad" },
+  ],
+  [
+    { title: "Dentist", start: 9, duration: 1, person: "Leo" },
+    { title: "Swim", start: 17, duration: 1, person: "Mia" },
+    { title: "Yoga", start: 18, duration: 1, person: "Mum" },
+  ],
+  [
+    {
+      title: "Choir",
+      start: 16,
+      duration: 1,
+      person: "Mia",
+      note: "Heavy rain",
+    },
+    { title: "Football", start: 17, duration: 1.5, person: "Leo" },
+    { title: "Parent meeting", start: 18.5, duration: 1.5, person: "Dad" },
+  ],
+  [
+    { title: "Gym", start: 7, duration: 1, person: "Dad" },
+    { title: "Sleepover", start: 17, duration: 2, person: "Mia" },
+    { title: "Book club", start: 19, duration: 2, person: "Mum" },
+  ],
+  [
+    { title: "Market", start: 8, duration: 1.5, person: "Mum" },
+    { title: "Match", start: 10, duration: 2, person: "Leo" },
+    { title: "Party", start: 11, duration: 2, person: "Mia" },
+  ],
+  [
+    { title: "Run", start: 9, duration: 1, person: "Dad" },
+    { title: "Family lunch", start: 13, duration: 2, person: "Family" },
+    { title: "Meal prep", start: 17, duration: 1, person: "Mum" },
+  ],
 ]
-
-// The calendar shows this fixed week (Mon 5 – Sun 11 October 2026); the forecast is requested for these dates.
-const FIRST_DAY = "2026-10-05"
-const WEEK_DATES = DAYS.map((_, index) => addDays(FIRST_DAY, index))
 
 // Shown in the time column until a forecast tells us the time zone of the chosen location.
 const DEFAULT_TIME_ZONE_LABEL = "GMT+2"
@@ -207,6 +217,7 @@ function WeatherIcon({
 
 function WeatherStatus({
   hasLocation,
+  noForecastInView,
   loading,
   error,
   saved,
@@ -215,6 +226,8 @@ function WeatherStatus({
   onRetry,
 }: {
   hasLocation: boolean
+  /** A forecast is loaded, but none of the days on screen are covered by it. */
+  noForecastInView: boolean
   loading: boolean
   error: string
   saved: boolean
@@ -240,6 +253,12 @@ function WeatherStatus({
         </>
       )}
       {hasLocation && loading && fetchedAt === null && "Loading weather…"}
+      {hasLocation && noForecastInView && (
+        <span>
+          No forecast for these dates. Weather is shown for this week and next
+          week.
+        </span>
+      )}
       {hasLocation && error && (
         <>
           <span className="weather-status__error">
@@ -292,35 +311,39 @@ function formatTime(hour: number) {
 
 function DayColumn({
   day,
-  dayIndex,
   events,
   weather,
   showWeather,
   showPrices,
+  isToday,
   selected,
   onEditEvent,
   onSelect,
 }: {
-  day: Day
-  dayIndex: number
+  day: CalendarDay
   events: Event[]
   weather: DayWeather | null
   showWeather: boolean
   showPrices: boolean
+  isToday: boolean
   selected: boolean
   onEditEvent: (eventIndex: number) => void
   onSelect: () => void
 }) {
   return (
-    <section className={`day-column ${selected ? "day-column--selected" : ""}`}>
+    <section
+      className={`day-column ${isToday ? "day-column--today" : ""} ${
+        selected ? "day-column--selected" : ""
+      }`}
+    >
       <Button
         className="day-heading"
         onClick={onSelect}
-        label={`Show ${day.short} ${day.date}`}
+        label={`Show ${day.short} ${day.date}${isToday ? " (today)" : ""}`}
       >
         <span className="day-name">{day.short}</span>
         <span className="day-date">{day.date}</span>
-        {selected && <span className="today-label">Today</span>}
+        {isToday && <span className="today-label">Today</span>}
         <span className="day-summary">
           {weather && (
             <>
@@ -334,7 +357,7 @@ function DayColumn({
       <div className="day-body">
         {HOURS.map((hour, rowIndex) => {
           const hourWeather = weather?.hours[hour]
-          const price = Math.max(1, PRICES[rowIndex] - (dayIndex % 3))
+          const price = Math.max(1, PRICES[rowIndex] - (day.index % 3))
           return (
             <div
               className={`hour-cell ${
@@ -406,12 +429,15 @@ export default function App() {
   const [view, setView] = useState<ViewMode>("week")
   const [showWeather, setShowWeather] = useState(true)
   const [showPrices, setShowPrices] = useState(true)
-  const [selectedDay, setSelectedDay] = useState(0)
-  const [calendarEvents, setCalendarEvents] = useState<Event[][]>(() =>
-    DAYS.map((day) => [...day.events]),
+  const today = useToday()
+  // null means "follow today", so the calendar moves on by itself when the date changes.
+  const [pickedDate, setPickedDate] = useState<string | null>(null)
+  const selectedDate = pickedDate ?? today
+  const [calendarEvents, setCalendarEvents] = useState<EventsByDate>(() =>
+    sampleEvents(today),
   )
   const [editingEvent, setEditingEvent] = useState<{
-    dayIndex: number
+    date: string
     eventIndex: number
   } | null>(null)
   const [draft, setDraft] = useState<EventDraft | null>(null)
@@ -422,7 +448,11 @@ export default function App() {
   const [locationDialogOpen, setLocationDialogOpen] = useState(
     location === null,
   )
-  const weather = useForecast(location, WEEK_DATES, START_HOUR, END_HOUR)
+
+  // The forecast covers the current week and the next one, counted from today.
+  const windowStart = mondayOf(today)
+  const forecastDates = useMemo(() => forecastWindow(windowStart), [windowStart])
+  const weather = useForecast(location, forecastDates, START_HOUR, END_HOUR)
 
   const chooseLocation = (next: SavedLocation) => {
     saveLocation(next)
@@ -438,22 +468,35 @@ export default function App() {
       day && Object.values(day.hours).some((hour) => hour.kind === "snow"),
   )
 
+  const weekDates = useMemo(() => weekOf(selectedDate), [selectedDate])
+  const weekDays = useMemo(() => weekDates.map(calendarDay), [weekDates])
+  const selectedDay = calendarDay(selectedDate)
   const visibleDays = useMemo(
-    () => (view === "day" ? [DAYS[selectedDay]] : DAYS),
-    [view, selectedDay],
+    () => (view === "day" ? [calendarDay(selectedDate)] : weekDays),
+    [view, selectedDate, weekDays],
   )
 
-  const moveDay = (direction: number) => {
-    setSelectedDay(
-      (current) => (current + direction + DAYS.length) % DAYS.length,
-    )
-  }
+  const weatherByDate = useMemo(() => {
+    const byDate = new Map<string, DayWeather>()
+    weather.forecast?.days.forEach((day, index) => {
+      if (day) byDate.set(weather.forecast!.dates[index], day)
+    })
+    return byDate
+  }, [weather.forecast])
+  const noForecastInView =
+    weather.forecast !== null &&
+    visibleDays.every((day) => !weatherByDate.has(day.iso))
+
+  // Arrows move by a week in the week view and by a day in the day view.
+  const step = view === "week" ? 7 : 1
+  const moveDate = (direction: number) =>
+    setPickedDate(addDays(selectedDate, direction * step))
 
   const openNewEvent = () => {
     setEditingEvent(null)
     setDraft({
       title: "",
-      dayIndex: selectedDay,
+      date: selectedDate,
       start: 9,
       duration: 1,
       person: "Mum",
@@ -461,12 +504,11 @@ export default function App() {
     })
   }
 
-  const openExistingEvent = (dayIndex: number, eventIndex: number) => {
-    setEditingEvent({ dayIndex, eventIndex })
-    setDraft({
-      ...calendarEvents[dayIndex][eventIndex],
-      dayIndex,
-    })
+  const openExistingEvent = (date: string, eventIndex: number) => {
+    const event = calendarEvents[date]?.[eventIndex]
+    if (!event) return
+    setEditingEvent({ date, eventIndex })
+    setDraft({ ...event, date })
   }
 
   const closeEditor = () => {
@@ -487,27 +529,29 @@ export default function App() {
     }
 
     setCalendarEvents((current) => {
-      const next = current.map((events) => [...events])
+      const next: EventsByDate = { ...current }
       if (editingEvent) {
-        next[editingEvent.dayIndex].splice(editingEvent.eventIndex, 1)
+        next[editingEvent.date] = (next[editingEvent.date] ?? []).filter(
+          (_, index) => index !== editingEvent.eventIndex,
+        )
       }
-      next[draft.dayIndex].push(nextEvent)
-      next[draft.dayIndex].sort((a, b) => a.start - b.start)
+      next[draft.date] = [...(next[draft.date] ?? []), nextEvent].sort(
+        (a, b) => a.start - b.start,
+      )
       return next
     })
-    setSelectedDay(draft.dayIndex)
+    setPickedDate(draft.date)
     closeEditor()
   }
 
   const deleteEvent = () => {
     if (!editingEvent) return
-    setCalendarEvents((current) =>
-      current.map((events, dayIndex) =>
-        dayIndex === editingEvent.dayIndex
-          ? events.filter((_, index) => index !== editingEvent.eventIndex)
-          : events,
+    setCalendarEvents((current) => ({
+      ...current,
+      [editingEvent.date]: (current[editingEvent.date] ?? []).filter(
+        (_, index) => index !== editingEvent.eventIndex,
       ),
-    )
+    }))
     closeEditor()
   }
 
@@ -549,10 +593,12 @@ export default function App() {
             <h1>
               {view === "week"
                 ? "Week at a glance"
-                : `${DAYS[selectedDay].short}, October ${DAYS[selectedDay].date}`}
+                : `${selectedDay.short}, ${selectedDay.month} ${selectedDay.date}`}
             </h1>
             <span className="date-range">
-              {view === "week" ? "5–11 October 2026" : "2026"}
+              {view === "week"
+                ? formatWeekRange(weekDates)
+                : yearOf(selectedDate)}
             </span>
           </div>
         </div>
@@ -561,18 +607,18 @@ export default function App() {
           <div className="date-nav">
             <Button
               className="icon-button"
-              label="Previous day"
-              onClick={() => moveDay(-1)}
+              label={view === "week" ? "Previous week" : "Previous day"}
+              onClick={() => moveDate(-1)}
             >
               <Icon name="chevron-left" />
             </Button>
-            <Button className="today-button" onClick={() => setSelectedDay(0)}>
+            <Button className="today-button" onClick={() => setPickedDate(null)}>
               Today
             </Button>
             <Button
               className="icon-button"
-              label="Next day"
-              onClick={() => moveDay(1)}
+              label={view === "week" ? "Next week" : "Next day"}
+              onClick={() => moveDate(1)}
             >
               <Icon name="chevron-right" />
             </Button>
@@ -677,18 +723,18 @@ export default function App() {
           {visibleDays.map((day) => (
             <DayColumn
               day={day}
-              dayIndex={DAYS.indexOf(day)}
-              events={calendarEvents[DAYS.indexOf(day)]}
-              weather={weather.forecast?.days[DAYS.indexOf(day)] ?? null}
-              key={day.short}
+              events={calendarEvents[day.iso] ?? []}
+              weather={weatherByDate.get(day.iso) ?? null}
+              key={day.iso}
               onEditEvent={(eventIndex) =>
-                openExistingEvent(DAYS.indexOf(day), eventIndex)
+                openExistingEvent(day.iso, eventIndex)
               }
               onSelect={() => {
-                setSelectedDay(DAYS.indexOf(day))
+                setPickedDate(day.iso)
                 if (window.innerWidth < 700) setView("day")
               }}
-              selected={DAYS.indexOf(day) === selectedDay}
+              isToday={day.iso === today}
+              selected={view === "week" && day.iso === selectedDate}
               showPrices={showPrices}
               showWeather={showWeather}
             />
@@ -698,6 +744,7 @@ export default function App() {
 
       <WeatherStatus
         hasLocation={location !== null}
+        noForecastInView={noForecastInView}
         loading={weather.status === "loading"}
         error={weather.error}
         saved={weather.saved}
@@ -765,14 +812,14 @@ export default function App() {
               <label className="field">
                 <span>Day</span>
                 <select
-                  value={draft.dayIndex}
+                  value={draft.date}
                   onChange={(event) =>
-                    setDraft({ ...draft, dayIndex: Number(event.target.value) })
+                    setDraft({ ...draft, date: event.target.value })
                   }
                 >
-                  {DAYS.map((day, index) => (
-                    <option value={index} key={day.short}>
-                      {day.short}, October {day.date}
+                  {weekDays.map((day) => (
+                    <option value={day.iso} key={day.iso}>
+                      {day.short}, {day.month} {day.date}
                     </option>
                   ))}
                 </select>
