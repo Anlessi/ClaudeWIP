@@ -498,10 +498,11 @@ export default function App() {
   const saveEvent = () => {
     if (!draft || !draft.title.trim()) return
 
+    const start = Math.min(Math.max(draft.start, START_HOUR), END_HOUR - 0.5)
     const nextEvent: Event = {
       title: draft.title.trim(),
-      start: Math.min(Math.max(draft.start, START_HOUR), END_HOUR - 0.5),
-      duration: Math.min(Math.max(draft.duration, 0.5), 4),
+      start,
+      duration: Math.min(Math.max(draft.duration, 0.5), 4, END_HOUR - start),
       person: draft.person,
       note: draft.note?.trim(),
     }
@@ -789,12 +790,13 @@ export default function App() {
                   step="1800"
                   value={formatTime(draft.start)}
                   onChange={(event) => {
+                    if (!event.target.value) return
                     const [hours, minutes] = event.target.value
                       .split(":")
                       .map(Number)
                     setDraft({
                       ...draft,
-                      start: hours + minutes / 60,
+                      start: hours + Math.round(minutes / 30) / 2,
                     })
                   }}
                 />
@@ -822,7 +824,7 @@ export default function App() {
                 <span>Notes</span>
                 <textarea
                   rows={3}
-                  value={draft.note}
+                  value={draft.note ?? ""}
                   placeholder="Optional details"
                   onChange={(event) =>
                     setDraft({ ...draft, note: event.target.value })
