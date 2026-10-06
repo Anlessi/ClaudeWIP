@@ -82,7 +82,8 @@ export function parsePrices(
       formatter.formatToParts(time).map(({ type, value }) => [type, value]),
     )
     const date = `${part.year}-${part.month}-${part.day}`
-    const hour = Number(part.hour)
+    // Some browsers report midnight as "24"; the modulo makes it 0.
+    const hour = Number(part.hour) % 24
 
     // When clocks go back, one local hour occurs twice: use the average of both.
     const day = (sums[date] ??= {})
