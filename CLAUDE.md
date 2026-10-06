@@ -18,7 +18,8 @@ Instructions for Claude Code when working in this repository.
 - When the change is ready, push the branch (`git push -u origin <branch>`) and open a pull request into `main`
   with the GitHub CLI: `gh pr create --base main --title "<conventional commit summary>" --body-file <file>`.
   Write the description (what and why) to a file in the scratchpad directory first: Windows PowerShell 5.1
-  mangles double quotes inside `--body` text passed to native programs. The GitHub CLI is signed in as Anlessi. If `gh` is not on PATH, call it in PowerShell as `& "C:\Program Files\GitHub CLI\gh.exe"`.
+  mangles double quotes inside `--body` text passed to native programs.
+  The GitHub CLI is signed in as Anlessi. If `gh` is not on PATH, call it in PowerShell as `& "C:\Program Files\GitHub CLI\gh.exe"`.
 - Review the full diff (`gh pr diff <number>`) before merging, and fix problems on the branch first.
 - Merge only after the owner approves: `gh pr merge <number> --squash --delete-branch`, then
   `git switch main` and `git pull` to update the local copy.
