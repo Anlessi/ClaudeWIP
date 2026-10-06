@@ -17,7 +17,7 @@ Instructions for Claude Code when working in this repository.
 - Keep each branch focused on one change. Unrelated changes go on separate branches.
 - When the change is ready, push the branch (`git push -u origin <branch>`) and open a pull request into `main`
   with the GitHub CLI: `gh pr create --base main --title "<conventional commit summary>" --body "<what and why>"`.
-  The GitHub CLI is signed in as Anlessi. If `gh` is not on PATH, use `"C:\Program Files\GitHub CLI\gh.exe"`.
+  The GitHub CLI is signed in as Anlessi. If `gh` is not on PATH, call it in PowerShell as `& "C:\Program Files\GitHub CLI\gh.exe"`.
 - Review the full diff (`gh pr diff <number>`) before merging, and fix problems on the branch first.
 - Merge only after the owner approves: `gh pr merge <number> --squash --delete-branch`, then
   `git switch main` and `git pull` to update the local copy.
