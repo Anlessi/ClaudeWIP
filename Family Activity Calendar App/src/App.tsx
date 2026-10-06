@@ -854,18 +854,15 @@ export default function App() {
 
       <section className="calendar-header">
         <div className="date-block">
-          <p className="eyebrow">Family calendar</p>
           <div className="title-row">
             <h1>
               {view === "week"
-                ? "Week at a glance"
+                ? formatWeekRange(weekDates)
                 : `${selectedDay.short}, ${selectedDay.month} ${selectedDay.date}`}
             </h1>
-            <span className="date-range">
-              {view === "week"
-                ? formatWeekRange(weekDates)
-                : yearOf(selectedDate)}
-            </span>
+            {view === "day" && (
+              <span className="date-range">{yearOf(selectedDate)}</span>
+            )}
           </div>
         </div>
 

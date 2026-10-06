@@ -32,8 +32,8 @@ export default defineConfig(({ mode }) => {
         registerType: "autoUpdate",
         pwaAssets: { config: true },
         manifest: {
-          name: "Family Flow",
-          short_name: "Family Flow",
+          name: "Week at a Glance",
+          short_name: "Week at a Glance",
           description:
             "Family activity calendar with hourly weather and electricity prices.",
           theme_color: "#245e46",
