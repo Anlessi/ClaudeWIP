@@ -12,6 +12,7 @@
   --sunny: #fff7d6;
   --cloudy: #f0f3f1;
   --rain: #deedf5;
+  --snow: #e8e9f7;
   --mum: #3568c5;
   --dad: #bc5b12;
   --mia: #7a48c7;
@@ -353,6 +354,10 @@ h1 {
   background: var(--rain);
 }
 
+.weather-key--snow {
+  background: var(--snow);
+}
+
 .schedule-frame {
   display: flex;
   border: 1px solid var(--line);
@@ -500,6 +505,10 @@ h1 {
 
 .weather-rain {
   background: var(--rain);
+}
+
+.weather-snow {
+  background: var(--snow);
 }
 
 .cell-data {
@@ -827,6 +836,117 @@ h1 {
   cursor: default;
 }
 
+.location-button {
+  max-width: 13rem;
+}
+
+.location-button span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.weather-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  margin: 0.75rem 0.25rem 0;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.weather-status a {
+  color: inherit;
+}
+
+.weather-status__error {
+  color: #b73a2d;
+  font-weight: 650;
+}
+
+.weather-link {
+  padding: 0;
+  color: var(--accent);
+  border: 0;
+  background: none;
+  font-size: inherit;
+  font-weight: 750;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.location-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.25rem 0;
+}
+
+.location-note,
+.location-privacy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.location-privacy {
+  font-size: 0.72rem;
+}
+
+.location-note--error {
+  color: #b73a2d;
+  font-weight: 650;
+}
+
+.location-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.location-result {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 0.8rem;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.location-result:hover {
+  border-color: #b3ccbd;
+  background: var(--accent-soft);
+}
+
+.location-result span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.location-result small {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.location-locate {
+  align-self: flex-start;
+}
+
+.location-locate:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 @media (max-width: 900px) {
   .app-shell {
     padding: 0 1.15rem 2rem;
@@ -884,6 +1004,11 @@ h1 {
   .filter-toggle {
     flex: 1;
     justify-content: center;
+  }
+
+  .location-button {
+    flex: 1 0 100%;
+    max-width: none;
   }
 
   .add-event-button {

@@ -1,7 +1,18 @@
 import { useMemo, useState, type ReactNode } from "react"
+import Icon from "./Icon"
+import LocationDialog from "./LocationDialog"
+import useForecast from "./useForecast"
+import {
+  addDays,
+  formatUtcOffset,
+  loadSavedLocation,
+  saveLocation,
+  type DayWeather,
+  type SavedLocation,
+  type WeatherKind,
+} from "./weather"
 
 type ViewMode = "day" | "week"
-type WeatherKind = "sunny" | "cloudy" | "rain"
 type Person = "Mum" | "Dad" | "Mia" | "Leo" | "Family"
 
 type Event = {
@@ -19,11 +30,6 @@ type EventDraft = Event & {
 type Day = {
   short: string
   date: number
-  summary: string
-  high: number
-  low: number
-  weather: WeatherKind
-  weatherByPeriod: [WeatherKind, WeatherKind, WeatherKind]
   events: Event[]
 }
 
@@ -38,11 +44,6 @@ const DAYS: Day[] = [
   {
     short: "Mon",
     date: 5,
-    summary: "Rain after 17:00",
-    high: 10,
-    low: 6,
-    weather: "rain",
-    weatherByPeriod: ["cloudy", "sunny", "rain"],
     events: [
       { title: "Dentist", start: 8, duration: 1, person: "Dad" },
       { title: "Team meeting", start: 9, duration: 1, person: "Mum" },
@@ -59,11 +60,6 @@ const DAYS: Day[] = [
   {
     short: "Tue",
     date: 6,
-    summary: "Cloudy",
-    high: 11,
-    low: 6,
-    weather: "cloudy",
-    weatherByPeriod: ["cloudy", "sunny", "cloudy"],
     events: [
       { title: "Pick up Leo", start: 15, duration: 1, person: "Mum" },
       { title: "Late shift", start: 17, duration: 3, person: "Dad" },
@@ -72,11 +68,6 @@ const DAYS: Day[] = [
   {
     short: "Wed",
     date: 7,
-    summary: "Sunny start",
-    high: 12,
-    low: 5,
-    weather: "sunny",
-    weatherByPeriod: ["sunny", "cloudy", "cloudy"],
     events: [
       { title: "Dentist", start: 9, duration: 1, person: "Leo" },
       { title: "Swim", start: 17, duration: 1, person: "Mia" },
@@ -86,11 +77,6 @@ const DAYS: Day[] = [
   {
     short: "Thu",
     date: 8,
-    summary: "Rain all day",
-    high: 9,
-    low: 7,
-    weather: "rain",
-    weatherByPeriod: ["rain", "rain", "rain"],
     events: [
       {
         title: "Choir",
@@ -106,11 +92,6 @@ const DAYS: Day[] = [
   {
     short: "Fri",
     date: 9,
-    summary: "Sunny spells",
-    high: 12,
-    low: 6,
-    weather: "sunny",
-    weatherByPeriod: ["cloudy", "sunny", "cloudy"],
     events: [
       { title: "Gym", start: 7, duration: 1, person: "Dad" },
       { title: "Sleepover", start: 17, duration: 2, person: "Mia" },
@@ -120,11 +101,6 @@ const DAYS: Day[] = [
   {
     short: "Sat",
     date: 10,
-    summary: "Early showers",
-    high: 12,
-    low: 7,
-    weather: "rain",
-    weatherByPeriod: ["rain", "sunny", "sunny"],
     events: [
       { title: "Market", start: 8, duration: 1.5, person: "Mum" },
       { title: "Match", start: 10, duration: 2, person: "Leo" },
@@ -134,11 +110,6 @@ const DAYS: Day[] = [
   {
     short: "Sun",
     date: 11,
-    summary: "Sunny",
-    high: 13,
-    low: 6,
-    weather: "sunny",
-    weatherByPeriod: ["sunny", "sunny", "cloudy"],
     events: [
       { title: "Run", start: 9, duration: 1, person: "Dad" },
       { title: "Family lunch", start: 13, duration: 2, person: "Family" },
@@ -146,6 +117,13 @@ const DAYS: Day[] = [
     ],
   },
 ]
+
+// The calendar shows this fixed week (Mon 5 – Sun 11 October 2026); the forecast is requested for these dates.
+const FIRST_DAY = "2026-10-05"
+const WEEK_DATES = DAYS.map((_, index) => addDays(FIRST_DAY, index))
+
+// Shown in the time column until a forecast tells us the time zone of the chosen location.
+const DEFAULT_TIME_ZONE_LABEL = "GMT+2"
 
 const PERSON_COLORS: Record<Person, string> = {
   Mum: "var(--mum)",
@@ -156,109 +134,6 @@ const PERSON_COLORS: Record<Person, string> = {
 }
 
 const PRICES = [11, 14, 12, 9, 7, 6, 5, 5, 6, 9, 13, 15, 12, 9]
-
-function Icon({
-  name,
-  size = 18,
-}: {
-  name: "calendar" | "chevron-left" | "chevron-right" | "cloud" | "sun" | "rain" | "bolt" | "check" | "arrow-up" | "arrow-down" | "plus" | "x" | "trash"
-  size?: number
-}) {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.8,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-  }
-
-  if (name === "calendar") {
-    return (
-      <svg {...common}>
-        <path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" />
-      </svg>
-    )
-  }
-  if (name === "chevron-left")
-    return (
-      <svg {...common}>
-        <path d="m15 18-6-6 6-6" />
-      </svg>
-    )
-  if (name === "chevron-right")
-    return (
-      <svg {...common}>
-        <path d="m9 18 6-6-6-6" />
-      </svg>
-    )
-  if (name === "sun") {
-    return (
-      <svg {...common}>
-        <circle cx="12" cy="12" r="3.5" />
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41" />
-      </svg>
-    )
-  }
-  if (name === "rain") {
-    return (
-      <svg {...common}>
-        <path d="M7 16h10a4 4 0 0 0 .5-7.97A6 6 0 0 0 6.2 7.5 4.5 4.5 0 0 0 7 16Z" />
-        <path d="m8 19-1 2M13 19l-1 2M18 19l-1 2" />
-      </svg>
-    )
-  }
-  if (name === "bolt")
-    return (
-      <svg {...common}>
-        <path d="m13 2-8 12h7l-1 8 8-12h-7l1-8Z" />
-      </svg>
-    )
-  if (name === "check")
-    return (
-      <svg {...common}>
-        <path d="m5 12 4 4L19 6" />
-      </svg>
-    )
-  if (name === "arrow-up")
-    return (
-      <svg {...common}>
-        <path d="M12 19V5M6.5 10.5 12 5l5.5 5.5" />
-      </svg>
-    )
-  if (name === "arrow-down")
-    return (
-      <svg {...common}>
-        <path d="M12 5v14M17.5 13.5 12 19l-5.5-5.5" />
-      </svg>
-    )
-  if (name === "plus")
-    return (
-      <svg {...common}>
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-    )
-  if (name === "x")
-    return (
-      <svg {...common}>
-        <path d="m6 6 12 12M18 6 6 18" />
-      </svg>
-    )
-  if (name === "trash")
-    return (
-      <svg {...common}>
-        <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
-      </svg>
-    )
-  return (
-    <svg {...common}>
-      <path d="M7 17h10a4 4 0 0 0 .5-7.97A6 6 0 0 0 6.2 8.5 4.5 4.5 0 0 0 7 17Z" />
-    </svg>
-  )
-}
 
 function Button({
   children,
@@ -308,10 +183,84 @@ function Toggle({
   )
 }
 
-function WeatherIcon({ kind, size = 18 }: { kind: WeatherKind; size?: number }) {
+function WeatherIcon({
+  kind,
+  size = 18,
+  night = false,
+}: {
+  kind: WeatherKind
+  size?: number
+  night?: boolean
+}) {
   const iconName =
-    kind === "sunny" ? "sun" : kind === "cloudy" ? "cloud" : "rain"
+    kind === "sunny"
+      ? night
+        ? "moon"
+        : "sun"
+      : kind === "cloudy"
+        ? "cloud"
+        : kind === "snow"
+          ? "snow"
+          : "rain"
   return <Icon name={iconName} size={size} />
+}
+
+function WeatherStatus({
+  hasLocation,
+  loading,
+  error,
+  saved,
+  fetchedAt,
+  onSetLocation,
+  onRetry,
+}: {
+  hasLocation: boolean
+  loading: boolean
+  error: string
+  saved: boolean
+  fetchedAt: number | null
+  onSetLocation: () => void
+  onRetry: () => void
+}) {
+  const time = fetchedAt
+    ? new Date(fetchedAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : ""
+
+  return (
+    <p className="weather-status" role="status">
+      {!hasLocation && (
+        <>
+          Set your location to see the hourly weather.
+          <button type="button" className="weather-link" onClick={onSetLocation}>
+            Set location
+          </button>
+        </>
+      )}
+      {hasLocation && loading && fetchedAt === null && "Loading weather…"}
+      {hasLocation && error && (
+        <>
+          <span className="weather-status__error">
+            {error}
+            {saved && ` Showing the forecast saved at ${time}.`}
+          </span>
+          <button type="button" className="weather-link" onClick={onRetry}>
+            Try again
+          </button>
+        </>
+      )}
+      {fetchedAt !== null && (
+        <span>
+          {!error && `Updated ${time} · `}Weather data by{" "}
+          <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">
+            Open-Meteo.com
+          </a>
+        </span>
+      )}
+    </p>
+  )
 }
 
 function EventCard({ event, onClick }: { event: Event; onClick: () => void }) {
@@ -345,6 +294,7 @@ function DayColumn({
   day,
   dayIndex,
   events,
+  weather,
   showWeather,
   showPrices,
   selected,
@@ -354,6 +304,7 @@ function DayColumn({
   day: Day
   dayIndex: number
   events: Event[]
+  weather: DayWeather | null
   showWeather: boolean
   showPrices: boolean
   selected: boolean
@@ -371,29 +322,35 @@ function DayColumn({
         <span className="day-date">{day.date}</span>
         {selected && <span className="today-label">Today</span>}
         <span className="day-summary">
-          {showWeather && <WeatherIcon kind={day.weather} size={15} />}
-          {day.high}° / {day.low}° · {day.summary}
+          {weather && (
+            <>
+              {showWeather && <WeatherIcon kind={weather.kind} size={15} />}
+              {weather.high}° / {weather.low}° · {weather.summary}
+            </>
+          )}
         </span>
       </Button>
 
       <div className="day-body">
         {HOURS.map((hour, rowIndex) => {
-          const period = rowIndex < 5 ? 0 : rowIndex < 10 ? 1 : 2
-          const weather = day.weatherByPeriod[period]
+          const hourWeather = weather?.hours[hour]
           const price = Math.max(1, PRICES[rowIndex] - (dayIndex % 3))
-          const temperature = Math.round(
-            day.low + ((day.high - day.low) * (9 - Math.abs(13 - hour))) / 9,
-          )
           return (
             <div
-              className={`hour-cell ${showWeather ? `weather-${weather}` : ""}`}
+              className={`hour-cell ${
+                showWeather && hourWeather ? `weather-${hourWeather.kind}` : ""
+              }`}
               key={hour}
             >
               <span className="cell-data">
-                {showWeather && (
+                {showWeather && hourWeather && (
                   <span className="weather-reading">
-                    <WeatherIcon kind={weather} size={15} />
-                    {temperature}°
+                    <WeatherIcon
+                      kind={hourWeather.kind}
+                      night={hourWeather.night}
+                      size={15}
+                    />
+                    {hourWeather.temp}°
                   </span>
                 )}
                 {showPrices && (
@@ -458,6 +415,28 @@ export default function App() {
     eventIndex: number
   } | null>(null)
   const [draft, setDraft] = useState<EventDraft | null>(null)
+  const [location, setLocation] = useState<SavedLocation | null>(
+    loadSavedLocation,
+  )
+  // First visit: ask for a location straight away, since the weather depends on it.
+  const [locationDialogOpen, setLocationDialogOpen] = useState(
+    location === null,
+  )
+  const weather = useForecast(location, WEEK_DATES, START_HOUR, END_HOUR)
+
+  const chooseLocation = (next: SavedLocation) => {
+    saveLocation(next)
+    setLocation(next)
+    setLocationDialogOpen(false)
+  }
+
+  const timeZoneLabel = weather.forecast
+    ? formatUtcOffset(weather.forecast.utcOffsetSeconds)
+    : DEFAULT_TIME_ZONE_LABEL
+  const hasSnow = !!weather.forecast?.days.some(
+    (day) =>
+      day && Object.values(day.hours).some((hour) => hour.kind === "snow"),
+  )
 
   const visibleDays = useMemo(
     () => (view === "day" ? [DAYS[selectedDay]] : DAYS),
@@ -599,6 +578,18 @@ export default function App() {
             </Button>
           </div>
           <div className="filters" aria-label="Calendar layers">
+            <Button
+              className="filter-toggle location-button"
+              label={
+                location
+                  ? `Change location, currently ${location.name}`
+                  : "Set location"
+              }
+              onClick={() => setLocationDialogOpen(true)}
+            >
+              <Icon name="pin" size={16} />
+              <span>{location ? location.name : "Set location"}</span>
+            </Button>
             <Toggle
               checked={showWeather}
               onChange={() => setShowWeather((value) => !value)}
@@ -642,6 +633,12 @@ export default function App() {
                 <WeatherIcon kind="rain" size={14} />
                 Rain
               </span>
+              {hasSnow && (
+                <span className="weather-key weather-key--snow">
+                  <WeatherIcon kind="snow" size={14} />
+                  Snow
+                </span>
+              )}
             </span>
           )}
           {showPrices && (
@@ -669,7 +666,7 @@ export default function App() {
 
       <section className="schedule-frame">
         <div className="time-column">
-          <div className="time-heading">GMT+2</div>
+          <div className="time-heading">{timeZoneLabel}</div>
           {HOURS.map((hour) => (
             <div className="time-label" key={hour}>
               {formatTime(hour)}
@@ -682,6 +679,7 @@ export default function App() {
               day={day}
               dayIndex={DAYS.indexOf(day)}
               events={calendarEvents[DAYS.indexOf(day)]}
+              weather={weather.forecast?.days[DAYS.indexOf(day)] ?? null}
               key={day.short}
               onEditEvent={(eventIndex) =>
                 openExistingEvent(DAYS.indexOf(day), eventIndex)
@@ -697,6 +695,24 @@ export default function App() {
           ))}
         </div>
       </section>
+
+      <WeatherStatus
+        hasLocation={location !== null}
+        loading={weather.status === "loading"}
+        error={weather.error}
+        saved={weather.saved}
+        fetchedAt={weather.forecast?.fetchedAt ?? null}
+        onSetLocation={() => setLocationDialogOpen(true)}
+        onRetry={weather.reload}
+      />
+
+      {locationDialogOpen && (
+        <LocationDialog
+          current={location}
+          onSelect={chooseLocation}
+          onClose={() => setLocationDialogOpen(false)}
+        />
+      )}
 
       {draft && (
         <div
