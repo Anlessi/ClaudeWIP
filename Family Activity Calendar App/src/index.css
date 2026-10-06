@@ -78,6 +78,11 @@ button:focus-visible {
   border-radius: 0.7rem;
 }
 
+.brand-logo {
+  width: auto;
+  height: 2.25rem;
+}
+
 .view-switcher {
   display: flex;
   align-items: center;

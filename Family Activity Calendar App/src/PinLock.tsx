@@ -44,7 +44,7 @@ export default function PinLock({ children }: { children: ReactNode }) {
             <path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" />
           </svg>
         </span>
-        <p className="eyebrow">Family Flow</p>
+        <p className="eyebrow">Week at a Glance</p>
         <h1>Enter PIN</h1>
 
         {isConfigured ? (

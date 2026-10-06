@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react"
 import Icon from "./Icon"
+import logo from "./assets/logo.png"
 import LocationDialog from "./LocationDialog"
 import {
   WEEKDAY_NAMES,
@@ -826,10 +827,8 @@ export default function App() {
     <main className="app-shell">
       <header className="topbar">
         <div className="brand">
-          <span className="brand-mark">
-            <Icon name="calendar" size={21} />
-          </span>
-          <span>Family Flow</span>
+          <img className="brand-logo" src={logo} alt="" />
+          <span>Week at a Glance</span>
         </div>
         <nav className="view-switcher" aria-label="Calendar view">
           <Button
