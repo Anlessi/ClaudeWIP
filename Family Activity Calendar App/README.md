@@ -3,12 +3,14 @@
 A family activity calendar for phones and tablets, showing each family member's events alongside hourly
 weather and electricity prices. The UI was designed and exported from Figma Make.
 
-The calendar shows a fixed week, 5–11 October 2026. The weather is real (see below); events and electricity
-prices are still built-in sample data, and event changes are kept in memory and reset when the page reloads.
+The calendar follows the real date. The weather is real (see below); events and electricity prices are still
+built-in sample data (the sample events are placed in the current week when the app opens), and event changes
+are kept in memory and reset when the page reloads.
 
 ## Features
 
-- Week and Day views, with previous day, Today and next day navigation
+- Week and Day views that follow the real date: the arrows move by a week (week view) or a day (day view), and
+  Today jumps back to the current date. Today is marked automatically, also after midnight
 - Real hourly weather (temperature and sunny/cloudy/rain/snow) for a location you choose, from Open-Meteo
 - Weather and Electricity toggles to show or hide hourly weather and prices
 - Add, edit and delete events (name, day, family member, start time, duration, notes)
@@ -44,6 +46,8 @@ Other commands:
 ## Project structure
 
 - `src/App.tsx` – the calendar UI and sample data
+- `src/dates.ts` – calendar date helpers (today, weeks, the forecast window; tested in `src/dates.test.ts`)
+- `src/useToday.ts` – keeps today's date up to date while the app is open
 - `src/weather.ts` – weather and place lookups from Open-Meteo, and turning them into calendar data (tested in `src/weather.test.ts`)
 - `src/useForecast.ts` – loads the forecast and keeps it fresh
 - `src/LocationDialog.tsx` – the dialog for choosing the weather location
@@ -87,5 +91,6 @@ free for non-commercial use; the app shows the required credit under the calenda
 - **Updates and offline:** the forecast reloads when the app is opened after 30 minutes or more, and when the
   connection returns after a failure. The last forecast is kept in the browser, so if the service can't be
   reached the app shows that saved copy with a note and a "Try again" button.
-- **Dates:** the calendar is fixed to 5–11 October 2026 for now, so only that week's forecast is requested.
-  Open-Meteo can provide dates from about three months back to 16 days ahead.
+- **Dates:** one request covers the current week (Monday to Sunday) and the next week, counted from today's
+  date on the device, so it never goes more than 13 days ahead (Open-Meteo allows 15). Days outside that
+  window (older weeks, or more than a week ahead) show no weather, and the line under the calendar says so.

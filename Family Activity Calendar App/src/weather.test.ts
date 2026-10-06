@@ -1,7 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 import {
-  addDays,
   classifyWeather,
   dominantKind,
   formatUtcOffset,
@@ -88,12 +87,10 @@ test("dominantKind picks one category for the day", () => {
   assert.equal(dominantKind(["cloudy", "cloudy", "sunny"]), "cloudy")
 })
 
-test("formatUtcOffset and addDays", () => {
+test("formatUtcOffset", () => {
   assert.equal(formatUtcOffset(10800), "GMT+3")
   assert.equal(formatUtcOffset(-12600), "GMT-3:30")
   assert.equal(formatUtcOffset(0), "GMT+0")
-  assert.equal(addDays("2026-10-05", 6), "2026-10-11")
-  assert.equal(addDays("2026-10-30", 3), "2026-11-02")
 })
 
 function rawForecast() {
@@ -129,6 +126,7 @@ test("parseForecast keeps the visible hours and converts the values", () => {
 
   assert.equal(forecast.utcOffsetSeconds, 10800)
   assert.equal(forecast.fetchedAt, 1000)
+  assert.deepEqual(forecast.dates, week)
   assert.equal(forecast.days.length, 3)
 
   const monday = forecast.days[0]!
