@@ -24,6 +24,11 @@ npx pnpm@10.34.3 install
 npx pnpm@10.34.3 run dev
 ```
 
+The app asks for a 6-digit PIN before showing the calendar. Copy `.env.example` to `.env.local` and set
+`VITE_ACCESS_PIN` to your PIN; `.env.local` is not committed. Restart the dev server after changing it.
+This PIN is only a basic barrier for testing: it is included in the app's JavaScript, so it does not
+protect against a determined person.
+
 Then open http://localhost:8443. The dev server also listens on your local network, so you can open
 `http://<your-computer's-IP>:8443` on a phone or tablet on the same Wi-Fi.
 
@@ -36,6 +41,7 @@ Other commands:
 ## Project structure
 
 - `src/App.tsx` – the calendar UI and sample data
+- `src/PinLock.tsx` – the PIN screen shown before the calendar
 - `src/index.css` – styles, including the phone and tablet layouts
 - `src/imports/` – the original Figma design image
 - `public/icon.svg`, `pwa-assets.config.ts` – source icon and settings for the generated app icons

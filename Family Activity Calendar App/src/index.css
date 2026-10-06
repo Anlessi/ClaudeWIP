@@ -751,6 +751,82 @@ h1 {
   background: #fff5f3;
 }
 
+.pin-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+.pin-card {
+  width: min(22rem, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem 1.75rem;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 1.1rem;
+  background: var(--surface);
+  box-shadow: 0 14px 45px rgba(31, 53, 42, 0.08);
+}
+
+.pin-mark {
+  margin-bottom: 1rem;
+}
+
+.pin-card h1 {
+  font-size: 1.6rem;
+}
+
+.pin-label {
+  margin: 0.7rem 0 1.1rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.pin-input {
+  width: 100%;
+  height: 3.2rem;
+  color: var(--ink);
+  border: 1px solid #cad4ce;
+  border-radius: 0.75rem;
+  outline: 0;
+  background: #fbfcfb;
+  font: inherit;
+  font-size: 1.5rem;
+  letter-spacing: 0.5em;
+  text-align: center;
+  text-indent: 0.5em;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.pin-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(36, 94, 70, 0.12);
+}
+
+.pin-input[aria-invalid="true"] {
+  border-color: #c73e2e;
+}
+
+.pin-error {
+  min-height: 1.2rem;
+  margin: 0.6rem 0 0.4rem;
+  color: #b73a2d;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.pin-submit {
+  width: 100%;
+}
+
+.pin-submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 @media (max-width: 900px) {
   .app-shell {
     padding: 0 1.15rem 2rem;
