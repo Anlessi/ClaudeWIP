@@ -944,15 +944,6 @@ h1 {
   font-size: 0.74rem;
 }
 
-.location-locate {
-  align-self: flex-start;
-}
-
-.location-locate:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
 @media (max-width: 900px) {
   .app-shell {
     padding: 0 1.15rem 2rem;

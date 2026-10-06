@@ -18,7 +18,6 @@ export type IconName =
   | "trash"
   | "pin"
   | "search"
-  | "locate"
 
 const SHAPES: Record<IconName, ReactNode> = {
   calendar: (
@@ -58,12 +57,6 @@ const SHAPES: Record<IconName, ReactNode> = {
     <>
       <circle cx="11" cy="11" r="6" />
       <path d="m20 20-4.2-4.2" />
-    </>
-  ),
-  locate: (
-    <>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
     </>
   ),
 }

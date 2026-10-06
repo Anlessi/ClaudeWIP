@@ -1,17 +1,6 @@
 import { useEffect, useState } from "react"
 import Icon from "./Icon"
-import {
-  roundCoordinate,
-  searchPlaces,
-  type Place,
-  type SavedLocation,
-} from "./weather"
-
-const canUseCurrentLocation =
-  typeof navigator !== "undefined" &&
-  "geolocation" in navigator &&
-  typeof window !== "undefined" &&
-  window.isSecureContext
+import { searchPlaces, type Place, type SavedLocation } from "./weather"
 
 export default function LocationDialog({
   current,
@@ -26,8 +15,6 @@ export default function LocationDialog({
   const [results, setResults] = useState<Place[]>([])
   const [searching, setSearching] = useState(false)
   const [searchMessage, setSearchMessage] = useState("")
-  const [locating, setLocating] = useState(false)
-  const [locateError, setLocateError] = useState("")
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -70,30 +57,6 @@ export default function LocationDialog({
       controller.abort()
     }
   }, [query])
-
-  const useCurrentLocation = () => {
-    setLocating(true)
-    setLocateError("")
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocating(false)
-        onSelect({
-          name: "Current location",
-          latitude: roundCoordinate(position.coords.latitude),
-          longitude: roundCoordinate(position.coords.longitude),
-        })
-      },
-      (error) => {
-        setLocating(false)
-        setLocateError(
-          error.code === error.PERMISSION_DENIED
-            ? "Location access was blocked. Allow it in your browser settings, or search for your city instead."
-            : "Couldn't find your location. Search for your city instead.",
-        )
-      },
-      { timeout: 10000, maximumAge: 600000 },
-    )
-  }
 
   return (
     <div
@@ -170,28 +133,6 @@ export default function LocationDialog({
                 </li>
               ))}
             </ul>
-          )}
-
-          {canUseCurrentLocation ? (
-            <button
-              type="button"
-              className="cancel-button location-locate"
-              onClick={useCurrentLocation}
-              disabled={locating}
-            >
-              <Icon name="locate" size={16} />
-              {locating ? "Finding your location…" : "Use my current location"}
-            </button>
-          ) : (
-            <p className="location-note">
-              Using your current location needs a secure (https) connection.
-              Search for your city instead.
-            </p>
-          )}
-          {locateError && (
-            <p className="location-note location-note--error" role="alert">
-              {locateError}
-            </p>
           )}
 
           <p className="location-privacy">
