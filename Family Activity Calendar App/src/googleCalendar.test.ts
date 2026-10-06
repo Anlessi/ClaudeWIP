@@ -269,15 +269,34 @@ test("mergeWeeks of nothing is an empty week", () => {
   assert.equal(week.allDay["2026-10-06"].length, 0)
 })
 
-test("fetchWeeks reports an expired sign-in separately from other errors", async () => {
+test("fetchWeeks asks for a new sign-in only when the sign-in has expired", async () => {
   stubFetch(() => json({}, 401))
   await assert.rejects(fetchWeeks("old", [FAMILY], DATES, 7, 21), GoogleAccessError)
+})
 
-  stubFetch(() => json({}, 500))
-  await assert.rejects(
-    fetchWeeks("token", [FAMILY], DATES, 7, 21),
-    (error: Error) => !(error instanceof GoogleAccessError) && /500/.test(error.message),
-  )
+test("fetchWeeks names the calendar that can't be read, and signing in again is not suggested", async () => {
+  // A calendar that is no longer shared (403) or was deleted (404) would fail again after signing in.
+  for (const status of [403, 404, 500]) {
+    stubFetch((url) =>
+      url.pathname.includes("mia%40example.com")
+        ? json({}, status)
+        : json({ items: [] }),
+    )
+    await assert.rejects(
+      fetchWeeks("token", [FAMILY, MIA], DATES, 7, 21),
+      (error: Error) =>
+        !(error instanceof GoogleAccessError) &&
+        error.message.includes('"Mia"') &&
+        error.message.includes(String(status)),
+    )
+  }
+})
+
+test("fetchWeeks lets connection problems through unchanged", async () => {
+  globalThis.fetch = (async () => {
+    throw new TypeError("Failed to fetch")
+  }) as typeof fetch
+  await assert.rejects(fetchWeeks("token", [FAMILY], DATES, 7, 21), TypeError)
 })
 
 test("fetchCalendarList names calendars, adds Google's colours and puts the main one first", async () => {

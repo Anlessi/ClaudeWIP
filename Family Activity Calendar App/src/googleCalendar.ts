@@ -54,7 +54,7 @@ const OLD_CALENDAR_KEY = "familyflow.googleCalendar"
 const FALLBACK_COLOR = "#4f5b6b"
 const FALLBACK_TEXT_COLOR = "#ffffff"
 
-/** Thrown when Google says the sign-in has expired or doesn't allow this request. */
+/** Thrown when Google says the sign-in has expired, so signing in again can help. */
 export class GoogleAccessError extends Error {}
 
 const MAX_NOTE_LENGTH = 140
@@ -171,7 +171,9 @@ async function googleGet<T>(
     headers: { Authorization: `Bearer ${accessToken}` },
     signal,
   })
-  if (response.status === 401 || response.status === 403) {
+  // Only 401 means the sign-in has run out. Other refusals (403, 404: a calendar that is no longer shared
+  // or was deleted) would fail again after signing in, so they are reported as ordinary errors.
+  if (response.status === 401) {
     throw new GoogleAccessError("Google Calendar access has expired.")
   }
   if (!response.ok) {
@@ -284,7 +286,20 @@ export async function fetchWeeks(
 ): Promise<GoogleWeek> {
   const weeks = await Promise.all(
     calendars.map((calendar) =>
-      fetchWeek(accessToken, calendar.id, dates, firstHour, endHour, signal),
+      fetchWeek(accessToken, calendar.id, dates, firstHour, endHour, signal).catch(
+        (error: unknown) => {
+          // Say which calendar failed; sign-in and connection problems keep their own handling.
+          if (
+            error instanceof GoogleAccessError ||
+            error instanceof TypeError ||
+            !(error instanceof Error) ||
+            signal?.aborted
+          ) {
+            throw error
+          }
+          throw new Error(`Couldn't load "${calendar.name}". ${error.message}`)
+        },
+      ),
     ),
   )
   return mergeWeeks(weeks, dates)
