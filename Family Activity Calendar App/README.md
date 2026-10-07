@@ -16,7 +16,6 @@ current week when the app opens), and changes to them are kept in memory and res
 - Weather and Electricity toggles to show or hide hourly weather and prices
 - Real events from one or more Google calendars (read-only), each in its Google colour, with a legend of the
   calendars; all-day events and overlapping events are shown
-- Add, edit and delete sample events (name, day, start time, duration, notes)
 - Layouts for phones, tablets and desktops
 
 ## Running locally
@@ -128,8 +127,8 @@ offer from any supplier, only the market price.
 ## Google Calendar
 
 The app can show the real events of a Google Calendar instead of the sample events. It only **reads** the
-calendar: it can't add, change or delete anything, so Add event and editing are turned off while Google
-Calendar is connected (change events in Google Calendar itself). There is no server: the browser talks to Google
+calendar: it can't add, change or delete anything, and the app has no way to add or edit events
+(change them in Google Calendar itself). There is no server: the browser talks to Google
 directly.
 
 ### One-time setup (about 10 minutes)

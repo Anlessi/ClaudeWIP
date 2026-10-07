@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-07, after the pull request that extended the day to 24:00._
+_Last updated: 2026-10-07, after the pull request that removed adding and editing events._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -16,7 +16,8 @@ renamed "Week at a Glance" (0010).
 - Hourly weather from Open-Meteo for a searched place (0005)
 - Hourly Finnish electricity spot prices including VAT, from sahkotin.fi (0007)
 - Real events from one or more Google calendars, read-only. The legend lists the calendars in their Google
-  colours (0008, 0009). Before connecting, sample events can be added, edited and deleted in memory.
+  colours (0008, 0009). Before connecting, read-only sample events are shown. There is no add, edit or delete (0011). A green notice at the top
+  of the page says so and links to "Connect Google Calendar".
 - A 6-digit PIN screen as a testing barrier (0003)
 - An installable, offline-capable PWA, with the WG logo as its icon (0004, 0010)
 
@@ -47,7 +48,7 @@ renamed "Week at a Glance" (0010).
 - Plain-language UI text. Status and errors go in the line under the calendar.
 - Data window: Monday of this week to Sunday of next week, one request per source (0006).
 - Keep the `familyflow.*` storage keys. When a saved format changes, migrate the old one (as in 0009).
-- When Google is connected, the app is read-only: no add or edit.
+- The app is read-only: no add or edit of events anywhere (0011).
 
 ## In progress
 Nothing. Colouring events by a name in the title was built and then set aside by the owner; it is described in

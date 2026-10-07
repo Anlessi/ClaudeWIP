@@ -38,10 +38,6 @@ import {
 
 type ViewMode = "day" | "week"
 
-type EventDraft = Event & {
-  date: string
-}
-
 type CalendarDay = {
   /** ISO date, e.g. "2026-10-06". */
   iso: string
@@ -368,18 +364,8 @@ function GoogleStatus({
   const [signInMessage, setSignInMessage] = useState("")
   const time = fetchedAt ? clockTime(fetchedAt) : ""
 
-  if (calendarNames.length === 0) {
-    return (
-      <p className="data-status" role="status">
-        These are sample events.
-        {configured && (
-          <button type="button" className="weather-link" onClick={onOpenSettings}>
-            Connect Google Calendar
-          </button>
-        )}
-      </p>
-    )
-  }
+  // Before connecting, the notice is at the top of the page (SampleNotice).
+  if (calendarNames.length === 0) return null
 
   return (
     <p className="data-status" role="status">
@@ -428,6 +414,26 @@ function GoogleStatus({
   )
 }
 
+/** Tells that the events on screen are samples, at the top of the page where it is easy to find. */
+function SampleNotice({
+  configured,
+  onOpenSettings,
+}: {
+  configured: boolean
+  onOpenSettings: () => void
+}) {
+  return (
+    <p className="sample-notice" role="status">
+      These are sample events.
+      {configured && (
+        <button type="button" className="weather-link" onClick={onOpenSettings}>
+          Connect Google Calendar
+        </button>
+      )}
+    </p>
+  )
+}
+
 /** An hour such as 17.25 as "17:15". */
 function formatTime(hour: number) {
   const totalMinutes = Math.round(hour * 60)
@@ -436,17 +442,14 @@ function formatTime(hour: number) {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
 }
 
-/** `onClick` is missing for events that can't be edited here (the ones from Google Calendar). */
 function EventCard({
   event,
   calendar,
   lane,
-  onClick,
 }: {
   event: Event
   calendar: CalendarSource
   lane: Lane
-  onClick?: () => void
 }) {
   const style = {
     "--event-top": `${(event.start - START_HOUR) * 64 + 4}px`,
@@ -460,41 +463,22 @@ function EventCard({
     ...(lane.lanes > 1 && { "--lane-left": lane.lanes === 2 ? "30%" : "10%" }),
   } as React.CSSProperties
 
-  const content = (
-    <>
+  return (
+    <div
+      className="event-card"
+      style={style}
+      title={[
+        `${event.title} (${calendar.name})`,
+        `${formatTime(event.start)}–${formatTime(event.start + event.duration)}`,
+        event.note,
+      ]
+        .filter(Boolean)
+        .join("\n")}
+    >
       <strong>{event.title}</strong>
       <span>{formatTime(event.start)}</span>
       {event.note && <small>{event.note}</small>}
-    </>
-  )
-
-  if (!onClick) {
-    return (
-      <div
-        className="event-card event-card--readonly"
-        style={style}
-        title={[
-          `${event.title} (${calendar.name})`,
-          `${formatTime(event.start)}–${formatTime(event.start + event.duration)}`,
-          event.note,
-        ]
-          .filter(Boolean)
-          .join("\n")}
-      >
-        {content}
-      </div>
-    )
-  }
-
-  return (
-    <Button
-      className="event-card"
-      style={style}
-      label={`Edit ${event.title} at ${formatTime(event.start)}`}
-      onClick={onClick}
-    >
-      {content}
-    </Button>
+    </div>
   )
 }
 
@@ -552,7 +536,6 @@ function DayColumn({
   showPrices,
   isToday,
   selected,
-  onEditEvent,
   onSelect,
 }: {
   day: CalendarDay
@@ -570,8 +553,6 @@ function DayColumn({
   showPrices: boolean
   isToday: boolean
   selected: boolean
-  /** Missing when the events can't be edited here. */
-  onEditEvent?: (eventIndex: number) => void
   onSelect: () => void
 }) {
   const lanes = layoutLanes(events)
@@ -667,7 +648,6 @@ function DayColumn({
               calendar={calendars.get(event.calendarId) ?? SAMPLE_CALENDAR}
               lane={lanes[eventIndex]}
               key={`${event.title}-${event.start}-${eventIndex}`}
-              onClick={onEditEvent && (() => onEditEvent(eventIndex))}
             />
           ))}
         </div>
@@ -684,14 +664,8 @@ export default function App() {
   // null means "follow today", so the calendar moves on by itself when the date changes.
   const [pickedDate, setPickedDate] = useState<string | null>(null)
   const selectedDate = pickedDate ?? today
-  const [calendarEvents, setCalendarEvents] = useState<EventsByDate>(() =>
-    sampleEvents(today),
-  )
-  const [editingEvent, setEditingEvent] = useState<{
-    date: string
-    eventIndex: number
-  } | null>(null)
-  const [draft, setDraft] = useState<EventDraft | null>(null)
+  // The sample events are only shown until Google Calendar is connected.
+  const calendarEvents = useMemo(() => sampleEvents(today), [today])
   const [calendarDialogOpen, setCalendarDialogOpen] = useState(false)
   const [location, setLocation] = useState<SavedLocation | null>(
     loadSavedLocation,
@@ -740,7 +714,7 @@ export default function App() {
     })
     return byDate
   }, [weather.forecast])
-  // Once Google Calendar is connected its events replace the sample events, and they can't be edited here.
+  // Once Google Calendar is connected its events replace the sample events.
   const google = useGoogleCalendar(weekDates, START_HOUR, END_HOUR)
   const googleConnected = google.calendars.length > 0
   // The legend lists the calendars the events come from.
@@ -783,69 +757,6 @@ export default function App() {
   const moveDate = (direction: number) =>
     setPickedDate(addDays(selectedDate, direction * step))
 
-  const openNewEvent = () => {
-    setEditingEvent(null)
-    setDraft({
-      title: "",
-      date: selectedDate,
-      start: 9,
-      duration: 1,
-      calendarId: SAMPLE_CALENDAR.id,
-      note: "",
-    })
-  }
-
-  const openExistingEvent = (date: string, eventIndex: number) => {
-    const event = calendarEvents[date]?.[eventIndex]
-    if (!event) return
-    setEditingEvent({ date, eventIndex })
-    setDraft({ ...event, date })
-  }
-
-  const closeEditor = () => {
-    setDraft(null)
-    setEditingEvent(null)
-  }
-
-  const saveEvent = () => {
-    if (!draft || !draft.title.trim()) return
-
-    const start = Math.min(Math.max(draft.start, START_HOUR), END_HOUR - 0.5)
-    const nextEvent: Event = {
-      title: draft.title.trim(),
-      start,
-      duration: Math.min(Math.max(draft.duration, 0.5), 4, END_HOUR - start),
-      calendarId: SAMPLE_CALENDAR.id,
-      note: draft.note?.trim(),
-    }
-
-    setCalendarEvents((current) => {
-      const next: EventsByDate = { ...current }
-      if (editingEvent) {
-        next[editingEvent.date] = (next[editingEvent.date] ?? []).filter(
-          (_, index) => index !== editingEvent.eventIndex,
-        )
-      }
-      next[draft.date] = [...(next[draft.date] ?? []), nextEvent].sort(
-        (a, b) => a.start - b.start,
-      )
-      return next
-    })
-    setPickedDate(draft.date)
-    closeEditor()
-  }
-
-  const deleteEvent = () => {
-    if (!editingEvent) return
-    setCalendarEvents((current) => ({
-      ...current,
-      [editingEvent.date]: (current[editingEvent.date] ?? []).filter(
-        (_, index) => index !== editingEvent.eventIndex,
-      ),
-    }))
-    closeEditor()
-  }
-
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -874,6 +785,13 @@ export default function App() {
           </Button>
         </nav>
       </header>
+
+      {!googleConnected && (
+        <SampleNotice
+          configured={google.configured}
+          onOpenSettings={() => setCalendarDialogOpen(true)}
+        />
+      )}
 
       <section className="calendar-header">
         <div className="date-block">
@@ -948,11 +866,6 @@ export default function App() {
                 {googleConnected ? calendarSummary : "Connect calendar"}
               </span>
             </Button>
-            {!googleConnected && (
-              <Button className="add-event-button" onClick={openNewEvent}>
-                <Icon name="plus" size={16} /> Add event
-              </Button>
-            )}
           </div>
         </div>
       </section>
@@ -1040,11 +953,6 @@ export default function App() {
               weather={weatherByDate.get(day.iso) ?? null}
               prices={electricity.prices?.byDate[day.iso]}
               key={day.iso}
-              onEditEvent={
-                googleConnected
-                  ? undefined
-                  : (eventIndex) => openExistingEvent(day.iso, eventIndex)
-              }
               onSelect={() => {
                 setPickedDate(day.iso)
                 if (window.innerWidth < 700) setView("day")
@@ -1111,143 +1019,6 @@ export default function App() {
           onDisconnect={google.disconnect}
           onClose={() => setCalendarDialogOpen(false)}
         />
-      )}
-
-      {draft && (
-        <div
-          className="modal-backdrop"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) closeEditor()
-          }}
-        >
-          <section
-            className="event-editor"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="event-editor-title"
-          >
-            <div className="editor-heading">
-              <div>
-                <p className="eyebrow">
-                  {editingEvent ? "Update schedule" : "Plan something"}
-                </p>
-                <h2 id="event-editor-title">
-                  {editingEvent ? "Edit event" : "Add new event"}
-                </h2>
-              </div>
-              <Button
-                className="editor-close"
-                label="Close event editor"
-                onClick={closeEditor}
-              >
-                <Icon name="x" size={19} />
-              </Button>
-            </div>
-
-            <div className="editor-form">
-              <label className="field field--full">
-                <span>Event name</span>
-                <input
-                  autoFocus
-                  value={draft.title}
-                  placeholder="e.g. Football practice"
-                  onChange={(event) =>
-                    setDraft({ ...draft, title: event.target.value })
-                  }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") saveEvent()
-                  }}
-                />
-              </label>
-
-              <label className="field">
-                <span>Day</span>
-                <select
-                  value={draft.date}
-                  onChange={(event) =>
-                    setDraft({ ...draft, date: event.target.value })
-                  }
-                >
-                  {weekDays.map((day) => (
-                    <option value={day.iso} key={day.iso}>
-                      {day.short}, {day.month} {day.date}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="field">
-                <span>Starts at</span>
-                <input
-                  type="time"
-                  min="07:00"
-                  max="23:30"
-                  step="1800"
-                  value={formatTime(draft.start)}
-                  onChange={(event) => {
-                    if (!event.target.value) return
-                    const [hours, minutes] = event.target.value
-                      .split(":")
-                      .map(Number)
-                    setDraft({
-                      ...draft,
-                      start: hours + Math.round(minutes / 30) / 2,
-                    })
-                  }}
-                />
-              </label>
-
-              <label className="field">
-                <span>Duration</span>
-                <select
-                  value={draft.duration}
-                  onChange={(event) =>
-                    setDraft({ ...draft, duration: Number(event.target.value) })
-                  }
-                >
-                  {[0.5, 1, 1.5, 2, 2.5, 3, 4].map((duration) => (
-                    <option value={duration} key={duration}>
-                      {duration < 1
-                        ? "30 minutes"
-                        : `${duration} ${duration === 1 ? "hour" : "hours"}`}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="field field--full">
-                <span>Notes</span>
-                <textarea
-                  rows={3}
-                  value={draft.note ?? ""}
-                  placeholder="Optional details"
-                  onChange={(event) =>
-                    setDraft({ ...draft, note: event.target.value })
-                  }
-                />
-              </label>
-            </div>
-
-            <div className="editor-actions">
-              {editingEvent ? (
-                <Button className="delete-event-button" onClick={deleteEvent}>
-                  <Icon name="trash" size={16} /> Delete
-                </Button>
-              ) : (
-                <span />
-              )}
-              <div>
-                <Button className="cancel-button" onClick={closeEditor}>
-                  Cancel
-                </Button>
-                <Button className="save-event-button" onClick={saveEvent}>
-                  {editingEvent ? "Save changes" : "Add to calendar"}
-                </Button>
-              </div>
-            </div>
-          </section>
-        </div>
       )}
     </main>
   )
