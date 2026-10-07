@@ -71,6 +71,8 @@ Needed to install the PWA and to sign in to Google on a phone (0004, 0008). Opti
 a Cloudflare quick tunnel (temporary), or a host such as Netlify or Cloudflare Pages (public, so the PIN matters
 more). GitHub Pages is public even from a private repository. Add the `https://` address to the Google
 "Authorized JavaScript origins", and set `VITE_GOOGLE_CLIENT_ID` in the host's build.
+Linked: "Real access control" and "Payment method" both build on this (Stripe requires HTTPS). A host that can also
+run a small server would serve all three.
 
 ## Stay signed in to Google
 Today the sign-in lasts about an hour. A wall tablet would want no tapping, which needs a small server to keep a
@@ -94,8 +96,26 @@ its own switch, or both. Notes for when it's picked up:
   background, 0010) are light. Decide whether they change too.
 - Fits well with the "final polish" idea above.
 
+## Payment method, for example Stripe (added 2026-10-07)
+Let people pay for the app. Nothing is decided yet. What is being sold (a one-off purchase, a subscription, a
+donation) and who pays (the family or other users) are not settled, so collect those answers first. Notes for
+when it's picked up:
+- **Needs a server in most cases.** Stripe's secret key must never be in the browser, which conflicts with 0002
+  (no server). The exception is Stripe Payment Links or hosted Checkout created in the Stripe dashboard: they
+  need no code on our side, but cannot tell the app who has paid.
+- **Knowing who has paid** (to unlock features) needs accounts and a server to receive Stripe's webhooks, and
+  Stripe requires HTTPS.
+- **Linked ideas:** this is one of three that depend on each other: "HTTPS hosting, for phones and installing",
+  "Real access control" and this one. Plan them together: hosting comes first (an HTTPS address and a place to
+  run a small server), then real sign-in, then payment, which needs both. "Stay signed in to Google" would use
+  the same server.
+- **Questions to settle:** what is sold and at what price, who the customers are, which countries (VAT and
+  business registration in Finland), and whether a simple payment link or a donation button is enough.
+
 ## Real access control
 Replace the PIN (0003) with real sign-in. It needs a server.
+Linked: it needs "HTTPS hosting" first, and "Payment method" needs it to know who has paid, so plan the three
+together.
 
 ## Smaller items
 - Heavy rain and rain chance from the original design (Open-Meteo provides both).
