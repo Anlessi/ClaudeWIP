@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-07, after Anlessi/ClaudeWIP#14 (plus the docs pull request that added this file)._
+_Last updated: 2026-10-07, after the docs pull request that parked the name-colours idea._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -49,14 +49,10 @@ renamed "Week at a Glance" (0010).
 - When Google is connected, the app is read-only: no add or edit.
 
 ## In progress
-- **Colour events by name** (branch `feat/name-colours`, not merged yet). It uses "detect and confirm": the app
-  suggests the first word of event titles (up to a space, dash or colon) that starts at least two events, and the
-  owner ticks which are people. Ticked names get one of eight colours, which wins over the calendar colour, and
-  appear in the legend after a divider. "Milo - Football" shows as "Football". Saved in the browser only. The
-  owner was checking it at localhost:8443 and hadn't seen the dialog section yet (it needs a live Google sign-in
-  and names that repeat). Its decision record (0011) should be written by `/wrap-up` on that branch.
+Nothing. Colouring events by a name in the title was built and then set aside by the owner; it is described in
+`IDEAS.md`, and no code for it is in the repository.
 
 ## Next steps (owner's choice; details in `IDEAS.md`)
-1. Finish and merge name colours.
-2. Nearby events (concept done, waiting on the owner's answers).
-3. HTTPS hosting for phone use and installing. Stay signed in to Google. Add events to Google.
+1. Nearby events (concept done, waiting on the owner's answers).
+2. HTTPS hosting for phone use and installing. Stay signed in to Google. Add events to Google.
+3. Colour events by name (set aside, see `IDEAS.md`), if one calendar per person doesn't cover it.
