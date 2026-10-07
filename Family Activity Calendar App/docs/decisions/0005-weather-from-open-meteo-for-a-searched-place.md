@@ -12,7 +12,7 @@ Open-Meteo, based on a location setting.
   under the calendar.
 - The location is chosen by **searching for a city or town**. The choice (name and coordinates, rounded to about
   1 km) is saved only in the browser. The dialog opens by itself on first use.
-- Hours 07:00–21:00 show temperature and a category derived from the WMO weather code and cloud cover, with a
+- Hours 07:00–24:00 show temperature and a category derived from the WMO weather code and cloud cover, with a
   moon on clear hours after dark. Each day shows high, low and a short summary.
 - The "Use my current location" option was built and then **removed** at the owner's request (#10): searching is
   enough, and the device location needs HTTPS and a permission prompt.

@@ -3,16 +3,6 @@
 Discussed but not built. When one is picked up, it moves to a pull request (and a decision record if needed) and
 is removed here.
 
-## Show the day up to midnight (24:00) (added 2026-10-07)
-The calendar shows 07:00–21:00 (`START_HOUR` and `END_HOUR` in `src/App.tsx`). The owner wants it to run until
-24:00. Notes for when it's picked up:
-- The same hour range goes to the Google events (`googleCalendar.ts`: events outside it are only counted in a
-  note), the weather (`useForecast.ts`) and the electricity prices. Check all three after the change.
-- The "Starts at" field in the add/edit form is limited to `07:00`–`20:30` and needs to follow the new range.
-- Three more hour rows make the grid taller. Check that the phone and tablet layouts still read well, and
-  whether the view should scroll to the current hour.
-- Events crossing midnight are already split over both days.
-
 ## Final polish of the look and feel (added 2026-10-07)
 Minor UI changes to give the app a finished look. The details aren't decided yet: collect the specific items
 with the owner first (for example spacing, fonts, colours, dialogs, phone layout), then do them as one or a few
@@ -119,4 +109,6 @@ together.
 
 ## Smaller items
 - Heavy rain and rain chance from the original design (Open-Meteo provides both).
+- Scroll to the current hour when the calendar opens. The grid now runs 07:00–24:00 and is taller, so on a phone
+  the evening is a long scroll away (the page starts at 07:00).
 - Electricity prices for other countries or price areas (needs another source; 0007).
