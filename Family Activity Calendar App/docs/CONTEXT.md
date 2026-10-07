@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-07, after the pull request that added the northern lights (aurora) forecast._
+_Last updated: 2026-10-07, after the pull request that added the light/dark switch button._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -23,7 +23,7 @@ renamed "Week at a Glance" (0010).
   of the page says so and links to "Connect Google Calendar". When calendars are saved but Google needs a new sign-in (the token is never
   saved, so after every reload), a notice at the top asks to sign in, with a button.
 - Event titles wrap over up to 4 rows inside the card. The price legend reads "< 3" and "15<" (`LOW_PRICE`, `HIGH_PRICE`)
-- A dark theme that follows the device setting, the design system contrast fixes and the transparent WG logo (0012)
+- A dark theme that follows the device setting until the sun/moon button in the top bar is used (0012, 0014), the design system contrast fixes and the transparent WG logo (0012)
 - A 6-digit PIN screen as a testing barrier (0003)
 - An installable, offline-capable PWA, with a dark WG icon (0004, 0010, 0012)
 
@@ -56,7 +56,7 @@ renamed "Week at a Glance" (0010).
 - Data window: Monday of this week to Sunday of next week, one request per source (0006).
 - Keep the `familyflow.*` storage keys. When a saved format changes, migrate the old one (as in 0009).
 - The app is read-only: no add or edit of events anywhere (0011).
-- Colours are CSS variables with a light and a dark value in `index.css` (0012). Do not write colours directly in rules.
+- Colours are CSS variables with a light and a dark value in `index.css`, dark under `:root[data-theme="dark"]` (0012, 0014). Do not write colours directly in rules.
 
 ## In progress
 Nothing.
