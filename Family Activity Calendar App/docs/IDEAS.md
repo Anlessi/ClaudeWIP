@@ -112,3 +112,6 @@ together.
 - Scroll to the current hour when the calendar opens. The grid now runs 07:00–24:00 and is taller, so on a phone
   the evening is a long scroll away (the page starts at 07:00).
 - Electricity prices for other countries or price areas (needs another source; 0007).
+- A backup source for electricity prices. On 2026-10-07 sahkotin.fi was stuck in a redirect loop (every URL, even
+  the home page, redirected to itself with no CORS headers), so the app showed "Couldn't reach the electricity
+  price service". Candidates: porssisahko.net, ENTSO-E (needs a key). Would change 0007.
