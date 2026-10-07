@@ -18,3 +18,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0011](0011-no-adding-or-editing-events-in-the-app.md) | No adding or editing events in the app; it only shows Google events (and read-only samples) | Accepted |
 | [0012](0012-dark-theme-follows-the-device.md) | Dark theme follows the device setting; the install icon is dark | Accepted |
 | [0013](0013-aurora-from-noaa-kp-forecast.md) | Northern lights from NOAA's 3-day Kp forecast, shown in dark, clear hours as Low/Mid/High | Accepted |
+| [0014](0014-theme-switch-button.md) | A light/dark switch button in the top bar; follows the device until used | Accepted |

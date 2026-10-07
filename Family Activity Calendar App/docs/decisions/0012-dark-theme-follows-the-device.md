@@ -1,6 +1,6 @@
 # 0012: Dark theme follows the device setting, and the install icon is dark
 
-- **Status:** Accepted (2026-10-07)
+- **Status:** Accepted (2026-10-07); the "no switch" part is replaced by 0014
 - **Links:** this pull request, 0009, 0010 (the white icon part is replaced), `src/index.css`, `public/icon.svg`
 
 ## Context
