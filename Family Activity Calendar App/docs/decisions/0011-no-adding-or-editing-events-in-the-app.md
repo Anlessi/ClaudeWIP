@@ -18,4 +18,5 @@ decided the app will only use the read-only Google calendar, so events are manag
 
 ## Consequences
 - The app is read-only everywhere, which matches 0008.
-- "Add events to Google Calendar" in `IDEAS.md` would need to bring a form back, with a broader Google permission.
+- Writing events to Google Calendar would need a form and a broader Google permission. The owner dropped that
+  idea (2026-10-07), so it is no longer in `IDEAS.md`.
