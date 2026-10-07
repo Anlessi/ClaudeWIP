@@ -7,6 +7,8 @@ export type HourWeather = {
   kind: WeatherKind
   temp: number
   night: boolean
+  /** Cloud cover in percent. Missing in forecasts saved by older versions of the app. */
+  cloud?: number
 }
 
 export type DayWeather = {
@@ -195,6 +197,7 @@ export function parseForecast(
       kind: classifyWeather(code, cloud),
       temp: roundTemp(temp),
       night: day === 0,
+      cloud,
     }
     byDate.set(date, hours)
   })

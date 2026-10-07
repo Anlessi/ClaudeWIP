@@ -13,7 +13,8 @@ current week when the app opens), and changes to them are kept in memory and res
   Today jumps back to the current date. Today is marked automatically, also after midnight
 - Real hourly weather (temperature and sunny/cloudy/rain/snow) for a location you choose, from Open-Meteo
 - Real hourly electricity prices in c/kWh including VAT, for the days the Nord Pool market has published
-- Weather and Electricity toggles to show or hide hourly weather and prices
+- Northern lights forecast for the next 3 days (Low/Mid/High in dark, clear hours), from NOAA
+- Weather, Electricity and Northern lights toggles to show or hide each layer
 - Real events from one or more Google calendars (read-only), each in its Google colour, with a legend of the
   calendars; all-day events and overlapping events are shown
 - Layouts for phones, tablets and desktops
@@ -58,6 +59,8 @@ Other commands:
 - `src/weather.ts` – weather and place lookups from Open-Meteo, and turning them into calendar data (tested in `src/weather.test.ts`)
 - `src/electricity.ts` – electricity price lookups from sahkotin.fi and turning them into hourly prices (tested in `src/electricity.test.ts`)
 - `src/usePrices.ts` – loads the prices and keeps them fresh
+- `src/aurora.ts` – northern lights Kp forecast from NOAA, the Kp needed at a place and which hours to mark (tested in `src/aurora.test.ts`)
+- `src/useAurora.ts` – loads the Kp forecast and keeps it fresh
 - `src/useForecast.ts` – loads the forecast and keeps it fresh
 - `src/LocationDialog.tsx` – the dialog for choosing the weather location
 - `src/Icon.tsx` – the icons
@@ -123,6 +126,21 @@ offer from any supplier, only the market price.
   that saved copy with a note and a "Try again" button.
 - **Assumption:** prices are always for Finland, whatever place is chosen for the weather. Other countries or
   price areas would need another source.
+
+## Northern lights
+
+The forecast is the planetary Kp index (geomagnetic activity, 0–9) from NOAA's
+[Space Weather Prediction Center](https://www.swpc.noaa.gov/), which needs no account or key.
+
+- **What is shown:** for about the next 3 days, an hour gets a chip when Kp reaches the level needed at the
+  chosen place, it is dark there and cloud cover is at most 60 % (from the weather forecast). The chip shows the
+  aurora level: Kp 0–2 "Low", 3–4 "Mid", 5–9 "High" (exact Kp on hover). Days with such hours get an aurora icon,
+  and if the lights are possible later today a banner appears at the top.
+- **Kp needed:** worked out from the place's geomagnetic latitude, about Kp 1 in Lapland and 4 in Helsinki
+  (`kpNeeded` in `src/aurora.ts`). The line under the calendar shows the value for the chosen place.
+- **Limits:** only the hours the calendar shows (until 24:00). Cloudy hours are hidden. No phone notifications.
+- **Updates and offline:** the app looks again every 3 hours while open and keeps the last forecast in the
+  browser, like the prices.
 
 ## Google Calendar
 

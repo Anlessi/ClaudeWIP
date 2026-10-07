@@ -18,6 +18,7 @@ export type IconName =
   | "trash"
   | "pin"
   | "search"
+  | "aurora"
 
 const SHAPES: Record<IconName, ReactNode> = {
   calendar: (
@@ -57,6 +58,13 @@ const SHAPES: Record<IconName, ReactNode> = {
     <>
       <circle cx="11" cy="11" r="6" />
       <path d="m20 20-4.2-4.2" />
+    </>
+  ),
+  // Curtains of light above the horizon.
+  aurora: (
+    <>
+      <path d="M5 17c0-4 2-6 1-11M12 17c0-5 2-7 1-13M19 17c0-4-2-6-1-10" />
+      <path d="M3 20h18" />
     </>
   ),
 }

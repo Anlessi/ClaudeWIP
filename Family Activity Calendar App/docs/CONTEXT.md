@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-07, after the pull request that added the dark theme, contrast fixes and the transparent logo._
+_Last updated: 2026-10-07, after the pull request that added the northern lights (aurora) forecast._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -15,6 +15,9 @@ renamed "Week at a Glance" (0010).
 - The day grid runs 07:00–24:00 (`START_HOUR` and `END_HOUR` in `App.tsx`); weather, prices and Google events follow it
 - Hourly weather from Open-Meteo for a searched place (0005)
 - Hourly Finnish electricity spot prices including VAT, from sahkotin.fi (0007)
+- Northern lights for the next 3 days from NOAA's Kp forecast (0013): a Low/Mid/High chip in dark hours with
+  at most 60 % cloud when Kp reaches the level needed at the place, an icon in the day heading, an "Aurora level"
+  legend and a "tonight" banner at the top. "Northern lights" toggle, on by default
 - Real events from one or more Google calendars, read-only. The legend lists the calendars in their Google
   colours (0008, 0009). Before connecting, read-only sample events are shown. There is no add, edit or delete (0011). A green notice at the top
   of the page says so and links to "Connect Google Calendar". When calendars are saved but Google needs a new sign-in (the token is never
@@ -34,6 +37,7 @@ renamed "Week at a Glance" (0010).
   |---|---|---|---|
   | Open-Meteo (weather, place search) | `weather.ts` | `useForecast.ts` | `familyflow.location`, `familyflow.forecast` |
   | sahkotin.fi (prices) | `electricity.ts` | `usePrices.ts` | `familyflow.prices` |
+  | NOAA SWPC (aurora Kp) | `aurora.ts` | `useAurora.ts` | `familyflow.aurora` |
   | Google Calendar | `googleCalendar.ts`, `googleAuth.ts` | `useGoogleCalendar.ts` | `familyflow.googleCalendars` |
 
 - `App.tsx` is the main UI (large, with sample data). Dialogs: `CalendarDialog.tsx`, `LocationDialog.tsx`.
@@ -66,4 +70,4 @@ for electricity prices.
 1. Nearby events (concept done, waiting on the owner's answers).
 2. HTTPS hosting for phone use and installing. Stay signed in to Google.
    Hosting, real access control and a payment method (Stripe) depend on each other and are best planned together.
-3. Final polish of the look and feel. Northern lights (aurora) alert.
+3. Final polish of the look and feel.

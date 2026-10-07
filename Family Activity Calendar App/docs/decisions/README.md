@@ -17,3 +17,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0010](0010-name-week-at-a-glance.md) | The app is called "Week at a Glance" (internal names unchanged) | Accepted |
 | [0011](0011-no-adding-or-editing-events-in-the-app.md) | No adding or editing events in the app; it only shows Google events (and read-only samples) | Accepted |
 | [0012](0012-dark-theme-follows-the-device.md) | Dark theme follows the device setting; the install icon is dark | Accepted |
+| [0013](0013-aurora-from-noaa-kp-forecast.md) | Northern lights from NOAA's 3-day Kp forecast, shown in dark, clear hours as Low/Mid/High | Accepted |
