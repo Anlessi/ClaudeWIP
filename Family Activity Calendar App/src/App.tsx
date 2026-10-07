@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react"
 import Icon from "./Icon"
-import logo from "./assets/logo.png"
+import logo from "./assets/logo-transparent.png"
 import LocationDialog from "./LocationDialog"
 import {
   WEEKDAY_NAMES,

@@ -2,7 +2,7 @@
 
 :root {
   --ink: #17221d;
-  --muted: #6d7771;
+  --muted: #606963;
   --line: #dbe2dd;
   --surface: #ffffff;
   --canvas: #f3f6f2;
@@ -14,10 +14,88 @@
   --rain: #deedf5;
   --snow: #e8e9f7;
   --family: #4f5b6b;
+  --accent-border: #b3ccbd;
+  --price-low: #157044;
+  --price-high: #bb3a2b;
+  --danger: #b73a2d;
+  --field: #fbfcfb;
+  --field-border: #80988a;
+  --today-badge: #cce4d6;
+  --weather-text: #576d66;
+  --label: #56625b;
+  --time-heading: #6c7771;
+  --on-ink: #ffffff;
+  --on-ink-muted: #cbd3ce;
+  --on-accent: #ffffff;
+  --hover: #f8faf8;
+  --glow: rgba(213, 232, 219, 0.62);
+  --topbar-line: rgba(193, 204, 197, 0.7);
+  --hour-line: rgba(197, 207, 201, 0.75);
+  --switcher-track: rgba(255, 255, 255, 0.65);
+  --legend-surface: rgba(255, 255, 255, 0.78);
+  --key-border: rgba(82, 96, 88, 0.18);
+  --dialog-border: rgba(255, 255, 255, 0.5);
+  --backdrop: rgba(13, 24, 19, 0.52);
+  --danger-soft: #fff5f3;
+  --danger-border: #edc7c2;
+  --shadow-frame: 0 14px 45px rgba(31, 53, 42, 0.08);
+  --shadow-dialog: 0 24px 80px rgba(11, 29, 20, 0.28);
+  --shadow-event: 0 5px 12px rgba(29, 43, 36, 0.12);
+  --shadow-tab: 0 2px 8px rgba(23, 34, 29, 0.16);
+  --shadow-field-focus: 0 0 0 3px rgba(36, 94, 70, 0.12);
+  color-scheme: light;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--ink);
   background: var(--canvas);
   font-synthesis: none;
+}
+
+/* Dark theme: follows the device setting. Values come from the Week at a Glance design system. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e6ede8;
+    --muted: #9aa69f;
+    --line: #2b3832;
+    --surface: #18211d;
+    --canvas: #0f1613;
+    --soft: #202b26;
+    --accent: #7cc9a3;
+    --accent-soft: #1d3a2d;
+    --sunny: #352f1c;
+    --cloudy: #212926;
+    --rain: #192c38;
+    --snow: #24263d;
+    --accent-border: #3f7058;
+    --price-low: #74d3a1;
+    --price-high: #ff8f80;
+    --danger: #f4907f;
+    --field: #121a16;
+    --field-border: #64766c;
+    --today-badge: #1f4d39;
+    --weather-text: #a9bdb5;
+    --label: #aab6af;
+    --time-heading: #93a099;
+    --on-ink: #0f1613;
+    --on-ink-muted: #3d4943;
+    --on-accent: #0b1a13;
+    --hover: #1e2823;
+    --glow: rgba(36, 94, 70, 0.28);
+    --topbar-line: rgba(43, 56, 50, 0.9);
+    --hour-line: rgba(43, 56, 50, 0.9);
+    --switcher-track: rgba(24, 33, 29, 0.65);
+    --legend-surface: rgba(24, 33, 29, 0.78);
+    --key-border: rgba(230, 237, 232, 0.14);
+    --dialog-border: rgba(255, 255, 255, 0.08);
+    --backdrop: rgba(0, 0, 0, 0.6);
+    --danger-soft: #2c1916;
+    --danger-border: #6a3129;
+    --shadow-frame: 0 14px 45px rgba(0, 0, 0, 0.35);
+    --shadow-dialog: 0 24px 80px rgba(0, 0, 0, 0.55);
+    --shadow-event: 0 5px 12px rgba(0, 0, 0, 0.35);
+    --shadow-tab: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-field-focus: 0 0 0 3px rgba(124, 201, 163, 0.18);
+    color-scheme: dark;
+  }
 }
 
 * {
@@ -29,7 +107,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 80% 0%, rgba(213, 232, 219, 0.62), transparent 30rem),
+    radial-gradient(circle at 80% 0%, var(--glow), transparent 30rem),
     var(--canvas);
 }
 
@@ -39,7 +117,7 @@ button {
 }
 
 button:focus-visible {
-  outline: 3px solid rgba(36, 94, 70, 0.3);
+  outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -53,7 +131,7 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(193, 204, 197, 0.7);
+  border-bottom: 1px solid var(--topbar-line);
 }
 
 .brand {
@@ -76,7 +154,7 @@ button:focus-visible {
   padding: 0.25rem;
   border: 1px solid var(--line);
   border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.65);
+  background: var(--switcher-track);
 }
 
 .view-option,
@@ -98,9 +176,9 @@ button:focus-visible {
 }
 
 .view-option--active {
-  color: white;
+  color: var(--on-ink);
   background: var(--ink);
-  box-shadow: 0 2px 8px rgba(23, 34, 29, 0.16);
+  box-shadow: var(--shadow-tab);
 }
 
 .calendar-header {
@@ -200,7 +278,7 @@ h1 {
 
 .filter-toggle--active {
   color: var(--accent);
-  border-color: #b3ccbd;
+  border-color: var(--accent-border);
   background: var(--accent-soft);
 }
 
@@ -223,7 +301,7 @@ h1 {
   border: 1px solid var(--line);
   border-bottom: 0;
   border-radius: 1rem 1rem 0 0;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--legend-surface);
 }
 
 .calendar-legend,
@@ -269,12 +347,12 @@ h1 {
 
 .data-legend .price-low,
 .price-reading--low {
-  color: #157044;
+  color: var(--price-low);
 }
 
 .data-legend .price-high,
 .price-reading--high {
-  color: #c73e2e;
+  color: var(--price-high);
 }
 
 .price-trend {
@@ -287,11 +365,11 @@ h1 {
 }
 
 .price-trend--low {
-  color: #157044;
+  color: var(--price-low);
 }
 
 .price-trend--high {
-  color: #c73e2e;
+  color: var(--price-high);
 }
 
 .weather-legend {
@@ -307,7 +385,7 @@ h1 {
   align-items: center;
   gap: 0.22rem;
   padding: 0.2rem 0.38rem;
-  border: 1px solid rgba(82, 96, 88, 0.18);
+  border: 1px solid var(--key-border);
   border-radius: 0.35rem;
   color: var(--ink);
   font-weight: 650;
@@ -334,7 +412,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 0 0 1rem 1rem;
   background: var(--surface);
-  box-shadow: 0 14px 45px rgba(31, 53, 42, 0.08);
+  box-shadow: var(--shadow-frame);
   overflow: auto;
 }
 
@@ -354,7 +432,7 @@ h1 {
   align-items: flex-end;
   justify-content: center;
   padding-bottom: 0.7rem;
-  color: #929c96;
+  color: var(--time-heading);
   font-size: 0.58rem;
   font-weight: 700;
 }
@@ -407,12 +485,12 @@ h1 {
 }
 
 .day-heading:hover {
-  background: #f8faf8;
+  background: var(--hover);
 }
 
 .day-column--today .day-heading {
   background: var(--ink);
-  color: white;
+  color: var(--on-ink);
 }
 
 /* The day picked in the week view, when it is not today. */
@@ -433,7 +511,7 @@ h1 {
 
 .day-column--today .day-date,
 .day-column--today .day-summary {
-  color: #cbd3ce;
+  color: var(--on-ink-muted);
 }
 
 .today-label {
@@ -441,7 +519,7 @@ h1 {
   padding: 0.16rem 0.35rem;
   color: var(--accent);
   border-radius: 1rem;
-  background: #cce4d6;
+  background: var(--today-badge);
   font-size: 0.53rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -509,7 +587,7 @@ h1 {
 .hour-cell {
   position: relative;
   height: 4rem;
-  border-top: 1px solid rgba(197, 207, 201, 0.75);
+  border-top: 1px solid var(--hour-line);
   transition: background 180ms ease;
 }
 
@@ -553,7 +631,7 @@ h1 {
 }
 
 .weather-reading {
-  color: #597069;
+  color: var(--weather-text);
   font-size: 0.62rem;
   font-weight: 700;
 }
@@ -595,7 +673,7 @@ h1 {
   border: 0;
   border-radius: 0.48rem;
   background: var(--event-color);
-  box-shadow: 0 5px 12px rgba(29, 43, 36, 0.12);
+  box-shadow: var(--shadow-event);
   overflow: hidden;
   cursor: default;
   pointer-events: auto;
@@ -646,7 +724,7 @@ h1 {
   display: grid;
   place-items: center;
   padding: 1.25rem;
-  background: rgba(13, 24, 19, 0.52);
+  background: var(--backdrop);
   backdrop-filter: blur(4px);
 }
 
@@ -654,10 +732,10 @@ h1 {
   width: min(34rem, 100%);
   max-height: calc(100vh - 2.5rem);
   padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--dialog-border);
   border-radius: 1.1rem;
   background: var(--surface);
-  box-shadow: 0 24px 80px rgba(11, 29, 20, 0.28);
+  box-shadow: var(--shadow-dialog);
   overflow: auto;
 }
 
@@ -689,13 +767,6 @@ h1 {
   cursor: pointer;
 }
 
-.editor-form {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  padding: 1.25rem 0;
-}
-
 .field {
   display: flex;
   min-width: 0;
@@ -703,47 +774,32 @@ h1 {
   gap: 0.42rem;
 }
 
-.field--full {
-  grid-column: 1 / -1;
-}
-
 .field > span {
-  color: #56625b;
+  color: var(--label);
   font-size: 0.72rem;
   font-weight: 750;
 }
 
-.field input,
-.field select,
-.field textarea {
+.field input {
   width: 100%;
   color: var(--ink);
-  border: 1px solid #cad4ce;
+  border: 1px solid var(--field-border);
   border-radius: 0.65rem;
   outline: 0;
-  background: #fbfcfb;
+  background: var(--field);
   font: inherit;
   font-size: 0.86rem;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
-.field input,
-.field select {
+.field input {
   height: 2.7rem;
   padding: 0 0.75rem;
 }
 
-.field textarea {
-  min-height: 5.25rem;
-  padding: 0.7rem 0.75rem;
-  resize: vertical;
-}
-
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
+.field input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(36, 94, 70, 0.12);
+  box-shadow: var(--shadow-field-focus);
 }
 
 .editor-actions,
@@ -785,7 +841,7 @@ h1 {
 }
 
 .save-event-button {
-  color: white;
+  color: var(--on-accent);
   border: 1px solid var(--accent);
   background: var(--accent);
 }
@@ -796,9 +852,9 @@ h1 {
 }
 
 .delete-event-button {
-  color: #b73a2d;
-  border: 1px solid #edc7c2;
-  background: #fff5f3;
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+  background: var(--danger-soft);
 }
 
 .pin-screen {
@@ -818,7 +874,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 1.1rem;
   background: var(--surface);
-  box-shadow: 0 14px 45px rgba(31, 53, 42, 0.08);
+  box-shadow: var(--shadow-frame);
 }
 
 .pin-mark {
@@ -842,10 +898,10 @@ h1 {
   width: 100%;
   height: 3.2rem;
   color: var(--ink);
-  border: 1px solid #cad4ce;
+  border: 1px solid var(--field-border);
   border-radius: 0.75rem;
   outline: 0;
-  background: #fbfcfb;
+  background: var(--field);
   font: inherit;
   font-size: 1.5rem;
   letter-spacing: 0.5em;
@@ -856,17 +912,17 @@ h1 {
 
 .pin-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(36, 94, 70, 0.12);
+  box-shadow: var(--shadow-field-focus);
 }
 
 .pin-input[aria-invalid="true"] {
-  border-color: #c73e2e;
+  border-color: var(--price-high);
 }
 
 .pin-error {
   min-height: 1.2rem;
   margin: 0.6rem 0 0.4rem;
-  color: #b73a2d;
+  color: var(--danger);
   font-size: 0.8rem;
   font-weight: 650;
 }
@@ -908,7 +964,7 @@ h1 {
   margin: 0.9rem 0 0;
   padding: 0.6rem 0.9rem;
   color: var(--ink);
-  border: 1px solid #b3ccbd;
+  border: 1px solid var(--accent-border);
   border-radius: 0.7rem;
   background: var(--accent-soft);
   font-size: 0.82rem;
@@ -923,7 +979,7 @@ h1 {
 }
 
 .data-status__error {
-  color: #b73a2d;
+  color: var(--danger);
   font-weight: 650;
 }
 
@@ -958,7 +1014,7 @@ h1 {
 }
 
 .location-note--error {
-  color: #b73a2d;
+  color: var(--danger);
   font-weight: 650;
 }
 
@@ -985,7 +1041,7 @@ h1 {
 }
 
 .location-result:hover {
-  border-color: #b3ccbd;
+  border-color: var(--accent-border);
   background: var(--accent-soft);
 }
 
@@ -1098,14 +1154,6 @@ h1 {
 
   .event-editor {
     padding: 1.15rem;
-  }
-
-  .editor-form {
-    grid-template-columns: 1fr;
-  }
-
-  .field--full {
-    grid-column: auto;
   }
 
   .editor-actions {

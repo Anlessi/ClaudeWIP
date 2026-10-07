@@ -36,8 +36,8 @@ export default defineConfig(({ mode }) => {
           short_name: "Week at a Glance",
           description:
             "Family activity calendar with hourly weather and electricity prices.",
-          theme_color: "#245e46",
-          background_color: "#f3f6f2",
+          theme_color: "#0f1613",
+          background_color: "#0f1613",
           display: "standalone",
           orientation: "any",
         },

@@ -72,20 +72,6 @@ refresh token safe (changes 0002 and 0008).
 Add event would write to a chosen Google calendar. It needs the broader `calendar.events` scope and would need the
 add and edit form that 0011 removed.
 
-## Dark mode (added 2026-10-07)
-A dark colour theme. The details aren't decided yet: whether it follows the device setting automatically, has
-its own switch, or both. Notes for when it's picked up:
-- A good start exists: the main colours are CSS variables in `:root` in `src/index.css` (`--ink`, `--surface`,
-  `--canvas`, `--accent`, the weather tints and so on). A dark set of those values can go under
-  `@media (prefers-color-scheme: dark)`.
-- About 24 colours further down `index.css` are written directly instead of through variables. They need moving
-  to variables first.
-- Event cards use each Google calendar's own colour, with dark or light text picked for readability (0009). Check
-  they still look right on a dark background.
-- The install settings in `vite.config.ts` (`theme_color`, `background_color`) and the WG logo and icon (white
-  background, 0010) are light. Decide whether they change too.
-- Fits well with the "final polish" idea above.
-
 ## Payment method, for example Stripe (added 2026-10-07)
 Let people pay for the app. Nothing is decided yet. What is being sold (a one-off purchase, a subscription, a
 donation) and who pays (the family or other users) are not settled, so collect those answers first. Notes for

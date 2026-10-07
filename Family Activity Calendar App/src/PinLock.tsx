@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react"
-import logo from "./assets/logo.png"
+import logo from "./assets/logo-transparent.png"
 
 const PIN_LENGTH = 6
 const ACCESS_PIN = import.meta.env.VITE_ACCESS_PIN?.trim() ?? ""

@@ -1,6 +1,6 @@
 # 0010: The app is called "Week at a Glance", with the WG logo
 
-- **Status:** Accepted (2026-10-06)
+- **Status:** Accepted (2026-10-06); the white icon background is replaced by 0012
 - **Links:** Anlessi/ClaudeWIP#13
 
 ## Context
