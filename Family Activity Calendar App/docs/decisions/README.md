@@ -16,3 +16,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0009](0009-legend-is-the-google-calendars.md) | The legend lists Google calendars, not hard-coded family members | Accepted |
 | [0010](0010-name-week-at-a-glance.md) | The app is called "Week at a Glance" (internal names unchanged) | Accepted |
 | [0011](0011-no-adding-or-editing-events-in-the-app.md) | No adding or editing events in the app; it only shows Google events (and read-only samples) | Accepted |
+| [0012](0012-dark-theme-follows-the-device.md) | Dark theme follows the device setting; the install icon is dark | Accepted |

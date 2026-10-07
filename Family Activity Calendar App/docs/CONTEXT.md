@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-07, after the pull request that wrapped event titles and shortened the price legend._
+_Last updated: 2026-10-07, after the pull request that added the dark theme, contrast fixes and the transparent logo._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -20,8 +20,9 @@ renamed "Week at a Glance" (0010).
   of the page says so and links to "Connect Google Calendar". When calendars are saved but Google needs a new sign-in (the token is never
   saved, so after every reload), a notice at the top asks to sign in, with a button.
 - Event titles wrap over up to 4 rows inside the card. The price legend reads "< 3" and "15<" (`LOW_PRICE`, `HIGH_PRICE`)
+- A dark theme that follows the device setting, the design system contrast fixes and the transparent WG logo (0012)
 - A 6-digit PIN screen as a testing barrier (0003)
-- An installable, offline-capable PWA, with the WG logo as its icon (0004, 0010)
+- An installable, offline-capable PWA, with a dark WG icon (0004, 0010, 0012)
 
 ## How it's built
 - React 19, TypeScript, Vite 8, Tailwind CSS v4, from a Figma Make export (0001). Node 22, pnpm 10.34.3 via
@@ -51,6 +52,7 @@ renamed "Week at a Glance" (0010).
 - Data window: Monday of this week to Sunday of next week, one request per source (0006).
 - Keep the `familyflow.*` storage keys. When a saved format changes, migrate the old one (as in 0009).
 - The app is read-only: no add or edit of events anywhere (0011).
+- Colours are CSS variables with a light and a dark value in `index.css` (0012). Do not write colours directly in rules.
 
 ## In progress
 Nothing. Colouring events by a name in the title was built and then set aside by the owner; it is described in
@@ -61,4 +63,4 @@ Nothing. Colouring events by a name in the title was built and then set aside by
 2. HTTPS hosting for phone use and installing. Stay signed in to Google. Add events to Google.
    Hosting, real access control and a payment method (Stripe) depend on each other and are best planned together.
 3. Colour events by name (set aside, see `IDEAS.md`), if one calendar per person doesn't cover it.
-4. Final polish of the look and feel. Dark mode. Northern lights (aurora) alert.
+4. Final polish of the look and feel. Northern lights (aurora) alert.
