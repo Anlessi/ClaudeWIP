@@ -55,12 +55,15 @@ renamed "Week at a Glance" (0010).
 - Colours are CSS variables with a light and a dark value in `index.css` (0012). Do not write colours directly in rules.
 
 ## In progress
-Nothing. Colouring events by a name in the title was built and then set aside by the owner; it is described in
-`IDEAS.md`, and no code for it is in the repository.
+Nothing.
+
+## Not wanted
+The owner decided these will not be done: colouring events by a name in the title, adding events to Google
+Calendar (see 0011), scrolling to the current hour, heavy rain and rain chance in the weather, and a backup source
+for electricity prices.
 
 ## Next steps (owner's choice; details in `IDEAS.md`)
 1. Nearby events (concept done, waiting on the owner's answers).
-2. HTTPS hosting for phone use and installing. Stay signed in to Google. Add events to Google.
+2. HTTPS hosting for phone use and installing. Stay signed in to Google.
    Hosting, real access control and a payment method (Stripe) depend on each other and are best planned together.
-3. Colour events by name (set aside, see `IDEAS.md`), if one calendar per person doesn't cover it.
-4. Final polish of the look and feel. Northern lights (aurora) alert.
+3. Final polish of the look and feel. Northern lights (aurora) alert.
