@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import Icon from "./Icon"
 import logo from "./assets/logo-transparent.png"
 import LocationDialog from "./LocationDialog"
@@ -36,6 +36,13 @@ import useForecast from "./useForecast"
 import useGoogleCalendar from "./useGoogleCalendar"
 import usePrices from "./usePrices"
 import useToday from "./useToday"
+import {
+  applyTheme,
+  saveTheme,
+  savedTheme,
+  systemTheme,
+  type Theme,
+} from "./theme"
 import {
   formatUtcOffset,
   loadSavedLocation,
@@ -150,6 +157,38 @@ const SAMPLE_WEEK_EVENTS: Event[][] = [
 
 // Shown in the time column until a forecast tells us the time zone of the chosen location.
 const DEFAULT_TIME_ZONE_LABEL = "GMT+2"
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState<Theme>(() => savedTheme() ?? systemTheme())
+
+  useEffect(() => applyTheme(theme), [theme])
+
+  // Until the user picks a theme, follow the device setting as it changes.
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-color-scheme: dark)")
+    const follow = () => {
+      if (!savedTheme()) setTheme(systemTheme())
+    }
+    query.addEventListener("change", follow)
+    return () => query.removeEventListener("change", follow)
+  }, [])
+
+  const next: Theme = theme === "dark" ? "light" : "dark"
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      aria-label={`Switch to ${next} mode`}
+      title={`Switch to ${next} mode`}
+      onClick={() => {
+        saveTheme(next)
+        setTheme(next)
+      }}
+    >
+      <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
+    </button>
+  )
+}
 
 function Button({
   children,
@@ -912,6 +951,7 @@ export default function App() {
           <img className="brand-logo" src={logo} alt="" />
           <span>Week at a Glance</span>
         </div>
+        <div className="topbar-actions">
         <nav className="view-switcher" aria-label="Calendar view">
           <Button
             className={
@@ -932,6 +972,8 @@ export default function App() {
             Week
           </Button>
         </nav>
+        <ThemeToggle />
+        </div>
       </header>
 
       {!googleConnected && (

@@ -52,54 +52,52 @@
   font-synthesis: none;
 }
 
-/* Dark theme: follows the device setting. Values come from the Week at a Glance design system. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ink: #e6ede8;
-    --muted: #9aa69f;
-    --line: #2b3832;
-    --surface: #18211d;
-    --canvas: #0f1613;
-    --soft: #202b26;
-    --accent: #7cc9a3;
-    --accent-soft: #1d3a2d;
-    --sunny: #352f1c;
-    --cloudy: #212926;
-    --rain: #192c38;
-    --snow: #24263d;
-    --accent-border: #3f7058;
-    --price-low: #74d3a1;
-    --price-high: #ff8f80;
-    --aurora: #6fd9cb;
-    --aurora-soft: #133631;
-    --danger: #f4907f;
-    --field: #121a16;
-    --field-border: #64766c;
-    --today-badge: #1f4d39;
-    --weather-text: #a9bdb5;
-    --label: #aab6af;
-    --time-heading: #93a099;
-    --on-ink: #0f1613;
-    --on-ink-muted: #3d4943;
-    --on-accent: #0b1a13;
-    --hover: #1e2823;
-    --glow: rgba(36, 94, 70, 0.28);
-    --topbar-line: rgba(43, 56, 50, 0.9);
-    --hour-line: rgba(43, 56, 50, 0.9);
-    --switcher-track: rgba(24, 33, 29, 0.65);
-    --legend-surface: rgba(24, 33, 29, 0.78);
-    --key-border: rgba(230, 237, 232, 0.14);
-    --dialog-border: rgba(255, 255, 255, 0.08);
-    --backdrop: rgba(0, 0, 0, 0.6);
-    --danger-soft: #2c1916;
-    --danger-border: #6a3129;
-    --shadow-frame: 0 14px 45px rgba(0, 0, 0, 0.35);
-    --shadow-dialog: 0 24px 80px rgba(0, 0, 0, 0.55);
-    --shadow-event: 0 5px 12px rgba(0, 0, 0, 0.35);
-    --shadow-tab: 0 2px 8px rgba(0, 0, 0, 0.4);
-    --shadow-field-focus: 0 0 0 3px rgba(124, 201, 163, 0.18);
-    color-scheme: dark;
-  }
+/* Dark theme: theme.ts sets data-theme on <html> (the device setting unless the user picked one). Values come from the Week at a Glance design system. */
+:root[data-theme="dark"] {
+  --ink: #e6ede8;
+  --muted: #9aa69f;
+  --line: #2b3832;
+  --surface: #18211d;
+  --canvas: #0f1613;
+  --soft: #202b26;
+  --accent: #7cc9a3;
+  --accent-soft: #1d3a2d;
+  --sunny: #352f1c;
+  --cloudy: #212926;
+  --rain: #192c38;
+  --snow: #24263d;
+  --accent-border: #3f7058;
+  --price-low: #74d3a1;
+  --price-high: #ff8f80;
+  --aurora: #6fd9cb;
+  --aurora-soft: #133631;
+  --danger: #f4907f;
+  --field: #121a16;
+  --field-border: #64766c;
+  --today-badge: #1f4d39;
+  --weather-text: #a9bdb5;
+  --label: #aab6af;
+  --time-heading: #93a099;
+  --on-ink: #0f1613;
+  --on-ink-muted: #3d4943;
+  --on-accent: #0b1a13;
+  --hover: #1e2823;
+  --glow: rgba(36, 94, 70, 0.28);
+  --topbar-line: rgba(43, 56, 50, 0.9);
+  --hour-line: rgba(43, 56, 50, 0.9);
+  --switcher-track: rgba(24, 33, 29, 0.65);
+  --legend-surface: rgba(24, 33, 29, 0.78);
+  --key-border: rgba(230, 237, 232, 0.14);
+  --dialog-border: rgba(255, 255, 255, 0.08);
+  --backdrop: rgba(0, 0, 0, 0.6);
+  --danger-soft: #2c1916;
+  --danger-border: #6a3129;
+  --shadow-frame: 0 14px 45px rgba(0, 0, 0, 0.35);
+  --shadow-dialog: 0 24px 80px rgba(0, 0, 0, 0.55);
+  --shadow-event: 0 5px 12px rgba(0, 0, 0, 0.35);
+  --shadow-tab: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-field-focus: 0 0 0 3px rgba(124, 201, 163, 0.18);
+  color-scheme: dark;
 }
 
 * {
@@ -159,6 +157,29 @@ button:focus-visible {
   border: 1px solid var(--line);
   border-radius: 0.75rem;
   background: var(--switcher-track);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  color: var(--ink);
+  background: var(--switcher-track);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: var(--hover);
 }
 
 .view-option,
