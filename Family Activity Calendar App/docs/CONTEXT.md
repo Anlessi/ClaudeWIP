@@ -67,7 +67,13 @@ Calendar (see 0011), scrolling to the current hour, heavy rain and rain chance i
 for electricity prices.
 
 ## Next steps (owner's choice; details in `IDEAS.md`)
-1. Nearby events (concept done, waiting on the owner's answers).
-2. HTTPS hosting for phone use and installing. Stay signed in to Google.
-   Hosting, real access control and a payment method (Stripe) depend on each other and are best planned together.
-3. Final polish of the look and feel.
+The owner's scope for the **first release** (2026-10-07), in this order. The first four depend on each other and
+are best planned together:
+1. HTTPS hosting for phone use and installing.
+2. Real access control (replaces the PIN).
+3. A payment method (Stripe).
+4. Stay signed in to Google.
+5. Final polish of the look and feel.
+
+**Set for a later version:** nearby events and electricity prices for other countries or price areas. They are
+kept in `IDEAS.md`. The owner dropped the northern lights follow-ups (phone notification, days 4-7).

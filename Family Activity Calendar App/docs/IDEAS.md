@@ -3,12 +3,53 @@
 Discussed but not built. When one is picked up, it moves to a pull request (and a decision record if needed) and
 is removed here.
 
-## Final polish of the look and feel (added 2026-10-07)
+## First release (the owner's scope, 2026-10-07)
+The first release is these five items. Hosting, real access control, payment and staying signed in depend on
+each other, so plan them together, in this order. Final polish comes last.
+1. HTTPS hosting, for phones and installing
+2. Real access control
+3. Payment method, for example Stripe
+4. Stay signed in to Google
+5. Final polish of the look and feel
+
+### 1. HTTPS hosting, for phones and installing
+Needed to install the PWA and to sign in to Google on a phone (0004, 0008). Options: Tailscale (private),
+a Cloudflare quick tunnel (temporary), or a host such as Netlify or Cloudflare Pages (public, so the PIN matters
+more). GitHub Pages is public even from a private repository. Add the `https://` address to the Google
+"Authorized JavaScript origins", and set `VITE_GOOGLE_CLIENT_ID` in the host's build.
+Linked: real access control, payment and staying signed in all build on this (Stripe requires HTTPS). A host that
+can also run a small server would serve all of them.
+
+### 2. Real access control
+Replace the PIN (0003) with real sign-in. It needs a server.
+Linked: it needs hosting first, and the payment method needs it to know who has paid.
+
+### 3. Payment method, for example Stripe (added 2026-10-07)
+Let people pay for the app. Nothing is decided yet. What is being sold (a one-off purchase, a subscription, a
+donation) and who pays (the family or other users) are not settled, so collect those answers first. Notes for
+when it's picked up:
+- **Needs a server in most cases.** Stripe's secret key must never be in the browser, which conflicts with 0002
+  (no server). The exception is Stripe Payment Links or hosted Checkout created in the Stripe dashboard: they
+  need no code on our side, but cannot tell the app who has paid.
+- **Knowing who has paid** (to unlock features) needs accounts and a server to receive Stripe's webhooks, and
+  Stripe requires HTTPS.
+- **Questions to settle:** what is sold and at what price, who the customers are, which countries (VAT and
+  business registration in Finland), and whether a simple payment link or a donation button is enough.
+- Linked: needs hosting and real access control first.
+
+### 4. Stay signed in to Google
+Today the sign-in lasts about an hour. A wall tablet would want no tapping, which needs a small server to keep a
+refresh token safe (changes 0002 and 0008). It would use the same server as the items above.
+
+### 5. Final polish of the look and feel (added 2026-10-07)
 Minor UI changes to give the app a finished look. The details aren't decided yet: collect the specific items
 with the owner first (for example spacing, fonts, colours, dialogs, phone layout), then do them as one or a few
 small pull requests.
 
-## Nearby events (concept done, 2026-10-06)
+## Set for later version
+Not in the first release (owner's decision, 2026-10-07).
+
+### Nearby events (concept done, 2026-10-06)
 A "Nearby" toggle next to Weather and Electricity, showing events in the chosen city for this week and next.
 Researched and called live:
 - **Big events: Ticketmaster Discovery API.** Free key (5,000 calls a day), CORS allowed. Search by
@@ -24,41 +65,5 @@ Researched and called live:
 - **Waiting on the owner:** (1) which city they use (Helsinki region or not), (2) OK to create a free
   Ticketmaster key, (3) chips row or cards in the grid, (4) toggle on or off by default.
 
-## HTTPS hosting, for phones and installing
-Needed to install the PWA and to sign in to Google on a phone (0004, 0008). Options: Tailscale (private),
-a Cloudflare quick tunnel (temporary), or a host such as Netlify or Cloudflare Pages (public, so the PIN matters
-more). GitHub Pages is public even from a private repository. Add the `https://` address to the Google
-"Authorized JavaScript origins", and set `VITE_GOOGLE_CLIENT_ID` in the host's build.
-Linked: "Real access control" and "Payment method" both build on this (Stripe requires HTTPS). A host that can also
-run a small server would serve all three.
-
-## Stay signed in to Google
-Today the sign-in lasts about an hour. A wall tablet would want no tapping, which needs a small server to keep a
-refresh token safe (changes 0002 and 0008).
-
-## Payment method, for example Stripe (added 2026-10-07)
-Let people pay for the app. Nothing is decided yet. What is being sold (a one-off purchase, a subscription, a
-donation) and who pays (the family or other users) are not settled, so collect those answers first. Notes for
-when it's picked up:
-- **Needs a server in most cases.** Stripe's secret key must never be in the browser, which conflicts with 0002
-  (no server). The exception is Stripe Payment Links or hosted Checkout created in the Stripe dashboard: they
-  need no code on our side, but cannot tell the app who has paid.
-- **Knowing who has paid** (to unlock features) needs accounts and a server to receive Stripe's webhooks, and
-  Stripe requires HTTPS.
-- **Linked ideas:** this is one of three that depend on each other: "HTTPS hosting, for phones and installing",
-  "Real access control" and this one. Plan them together: hosting comes first (an HTTPS address and a place to
-  run a small server), then real sign-in, then payment, which needs both. "Stay signed in to Google" would use
-  the same server.
-- **Questions to settle:** what is sold and at what price, who the customers are, which countries (VAT and
-  business registration in Finland), and whether a simple payment link or a donation button is enough.
-
-## Real access control
-Replace the PIN (0003) with real sign-in. It needs a server.
-Linked: it needs "HTTPS hosting" first, and "Payment method" needs it to know who has paid, so plan the three
-together.
-
-## Smaller items
-- Electricity prices for other countries or price areas (needs another source; 0007).
-- Northern lights (2026-10-07, see 0013): a phone notification needs push notifications, so HTTPS hosting and
-  probably a server. A rough outlook for days 4-7 is possible from NOAA's 27-day outlook
-  (`services.swpc.noaa.gov/text/27-day-outlook.txt`, daily max Kp, CORS allowed); the owner chose 3 days for now.
+### Electricity prices for other countries or price areas
+Needs another source (0007).
