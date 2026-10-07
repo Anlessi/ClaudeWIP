@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-07, after the pull request that removed adding and editing events._
+_Last updated: 2026-10-07, after the pull request that added the sign-in banner._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -17,7 +17,8 @@ renamed "Week at a Glance" (0010).
 - Hourly Finnish electricity spot prices including VAT, from sahkotin.fi (0007)
 - Real events from one or more Google calendars, read-only. The legend lists the calendars in their Google
   colours (0008, 0009). Before connecting, read-only sample events are shown. There is no add, edit or delete (0011). A green notice at the top
-  of the page says so and links to "Connect Google Calendar".
+  of the page says so and links to "Connect Google Calendar". When calendars are saved but Google needs a new sign-in (the token is never
+  saved, so after every reload), a notice at the top asks to sign in, with a button.
 - A 6-digit PIN screen as a testing barrier (0003)
 - An installable, offline-capable PWA, with the WG logo as its icon (0004, 0010)
 

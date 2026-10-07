@@ -333,6 +333,28 @@ function PriceStatus({
   )
 }
 
+/** At the top of the page when calendars are chosen but Google needs a new sign-in (it is not kept after a reload). */
+function SignInNotice({ onReconnect }: { onReconnect: () => Promise<void> }) {
+  const [message, setMessage] = useState("")
+  return (
+    <p className="sample-notice" role="status">
+      {message || "Sign in to Google to see your calendar events."}
+      <button
+        type="button"
+        className="weather-link"
+        onClick={() => {
+          setMessage("")
+          onReconnect().catch(() =>
+            setMessage("Couldn't sign in to Google. Try again."),
+          )
+        }}
+      >
+        Sign in
+      </button>
+    </p>
+  )
+}
+
 function GoogleStatus({
   configured,
   calendarNames,
@@ -791,6 +813,9 @@ export default function App() {
           configured={google.configured}
           onOpenSettings={() => setCalendarDialogOpen(true)}
         />
+      )}
+      {googleConnected && google.needsSignIn && (
+        <SignInNotice onReconnect={google.reconnect} />
       )}
 
       <section className="calendar-header">
