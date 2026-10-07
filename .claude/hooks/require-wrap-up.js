@@ -13,14 +13,16 @@ process.stdin.on("end", () => {
     process.exit(0);
   }
   const command = (input.tool_input && input.tool_input.command) || "";
-  if (!/\bgh(\.exe)?["']?\s+pr\s+create\b/.test(command)) process.exit(0);
+  const create = command.match(/\bgh(\.exe)?["']?\s+pr\s+create\b/);
+  if (!create) process.exit(0);
 
   const block = (reason) => {
     process.stderr.write(reason + "\n");
     process.exit(2);
   };
 
-  const match = command.match(/--body-file[=\s]+(?:"([^"]+)"|'([^']+)'|(\S+))/);
+  // Only look after `gh pr create`, so a --body-file mentioned earlier (e.g. in a commit message) is ignored.
+  const match = command.slice(create.index).match(/--body-file[=\s]+(?:"([^"]+)"|'([^']+)'|(\S+))/);
   if (!match) {
     block(
       "Blocked by .claude/hooks/require-wrap-up.js: open pull requests with --body-file <file> (see CLAUDE.md), " +
@@ -32,7 +34,11 @@ process.stdin.on("end", () => {
   try {
     body = fs.readFileSync(file, "utf8");
   } catch {
-    block(`Blocked by .claude/hooks/require-wrap-up.js: can't read the description file ${file}.`);
+    block(
+      `Blocked by .claude/hooks/require-wrap-up.js: can't read the description file ${file}. ` +
+        "Write the full path after --body-file: this hook sees the command before the shell expands variables " +
+        "such as $S or $env:TEMP.",
+    );
   }
   if (!/^##\s+Decisions\s*$/m.test(body)) {
     block(
