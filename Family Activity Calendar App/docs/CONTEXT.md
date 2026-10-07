@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-07, after the pull request that added the light/dark switch button._
+_Last updated: 2026-10-07, after the pull request that documented hosting on Vercel._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -26,6 +26,10 @@ renamed "Week at a Glance" (0010).
 - A dark theme that follows the device setting until the sun/moon button in the top bar is used (0012, 0014), the design system contrast fixes and the transparent WG logo (0012)
 - A 6-digit PIN screen as a testing barrier (0003)
 - An installable, offline-capable PWA, with a dark WG icon (0004, 0010, 0012)
+- Hosted on Vercel's free Hobby plan (0015): every merge into `main` deploys. The settings are in the Vercel
+  dashboard (table in the README), and the address is there too, kept out of this public repository. The Vercel
+  address is not yet in Google's Authorized JavaScript origins, so Google sign-in on the hosted site doesn't
+  work until the owner adds it.
 
 ## How it's built
 - React 19, TypeScript, Vite 8, Tailwind CSS v4, from a Figma Make export (0001). Node 22, pnpm 10.34.3 via
@@ -44,12 +48,14 @@ renamed "Week at a Glance" (0010).
   Others: `dates.ts` (week and window helpers), `useToday.ts`, `events.ts` (event types and overlap layout),
   `Icon.tsx`, `PinLock.tsx`, `index.css` (all styles, including phone and tablet layouts).
 - **Settings** go in `.env.local` (not committed): `VITE_ACCESS_PIN`, `VITE_GOOGLE_CLIENT_ID`. See `.env.example`.
+  The same variables are set in Vercel, and changing one there needs a redeploy.
 - **Tests:** Node's built-in test runner (`npx pnpm@10.34.3 run test`), files `src/*.test.ts`. Logic is tested,
   and the UI is checked in the browser preview. Don't add test dependencies without asking. Also run
   `npx tsc --noEmit` and `vite build` before a pull request.
 - **Running:** the `family-calendar` configuration in `.claude/launch.json` (dev server, port 8443), or
-  `family-calendar-installable` (production preview with service worker, port 4173). Google sign-in only works
-  at `http://localhost:8443`, not at the `192.168.x.x` address (0008).
+  `family-calendar-installable` (production preview with service worker, port 4173). Google sign-in works at
+  `http://localhost:8443` (and on the Vercel address once it is added to Google), not at `192.168.x.x` (0008).
+  On a phone, use the Vercel address.
 
 ## Conventions in this app
 - Plain-language UI text. Status and errors go in the line under the calendar.
@@ -67,13 +73,17 @@ Calendar (see 0011), scrolling to the current hour, heavy rain and rain chance i
 for electricity prices.
 
 ## Next steps (owner's choice; details in `IDEAS.md`)
-The owner's scope for the **first release** (2026-10-07), in this order. The first four depend on each other and
-are best planned together:
-1. HTTPS hosting for phone use and installing.
-2. Real access control (replaces the PIN).
-3. A payment method (Stripe).
-4. Stay signed in to Google.
-5. Final polish of the look and feel.
+The owner's goal for the **first release** (updated 2026-10-07) is a public app: people sign in with their own
+Google account and stay signed in, there is no PIN, it is free with an optional donation link, and usage is
+monitored. Hosting is done (0015). The proposed order (details in `IDEAS.md`):
+1. Add the Vercel address to Google's Authorized JavaScript origins (owner).
+2. Stay signed in to Google with small Vercel functions and an encrypted cookie, and remove the PIN.
+3. Publish and verify the Google app (start early).
+4. A donation link (replaces the Stripe idea).
+5. Usage monitoring.
+6. Final polish of the look and feel.
+
+Open questions: custom domain or not, which donation platform, and whether paid access is dropped for good.
 
 **Set for a later version:** nearby events and electricity prices for other countries or price areas. They are
 kept in `IDEAS.md`. The owner dropped the northern lights follow-ups (phone notification, days 4-7).

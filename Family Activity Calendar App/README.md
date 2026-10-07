@@ -79,12 +79,38 @@ screen like a normal app, and keeps working without a connection once it has bee
   `dev` server, so that editing code is never confused by cached files.
 - **Installing requires HTTPS.** Browsers only offer to install an app (and only run its service worker) on
   `https://` addresses or on `localhost`. A home-network address such as `http://192.168.x.x:8443` can show the
-  app but cannot install it. To install it on a phone, the built app (`dist/`) has to be hosted at an
-  `https://` address.
+  app but cannot install it. On a phone, open the hosted version instead (see "Hosting on Vercel").
 - **Installing:** on Android (Chrome) use the browser menu and choose "Install app" or "Add to Home screen". On
   iPhone/iPad (Safari) use Share, then "Add to Home Screen".
 - **Updates:** the app updates itself in the background; the new version is used the next time it is opened.
 - The app icons are generated from `public/icon.svg` at build time.
+
+## Hosting on Vercel
+
+The app is hosted on [Vercel](https://vercel.com/) (free Hobby plan), which builds it from GitHub and serves it at
+an `https://…vercel.app` address. The address is in the Vercel dashboard; it is deliberately not written in this
+public repository. Every merge into `main` updates the site automatically. Other branches get a "preview" address
+that only the Vercel account owner can open.
+
+The project is set up in the Vercel dashboard (there is no `vercel.json`):
+
+| Setting | Value |
+|---|---|
+| Root Directory | `Family Activity Calendar App` |
+| Framework Preset | Vite |
+| Install Command | `npx pnpm@10.34.3 install --frozen-lockfile` |
+| Build Command | `npx pnpm@10.34.3 run build` |
+| Output Directory | `dist` |
+| Node.js Version | 22.x |
+| Environment Variables | `VITE_ACCESS_PIN`, `VITE_GOOGLE_CLIENT_ID` (same as `.env.local`) |
+
+- **Changing a setting:** after changing an environment variable, redeploy (Deployments → ⋯ → Redeploy), because
+  `VITE_*` values are built into the app.
+- **Google sign-in** works only after the site's `https://` address is added to the OAuth client's **Authorized
+  JavaScript origins** (see "Google Calendar" below). Preview addresses change per branch, so they can't sign in.
+- **The site is public.** Anyone with the address sees the PIN screen, and the PIN can be read from the app's
+  JavaScript. Calendar events only appear after a Google sign-in with one of the app's test users.
+- Search engines are told not to list the site (`robots` in `.figma/make/site.json`).
 
 ## Weather and location
 
@@ -163,11 +189,11 @@ Google needs to know which app is asking for access, so you create a free "OAuth
 4. **Data access / Scopes**: add `.../auth/calendar.calendarlist.readonly` and `.../auth/calendar.events.readonly`.
 5. **Credentials** → **Create credentials** → **OAuth client ID** → type **Web application**. Under **Authorized
    JavaScript origins** add every address the app is opened from, for example `http://localhost:8443` and, for
-   your phone or tablet, the `https://` address where the built app is hosted. (Plain `http://192.168.x.x`
-   addresses are not accepted by Google.)
+   your phone or tablet, the Vercel `https://` address (without a `/` at the end). (Plain `http://192.168.x.x`
+   addresses are not accepted by Google.) A new origin can take from a few minutes to a few hours to work.
 6. Copy the **Client ID** (it ends in `.apps.googleusercontent.com`) into `.env.local` as
    `VITE_GOOGLE_CLIENT_ID=...` and restart the dev server. The client ID is not a secret, but keep it out of
-   the repository like the other settings. If the app is hosted, set the same variable when building it.
+   the repository like the other settings. Set the same variable in Vercel (see "Hosting on Vercel").
 
 ### Using it
 
