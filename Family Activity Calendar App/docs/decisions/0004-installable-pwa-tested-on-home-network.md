@@ -1,6 +1,6 @@
 # 0004: An installable, offline-capable PWA, tested on the home network for now
 
-- **Status:** Accepted (2026-10-06)
+- **Status:** Accepted (2026-10-06). The "home network only" part is superseded by 0015 (2026-10-07): the app is now hosted on Vercel
 - **Links:** Anlessi/ClaudeWIP#5, `vite.config.ts`, `pwa-assets.config.ts`
 
 ## Context
