@@ -19,6 +19,28 @@ Researched and called live:
 - **Waiting on the owner:** (1) which city they use (Helsinki region or not), (2) OK to create a free
   Ticketmaster key, (3) chips row or cards in the grid, (4) toggle on or off by default.
 
+## Colour events by name (built, then set aside, 2026-10-07)
+With one shared Google calendar every event has the calendar's colour, so nothing says who an event is for. The
+idea: use the name an event title starts with ("Milo - Football", "Tanja yoga"). It was built and checked in the
+browser (58 tests passed), then the owner cancelled it before any pull request, to analyse the idea later. The
+code was never merged and no copy is kept in the repository. The design that was settled:
+- **Detect and confirm, not automatic.** The owner chose this to avoid false matches. A name is the first word of
+  the title, up to a space, dash or colon, ignoring capital letters. A word is only suggested when it starts at
+  least two events (so "milo:" and "Milo" count together). The app lists suggestions with counts, and the owner
+  ticks which are people. Unticked words, such as "Dentist", are ignored.
+- **Where:** a "Colour events by name" section of chips in the calendar dialog, using the titles of every week
+  loaded so far. Ticking takes effect at once, with no save button.
+- **Look:** each ticked name gets the next of eight fixed dark colours (white text). A name's colour wins over the
+  calendar colour. The legend adds the names after a divider, only while their events are on screen. The name is
+  dropped from the card title only when a dash or colon follows it ("Milo - Football" shows "Football").
+- **Saved** in the browser only, under `familyflow.people` (name, colour). Events carried an optional `colorId` so
+  cards could look up the name's colour instead of the calendar's.
+- **Limits found:** it is hidden until the owner opens the dialog with a live Google sign-in, so it is easy to miss.
+  Suggestions only come from weeks already viewed. First words that aren't names can be suggested.
+- **Questions to settle before building it again:** is the colour-per-name idea still wanted, or would one Google
+  calendar per person (already supported, 0009) be simpler? Should suggestions appear on the main screen instead
+  of inside the dialog? Should the colour be editable?
+
 ## HTTPS hosting, for phones and installing
 Needed to install the PWA and to sign in to Google on a phone (0004, 0008). Options: Tailscale (private),
 a Cloudflare quick tunnel (temporary), or a host such as Netlify or Cloudflare Pages (public, so the PIN matters
