@@ -94,7 +94,7 @@ free for non-commercial use; the app shows the required credit under the calenda
 - **What is sent where:** the place you search for and the approximate coordinates of the chosen place
   (rounded to about 1 km) are sent to Open-Meteo. The choice itself is saved only in this browser
   (`localStorage`); it is never part of the repository.
-- **What is shown:** temperature and a sunny/cloudy/rain/snow category for each hour from 07:00 to 21:00, plus a
+- **What is shown:** temperature and a sunny/cloudy/rain/snow category for each hour from 07:00 to 24:00, plus a
   daily high, low and short summary such as "Rain from 17:00". Clear hours after dark show a moon. The time
   column shows the time zone of the chosen place.
 - **Updates and offline:** the forecast reloads when the app is opened after 30 minutes or more, and when the
@@ -162,9 +162,9 @@ Google needs to know which app is asking for access, so you create a free "OAuth
   events, shown before anything is connected, belong to one made-up "Sample events" calendar.
 - **If you connected before this change:** the calendar you chose then is found again, but in a neutral colour
   until you open **Change calendars** and choose it again, which also fetches its Google colour.
-- **What is shown:** timed events in the hours 07:00–21:00 on the device's clock (events that cross midnight are
+- **What is shown:** timed events in the hours 07:00–24:00 on the device's clock (events that cross midnight are
   split over both days), all-day and multi-day events in an "All day" row, and overlapping events side by side.
-  Events completely outside 07:00–21:00 are counted in a note under the calendar but not drawn. Cancelled events
+  Events completely outside 07:00–24:00 are counted in a note under the calendar but not drawn. Cancelled events
   and events you have declined are left out. The location and description show as the event's note.
 - **Signing in again:** Google's sign-in lasts about an hour and is deliberately never saved in the browser. When
   you open the app, and again after an hour, the line under the calendar asks you to **Sign in**; one tap

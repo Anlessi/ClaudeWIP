@@ -78,7 +78,7 @@ function sampleEvents(today: string): EventsByDate {
 }
 
 const START_HOUR = 7
-const END_HOUR = 21
+const END_HOUR = 24
 const HOURS = Array.from(
   { length: END_HOUR - START_HOUR },
   (_, index) => START_HOUR + index,
@@ -1182,7 +1182,7 @@ export default function App() {
                 <input
                   type="time"
                   min="07:00"
-                  max="20:30"
+                  max="23:30"
                   step="1800"
                   value={formatTime(draft.start)}
                   onChange={(event) => {

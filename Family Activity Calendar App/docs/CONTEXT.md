@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-07, after the docs pull request that added the payment method idea._
+_Last updated: 2026-10-07, after the pull request that extended the day to 24:00._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -12,6 +12,7 @@ renamed "Week at a Glance" (0010).
 
 ## What's built (on `main`)
 - Week and Day views that follow the real date, with weeks running Monday to Sunday (0006)
+- The day grid runs 07:00–24:00 (`START_HOUR` and `END_HOUR` in `App.tsx`); weather, prices and Google events follow it
 - Hourly weather from Open-Meteo for a searched place (0005)
 - Hourly Finnish electricity spot prices including VAT, from sahkotin.fi (0007)
 - Real events from one or more Google calendars, read-only. The legend lists the calendars in their Google
@@ -57,4 +58,4 @@ Nothing. Colouring events by a name in the title was built and then set aside by
 2. HTTPS hosting for phone use and installing. Stay signed in to Google. Add events to Google.
    Hosting, real access control and a payment method (Stripe) depend on each other and are best planned together.
 3. Colour events by name (set aside, see `IDEAS.md`), if one calendar per person doesn't cover it.
-4. Show the day up to 24:00. Final polish of the look and feel. Dark mode. Northern lights (aurora) alert.
+4. Final polish of the look and feel. Dark mode. Northern lights (aurora) alert.
