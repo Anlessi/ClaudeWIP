@@ -1,7 +1,7 @@
 # 0015: Host the app on Vercel (free Hobby plan)
 
 - **Status:** Accepted (2026-10-07)
-- **Links:** this pull request, 0002, 0003, 0004, 0008; README "Hosting on Vercel"
+- **Links:** Anlessi/ClaudeWIP#31, 0002, 0003, 0004, 0008; README "Hosting on Vercel"
 
 ## Context
 The owner wanted to use the app on their phone without `localhost`. Installing the PWA and Google sign-in both
