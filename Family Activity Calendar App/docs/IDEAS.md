@@ -69,8 +69,8 @@ Today the sign-in lasts about an hour. A wall tablet would want no tapping, whic
 refresh token safe (changes 0002 and 0008).
 
 ## Add events to Google Calendar
-Add event would write to a chosen Google calendar. It needs the broader `calendar.events` scope and replaces
-the in-memory sample events while connected.
+Add event would write to a chosen Google calendar. It needs the broader `calendar.events` scope and would need the
+add and edit form that 0011 removed.
 
 ## Dark mode (added 2026-10-07)
 A dark colour theme. The details aren't decided yet: whether it follows the device setting automatically, has
