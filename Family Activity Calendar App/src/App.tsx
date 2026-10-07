@@ -934,13 +934,13 @@ export default function App() {
                 Price c/kWh incl. VAT
               </span>
               <b className="price-low">
-                {LOW_PRICE} or below
+                {`< ${LOW_PRICE}`}
                 <span className="price-trend price-trend--low">
                   <Icon name="arrow-down" size={10} />
                 </span>
               </b>
               <b className="price-high">
-                {HIGH_PRICE}+
+                {`${HIGH_PRICE}<`}
                 <span className="price-trend price-trend--high">
                   <Icon name="arrow-up" size={10} />
                 </span>
