@@ -198,26 +198,6 @@ h1 {
   transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
 }
 
-.add-event-button {
-  display: flex;
-  align-items: center;
-  gap: 0.38rem;
-  height: 2.5rem;
-  padding: 0 0.85rem;
-  color: white;
-  border: 1px solid var(--accent);
-  border-radius: 0.7rem;
-  background: var(--accent);
-  font-size: 0.8rem;
-  font-weight: 750;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(36, 94, 70, 0.18);
-}
-
-.add-event-button:hover {
-  background: #1d503b;
-}
-
 .filter-toggle--active {
   color: var(--accent);
   border-color: #b3ccbd;
@@ -617,17 +597,8 @@ h1 {
   background: var(--event-color);
   box-shadow: 0 5px 12px rgba(29, 43, 36, 0.12);
   overflow: hidden;
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.event-card--readonly {
   cursor: default;
-}
-
-.event-card:hover {
-  filter: brightness(1.07);
-  box-shadow: 0 7px 16px rgba(29, 43, 36, 0.2);
+  pointer-events: auto;
 }
 
 .event-card strong {
@@ -925,6 +896,20 @@ h1 {
   font-size: 0.74rem;
 }
 
+.sample-notice {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  margin: 0.9rem 0 0;
+  padding: 0.6rem 0.9rem;
+  color: var(--ink);
+  border: 1px solid #b3ccbd;
+  border-radius: 0.7rem;
+  background: var(--accent-soft);
+  font-size: 0.82rem;
+}
+
 .data-status + .data-status {
   margin-top: 0.3rem;
 }
@@ -1083,11 +1068,6 @@ h1 {
   .location-button {
     flex: 1 0 100%;
     max-width: none;
-  }
-
-  .add-event-button {
-    flex: 1 0 100%;
-    justify-content: center;
   }
 
   .legend-bar {
