@@ -605,8 +605,12 @@ h1 {
   overflow: hidden;
   font-size: 0.68rem;
   line-height: 1.15;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  /* The title wraps over several rows; the card clips whatever does not fit. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow-wrap: anywhere;
 }
 
 .event-card span,
