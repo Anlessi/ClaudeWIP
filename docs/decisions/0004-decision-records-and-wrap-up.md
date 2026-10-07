@@ -29,3 +29,6 @@ can't be forgotten.
 - Every pull request also updates documentation, and the owner reviews both together.
 - Past decisions were reconstructed from pull requests #1–#14 and earlier session transcripts.
 - The hook only checks that the `## Decisions` section exists. Whether the docs are good is checked in review.
+- The hook reads the command text before the shell runs it, so the `--body-file` path must be written in full,
+  not built from a variable. It also triggers on any command whose text contains `gh pr create`, including
+  tests of the hook itself, so run such tests from a script file.

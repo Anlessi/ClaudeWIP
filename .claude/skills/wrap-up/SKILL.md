@@ -64,3 +64,7 @@ sections plus:
 If there are no new decisions, write `## Decisions` followed by `- None`, and say what was updated instead (for
 example "CONTEXT.md updated"). The section heading must be exactly `## Decisions`, because the
 `require-wrap-up` hook looks for it before allowing `gh pr create --body-file <file>`.
+
+Pass the description file to `--body-file` as a full, written-out path. The hook reads the command text before
+the shell runs it, so a path built from a variable (`$S/pr-body.md`, `$env:TEMP\...`) can't be found and the
+pull request is blocked.
