@@ -62,6 +62,10 @@ Repository-wide decisions: @docs/decisions/README.md
   Write the description (what and why) to a file in the scratchpad directory first: Windows PowerShell 5.1
   mangles double quotes inside `--body` text passed to native programs.
   The GitHub CLI is signed in as Anlessi. If `gh` is not on PATH, call it in PowerShell as `& "C:\Program Files\GitHub CLI\gh.exe"`.
+- **Right after opening a pull request,** call the app's `get_status` tool (`mcp__ccd_pr__get_status`). If it says no
+  pull request is bound, bind it with `bind_pr` and the pull request's URL. This links the session to the pull
+  request, so the session shows its real status (open, merged) instead of "idle". Binding only works while the
+  pull request is open, so do it before merging.
 - Review the full diff (`gh pr diff <number>`) before merging, and fix problems on the branch first.
 - Merge only after the owner approves: `gh pr merge <number> --squash --delete-branch`, then
   `git switch main` and `git pull` to update the local copy.
