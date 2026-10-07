@@ -8,16 +8,6 @@ Minor UI changes to give the app a finished look. The details aren't decided yet
 with the owner first (for example spacing, fonts, colours, dialogs, phone layout), then do them as one or a few
 small pull requests.
 
-## Northern lights (aurora) alert (added 2026-10-07)
-Alert the family when northern lights may be visible. Not researched yet. Questions to answer first:
-- **Data source**, which must be free and allow browser requests (0002). Candidates to check: the Finnish
-  Meteorological Institute's aurora service and NOAA's space weather (Kp index) forecasts.
-- **Visibility:** combine the aurora activity with the cloud cover we already get from Open-Meteo, and with
-  darkness at the chosen place.
-- **How to alert:** a marker in the calendar or a status line is possible today. A real phone notification
-  needs push notifications, which needs HTTPS hosting and probably a server, so it's linked to the hosting idea
-  below.
-
 ## Nearby events (concept done, 2026-10-06)
 A "Nearby" toggle next to Weather and Electricity, showing events in the chosen city for this week and next.
 Researched and called live:
@@ -69,3 +59,6 @@ together.
 
 ## Smaller items
 - Electricity prices for other countries or price areas (needs another source; 0007).
+- Northern lights (2026-10-07, see 0013): a phone notification needs push notifications, so HTTPS hosting and
+  probably a server. A rough outlook for days 4-7 is possible from NOAA's 27-day outlook
+  (`services.swpc.noaa.gov/text/27-day-outlook.txt`, daily max Kp, CORS allowed); the owner chose 3 days for now.
