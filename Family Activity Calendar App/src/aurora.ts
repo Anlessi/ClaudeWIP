@@ -125,8 +125,9 @@ export function auroraHours(
   if (!kpByHour || !weatherByHour || needed === null) return hours
   for (const [hour, kp] of Object.entries(kpByHour)) {
     const weather = weatherByHour[Number(hour)]
+    // Rounded like the aurora level: NOAA's 3.67 is "4-", so it counts as Kp 4.
     if (
-      kp >= needed &&
+      Math.round(kp) >= needed &&
       weather?.night &&
       weather.cloud !== undefined &&
       weather.cloud <= MAX_AURORA_CLOUD

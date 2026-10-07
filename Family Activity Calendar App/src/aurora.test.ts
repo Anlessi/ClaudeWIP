@@ -94,15 +94,22 @@ function hour(night: boolean, cloud?: number): HourWeather {
 }
 
 test("auroraHours needs enough activity, darkness and a clear enough sky", () => {
-  const kp = { 17: 6, 20: 4, 21: 4, 22: 3, 23: 5 }
+  const kp = { 17: 6, 19: 3.67, 20: 4, 21: 4, 22: 3.33, 23: 5 }
   const weather = {
     17: hour(false, 0), // daylight
+    19: hour(true, 0), // "4-" counts as Kp 4
     20: hour(true, MAX_AURORA_CLOUD), // just clear enough
     21: hour(true, MAX_AURORA_CLOUD + 1), // too cloudy
-    22: hour(true, 0), // too little activity
+    22: hour(true, 0), // too little activity ("3+")
     23: hour(true), // saved forecast without cloud cover
   }
-  assert.deepEqual([...auroraHours(kp, weather, 4)], [[20, 4]])
+  assert.deepEqual(
+    [...auroraHours(kp, weather, 4)],
+    [
+      [19, 3.67],
+      [20, 4],
+    ],
+  )
   assert.deepEqual([...auroraHours(kp, weather, null)], [])
   assert.deepEqual([...auroraHours(undefined, weather, 1)], [])
   assert.deepEqual([...auroraHours(kp, undefined, 1)], [])

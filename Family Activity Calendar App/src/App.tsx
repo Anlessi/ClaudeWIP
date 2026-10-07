@@ -852,9 +852,9 @@ export default function App() {
           neededKp,
         )
       : new Map()
-  // The banner only looks at the hours still to come today.
-  const currentHour = new Date().getHours()
-  const tonight = [...auroraOn(today)].find(([hour]) => hour >= currentHour)
+  // The banner only looks at this evening's hours still to come (dark mornings in Lapland are not "tonight").
+  const fromHour = Math.max(new Date().getHours(), 12)
+  const tonight = [...auroraOn(today)].find(([hour]) => hour >= fromHour)
   // The legend lists only the levels shown on screen, from low to high.
   const levelsInView = (["low", "moderate", "high"] as AuroraLevel[]).filter(
     (level) =>

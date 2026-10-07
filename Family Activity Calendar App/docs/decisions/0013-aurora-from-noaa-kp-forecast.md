@@ -16,12 +16,12 @@ geomagnetic activity, how far north the place is, darkness and clouds.
 - **Kp needed at the place:** from its geomagnetic latitude (dipole formula), `round((66 − magnetic latitude) / 2)`,
   at least 1. About Kp 1 in Lapland, 2 in Oulu, 3 in Jyväskylä, 4 in Helsinki and Kaarina. Above 9 means "almost
   never" and nothing is shown.
-- **An hour is marked** only when Kp is at least the needed value, Open-Meteo says it is dark (`is_day = 0`) and
+- **An hour is marked** only when Kp (rounded, so NOAA's 3.67 "4-" counts as 4) is at least the needed value, Open-Meteo says it is dark (`is_day = 0`) and
   cloud cover is at most 60 % (`MAX_AURORA_CLOUD`). The owner chose to **hide cloudy hours**, not show them faded.
 - **Display:** a chip in the hour cell with the **aurora level** in words: Kp 0-2 "Low", 3-4 "Mid", 5-9 "High"
   (Kp rounded first; exact Kp on hover). The owner chose "Mid" over "Moderate" to save space. The legend reads
   "Aurora level" followed by only the levels on screen. Days with marked hours get an aurora icon in the heading.
-- **Alert:** a banner at the top when hours later today are marked. In-app only, no phone notifications.
+- **Alert:** a banner at the top when hours later this evening (from 12:00) are marked. In-app only, no phone notifications.
 - **Toggle:** "Northern lights", on by default. The status line gives credit to NOAA and the Kp needed here.
 
 ## Alternatives considered
