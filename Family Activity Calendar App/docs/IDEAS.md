@@ -3,6 +3,31 @@
 Discussed but not built. When one is picked up, it moves to a pull request (and a decision record if needed) and
 is removed here.
 
+## Show the day up to midnight (24:00) (added 2026-10-07)
+The calendar shows 07:00–21:00 (`START_HOUR` and `END_HOUR` in `src/App.tsx`). The owner wants it to run until
+24:00. Notes for when it's picked up:
+- The same hour range goes to the Google events (`googleCalendar.ts`: events outside it are only counted in a
+  note), the weather (`useForecast.ts`) and the electricity prices. Check all three after the change.
+- The "Starts at" field in the add/edit form is limited to `07:00`–`20:30` and needs to follow the new range.
+- Three more hour rows make the grid taller. Check that the phone and tablet layouts still read well, and
+  whether the view should scroll to the current hour.
+- Events crossing midnight are already split over both days.
+
+## Final polish of the look and feel (added 2026-10-07)
+Minor UI changes to give the app a finished look. The details aren't decided yet: collect the specific items
+with the owner first (for example spacing, fonts, colours, dialogs, phone layout), then do them as one or a few
+small pull requests.
+
+## Northern lights (aurora) alert (added 2026-10-07)
+Alert the family when northern lights may be visible. Not researched yet. Questions to answer first:
+- **Data source**, which must be free and allow browser requests (0002). Candidates to check: the Finnish
+  Meteorological Institute's aurora service and NOAA's space weather (Kp index) forecasts.
+- **Visibility:** combine the aurora activity with the cloud cover we already get from Open-Meteo, and with
+  darkness at the chosen place.
+- **How to alert:** a marker in the calendar or a status line is possible today. A real phone notification
+  needs push notifications, which needs HTTPS hosting and probably a server, so it's linked to the hosting idea
+  below.
+
 ## Nearby events (concept done, 2026-10-06)
 A "Nearby" toggle next to Weather and Electricity, showing events in the chosen city for this week and next.
 Researched and called live:
