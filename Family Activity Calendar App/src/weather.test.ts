@@ -133,8 +133,18 @@ test("parseForecast keeps the visible hours and converts the values", () => {
   assert.deepEqual(Object.keys(monday.hours).map(Number), [
     7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
   ])
-  assert.deepEqual(monday.hours[7], { kind: "cloudy", temp: 10, night: true })
-  assert.deepEqual(monday.hours[12], { kind: "cloudy", temp: 10, night: false })
+  assert.deepEqual(monday.hours[7], {
+    kind: "cloudy",
+    temp: 10,
+    night: true,
+    cloud: 100,
+  })
+  assert.deepEqual(monday.hours[12], {
+    kind: "cloudy",
+    temp: 10,
+    night: false,
+    cloud: 100,
+  })
   assert.equal(monday.hours[17].kind, "rain")
   assert.equal(monday.high, 13)
   assert.equal(monday.low, 6)

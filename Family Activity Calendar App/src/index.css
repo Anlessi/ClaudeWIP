@@ -17,6 +17,8 @@
   --accent-border: #b3ccbd;
   --price-low: #157044;
   --price-high: #bb3a2b;
+  --aurora: #08756e;
+  --aurora-soft: #daf2ee;
   --danger: #b73a2d;
   --field: #fbfcfb;
   --field-border: #80988a;
@@ -68,6 +70,8 @@
     --accent-border: #3f7058;
     --price-low: #74d3a1;
     --price-high: #ff8f80;
+    --aurora: #6fd9cb;
+    --aurora-soft: #133631;
     --danger: #f4907f;
     --field: #121a16;
     --field-border: #64766c;
@@ -640,6 +644,67 @@ h1 {
   color: var(--ink);
   font-size: 0.7rem;
   font-weight: 800;
+}
+
+.aurora-reading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.16rem;
+  padding: 0 0.25rem;
+  border-radius: 0.3rem;
+  color: var(--aurora);
+  background: var(--aurora-soft);
+  font-size: 0.62rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Stronger aurora levels get a stronger chip. */
+.aurora-reading--low {
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--aurora);
+}
+
+.aurora-reading--high {
+  color: var(--surface);
+  background: var(--aurora);
+}
+
+.aurora-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.aurora-legend > .aurora-reading {
+  padding: 0.1rem 0.35rem;
+}
+
+.aurora-badge {
+  display: inline-flex;
+  flex: none;
+  color: var(--aurora);
+}
+
+.aurora-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--aurora);
+  font-weight: 700;
+}
+
+/* Two classes, so it wins over `.sample-notice`, which comes later in this file. */
+.sample-notice.aurora-notice {
+  flex-wrap: nowrap;
+  gap: 0.45rem;
+  border-color: var(--aurora);
+  background: var(--aurora-soft);
+}
+
+.aurora-notice svg {
+  flex: none;
+  color: var(--aurora);
 }
 
 .events-layer {

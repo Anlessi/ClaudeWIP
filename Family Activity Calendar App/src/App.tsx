@@ -14,6 +14,14 @@ import {
   weekdayIndex,
   yearOf,
 } from "./dates"
+import {
+  AURORA_LEVEL_NAMES,
+  auroraHours,
+  auroraLevel,
+  formatKp,
+  kpNeeded,
+  type AuroraLevel,
+} from "./aurora"
 import { HIGH_PRICE, LOW_PRICE, formatPrice, priceLevel } from "./electricity"
 import CalendarDialog from "./CalendarDialog"
 import {
@@ -23,6 +31,7 @@ import {
   type Event,
   type Lane,
 } from "./events"
+import useAurora from "./useAurora"
 import useForecast from "./useForecast"
 import useGoogleCalendar from "./useGoogleCalendar"
 import usePrices from "./usePrices"
@@ -333,6 +342,75 @@ function PriceStatus({
   )
 }
 
+function AuroraStatus({
+  hasLocation,
+  neededKp,
+  tooFarSouth,
+  loading,
+  error,
+  saved,
+  fetchedAt,
+  onRetry,
+}: {
+  hasLocation: boolean
+  /** The Kp needed to see the lights at the chosen place. */
+  neededKp: number | null
+  /** The lights are almost never seen at the chosen place. */
+  tooFarSouth: boolean
+  loading: boolean
+  error: string
+  saved: boolean
+  fetchedAt: number | null
+  onRetry: () => void
+}) {
+  const time = fetchedAt ? clockTime(fetchedAt) : ""
+
+  return (
+    <p className="data-status" role="status">
+      {!hasLocation && "Set your location to see the northern lights forecast."}
+      {tooFarSouth && "Northern lights are almost never seen this far south."}
+      {loading && fetchedAt === null && "Loading the northern lights forecast…"}
+      {error && (
+        <>
+          <span className="data-status__error">
+            {error}
+            {saved && ` Showing the forecast saved at ${time}.`}
+          </span>
+          <button type="button" className="weather-link" onClick={onRetry}>
+            Try again
+          </button>
+        </>
+      )}
+      {fetchedAt !== null && (
+        <span>
+          {!error && `Updated ${time} · `}Northern lights for the next 3 days,
+          in dark hours with clear enough skies until{" "}
+          {formatTime(END_HOUR)}
+          {neededKp !== null && `, when activity reaches Kp ${neededKp} or more here`}
+          . Aurora level: Kp 0–2 low, 3–4 mid, 5–9 high. Kp forecast by{" "}
+          <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noreferrer">
+            NOAA SWPC
+          </a>
+        </span>
+      )}
+    </p>
+  )
+}
+
+/** At the top of the page when the northern lights may be seen this evening. */
+function AuroraNotice({ from, kp }: { from: number; kp: number }) {
+  return (
+    <p className="sample-notice aurora-notice" role="status">
+      <Icon name="aurora" size={16} />
+      <span>
+        Northern lights possible tonight from {formatTime(from)} (
+        {AURORA_LEVEL_NAMES[auroraLevel(kp)].toLowerCase()} aurora level, clear
+        enough skies).
+      </span>
+    </p>
+  )
+}
+
 /** At the top of the page when calendars are chosen but Google needs a new sign-in (it is not kept after a reload). */
 function SignInNotice({ onReconnect }: { onReconnect: () => Promise<void> }) {
   const [message, setMessage] = useState("")
@@ -554,6 +632,7 @@ function DayColumn({
   calendars,
   weather,
   prices,
+  aurora,
   showWeather,
   showPrices,
   isToday,
@@ -571,6 +650,8 @@ function DayColumn({
   weather: DayWeather | null
   /** Cents per kWh by hour, or undefined when there are no prices for this day. */
   prices: Record<number, number> | undefined
+  /** Forecast Kp by hour, for the hours the northern lights may be seen; empty when hidden. */
+  aurora: Map<number, number>
   showWeather: boolean
   showPrices: boolean
   isToday: boolean
@@ -588,12 +669,20 @@ function DayColumn({
       <Button
         className="day-heading"
         onClick={onSelect}
-        label={`Show ${day.short} ${day.date}${isToday ? " (today)" : ""}`}
+        label={`Show ${day.short} ${day.date}${isToday ? " (today)" : ""}${
+          aurora.size > 0 ? ", northern lights possible" : ""
+        }`}
       >
         <span className="day-name">{day.short}</span>
         <span className="day-date">{day.date}</span>
         {isToday && <span className="today-label">Today</span>}
         <span className="day-summary">
+          {/* First, so a long weather summary can't push it out of sight. */}
+          {aurora.size > 0 && (
+            <span className="aurora-badge" title="Northern lights possible">
+              <Icon name="aurora" size={14} />
+            </span>
+          )}
           {weather && (
             <>
               {showWeather && <WeatherIcon kind={weather.kind} size={15} />}
@@ -610,6 +699,7 @@ function DayColumn({
           const hourWeather = weather?.hours[hour]
           const price = prices?.[hour]
           const level = price === undefined ? "normal" : priceLevel(price)
+          const kp = aurora.get(hour)
           return (
             <div
               className={`hour-cell ${
@@ -659,6 +749,18 @@ function DayColumn({
                     )}
                   </span>
                 )}
+                {kp !== undefined && (
+                  <span
+                    className={`aurora-reading aurora-reading--${auroraLevel(kp)}`}
+                    title={`Kp ${formatKp(kp)}`}
+                    aria-label={`Northern lights possible, ${AURORA_LEVEL_NAMES[
+                      auroraLevel(kp)
+                    ].toLowerCase()} aurora level, Kp ${formatKp(kp)}`}
+                  >
+                    <Icon name="aurora" size={11} />
+                    {AURORA_LEVEL_NAMES[auroraLevel(kp)]}
+                  </span>
+                )}
               </span>
             </div>
           )
@@ -682,6 +784,7 @@ export default function App() {
   const [view, setView] = useState<ViewMode>("week")
   const [showWeather, setShowWeather] = useState(true)
   const [showPrices, setShowPrices] = useState(true)
+  const [showAurora, setShowAurora] = useState(true)
   const today = useToday()
   // null means "follow today", so the calendar moves on by itself when the date changes.
   const [pickedDate, setPickedDate] = useState<string | null>(null)
@@ -706,6 +809,11 @@ export default function App() {
     forecastDates[0],
     forecastDates[forecastDates.length - 1],
   )
+  // The Kp forecast covers about three days from now; the place, darkness and clouds decide what is shown.
+  const aurora = useAurora()
+  const neededKp = location
+    ? kpNeeded(location.latitude, location.longitude)
+    : null
 
   const chooseLocation = (next: SavedLocation) => {
     saveLocation(next)
@@ -736,6 +844,24 @@ export default function App() {
     })
     return byDate
   }, [weather.forecast])
+  const auroraOn = (iso: string): Map<number, number> =>
+    showAurora
+      ? auroraHours(
+          aurora.kp?.byDate[iso],
+          weatherByDate.get(iso)?.hours,
+          neededKp,
+        )
+      : new Map()
+  // The banner only looks at the hours still to come today.
+  const currentHour = new Date().getHours()
+  const tonight = [...auroraOn(today)].find(([hour]) => hour >= currentHour)
+  // The legend lists only the levels shown on screen, from low to high.
+  const levelsInView = (["low", "moderate", "high"] as AuroraLevel[]).filter(
+    (level) =>
+      visibleDays.some((day) =>
+        [...auroraOn(day.iso).values()].some((kp) => auroraLevel(kp) === level),
+      ),
+  )
   // Once Google Calendar is connected its events replace the sample events.
   const google = useGoogleCalendar(weekDates, START_HOUR, END_HOUR)
   const googleConnected = google.calendars.length > 0
@@ -817,6 +943,7 @@ export default function App() {
       {googleConnected && google.needsSignIn && (
         <SignInNotice onReconnect={google.reconnect} />
       )}
+      {tonight && <AuroraNotice from={tonight[0]} kp={tonight[1]} />}
 
       <section className="calendar-header">
         <div className="date-block">
@@ -876,6 +1003,12 @@ export default function App() {
               onChange={() => setShowPrices((value) => !value)}
             >
               <Icon name="bolt" size={16} /> Electricity
+            </Toggle>
+            <Toggle
+              checked={showAurora}
+              onChange={() => setShowAurora((value) => !value)}
+            >
+              <Icon name="aurora" size={16} /> Northern lights
             </Toggle>
             <Button
               className="filter-toggle location-button"
@@ -947,6 +1080,23 @@ export default function App() {
               </b>
             </>
           )}
+          {showAurora && neededKp !== null && (
+            <span className="aurora-legend">
+              <span className="aurora-key">
+                <Icon name="aurora" size={12} />
+                Aurora level
+              </span>
+              {levelsInView.length === 0 && <span>None</span>}
+              {levelsInView.map((level) => (
+                <span
+                  className={`aurora-reading aurora-reading--${level}`}
+                  key={level}
+                >
+                  {AURORA_LEVEL_NAMES[level]}
+                </span>
+              ))}
+            </span>
+          )}
         </div>
       </section>
 
@@ -977,6 +1127,7 @@ export default function App() {
               calendars={calendarsById}
               weather={weatherByDate.get(day.iso) ?? null}
               prices={electricity.prices?.byDate[day.iso]}
+              aurora={auroraOn(day.iso)}
               key={day.iso}
               onSelect={() => {
                 setPickedDate(day.iso)
@@ -1024,6 +1175,19 @@ export default function App() {
           saved={electricity.saved}
           fetchedAt={electricity.prices?.fetchedAt ?? null}
           onRetry={electricity.reload}
+        />
+      )}
+
+      {showAurora && (
+        <AuroraStatus
+          hasLocation={location !== null}
+          neededKp={neededKp}
+          tooFarSouth={location !== null && neededKp === null}
+          loading={aurora.status === "loading"}
+          error={aurora.error}
+          saved={aurora.saved}
+          fetchedAt={aurora.kp?.fetchedAt ?? null}
+          onRetry={aurora.reload}
         />
       )}
 
