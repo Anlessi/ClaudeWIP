@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-07, after the docs pull request that added three new ideas (24:00 day, polish, aurora alert)._
+_Last updated: 2026-10-07, after the docs pull request that added the dark mode idea._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -56,4 +56,4 @@ Nothing. Colouring events by a name in the title was built and then set aside by
 1. Nearby events (concept done, waiting on the owner's answers).
 2. HTTPS hosting for phone use and installing. Stay signed in to Google. Add events to Google.
 3. Colour events by name (set aside, see `IDEAS.md`), if one calendar per person doesn't cover it.
-4. Show the day up to 24:00. Final polish of the look and feel. Northern lights (aurora) alert.
+4. Show the day up to 24:00. Final polish of the look and feel. Dark mode. Northern lights (aurora) alert.
