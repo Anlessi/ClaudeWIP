@@ -834,19 +834,19 @@ function DayColumn({
                     )}
                   </span>
                 )}
-                {kp !== undefined && (
-                  <span
-                    className={`aurora-reading aurora-reading--${auroraLevel(kp)}`}
-                    title={`Kp ${formatKp(kp)}`}
-                    aria-label={`Northern lights possible, ${AURORA_LEVEL_NAMES[
-                      auroraLevel(kp)
-                    ].toLowerCase()} aurora level, Kp ${formatKp(kp)}`}
-                  >
-                    <Icon name="aurora" size={11} />
-                    {AURORA_LEVEL_NAMES[auroraLevel(kp)]}
-                  </span>
-                )}
               </span>
+              {kp !== undefined && (
+                <span
+                  className={`aurora-reading aurora-reading--${auroraLevel(kp)} cell-aurora`}
+                  title={`Kp ${formatKp(kp)}`}
+                  aria-label={`Northern lights possible, ${AURORA_LEVEL_NAMES[
+                    auroraLevel(kp)
+                  ].toLowerCase()} aurora level, Kp ${formatKp(kp)}`}
+                >
+                  <Icon name="aurora" size={11} />
+                  {AURORA_LEVEL_NAMES[auroraLevel(kp)]}
+                </span>
+              )}
             </div>
           )
         })}
