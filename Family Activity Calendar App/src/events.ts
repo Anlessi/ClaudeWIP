@@ -74,11 +74,18 @@ export type CardLayout = {
   showNote: boolean
 }
 
+/** Height of one hour row in pixels (`.hour-cell` in index.css: 4rem, and 3rem on phones). */
+export const HOUR_HEIGHT = { regular: 64, phone: 48 }
+/** Space between a card and the hour lines above and below it, in pixels. */
+export const CARD_INSET = { regular: 4, phone: 2 }
+
 // Sizes from `.event-card` in index.css, in pixels (1rem = 16px): padding, title row and a row of small
 // text (font size × line height, plus its top margin). The Day view has bigger padding and title text.
+// On phones both views use smaller cards, so a 1-hour event (44px) still has two title rows.
 const CARD_SIZES = {
   week: { padding: 0.4 * 16, titleRow: 0.68 * 16 * 1.15, textRow: 0.15 * 16 + 0.58 * 16 * 1.15 },
   day: { padding: 0.55 * 16, titleRow: 0.78 * 16 * 1.15, textRow: 0.15 * 16 + 0.58 * 16 * 1.15 },
+  phone: { padding: 0.3 * 16, titleRow: 0.6 * 16 * 1.15, textRow: 0.1 * 16 + 0.58 * 16 * 1.15 },
 }
 /** The time row with the "+1" chip (`.event-more`: font size × line height 1, plus its padding), which is taller. */
 const MORE_ROW = 0.15 * 16 + 0.68 * 16 + 2 * 0.1 * 16
@@ -90,11 +97,12 @@ const MAX_TITLE_ROWS = 4
  * Works out how many whole title rows fit in a card of `height` pixels with the time below them, so a
  * title is never cut through a row or hidden behind the time. When even one row and the time don't fit,
  * the time goes on the title's row. The note only gets a row when the title can still have 2 rows.
- * `hasMore` is true when the card shows a "+1" chip next to the time.
+ * `hasMore` is true when the card shows a "+1" chip next to the time. `view` is "phone" on phones, in
+ * either view.
  */
 export function cardLayout(
   height: number,
-  view: "week" | "day",
+  view: keyof typeof CARD_SIZES,
   { hasNote = false, hasMore = false }: { hasNote?: boolean; hasMore?: boolean } = {},
 ): CardLayout {
   const { padding, titleRow, textRow } = CARD_SIZES[view]
