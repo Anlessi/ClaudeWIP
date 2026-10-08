@@ -870,6 +870,9 @@ export default function App() {
   const [showWeather, setShowWeather] = useState(true)
   const [showPrices, setShowPrices] = useState(true)
   const [showAurora, setShowAurora] = useState(true)
+  // The filters and the legend start closed so the calendar gets the room.
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [legendOpen, setLegendOpen] = useState(false)
   const today = useToday()
   // null means "follow today", so the calendar moves on by itself when the date changes.
   const [pickedDate, setPickedDate] = useState<string | null>(null)
@@ -1042,9 +1045,23 @@ export default function App() {
         <div className="date-block">
           <div className="title-row">
             <h1>
-              {view === "week"
-                ? formatWeekRange(weekDates)
-                : `${selectedDay.short}, ${selectedDay.month} ${selectedDay.date}`}
+              {view === "week" ? (
+                <>
+                  <span className="date-long">{formatWeekRange(weekDates)}</span>
+                  <span className="date-short">
+                    {formatWeekRange(weekDates, true)}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="date-long">
+                    {`${selectedDay.short}, ${selectedDay.month} ${selectedDay.date}`}
+                  </span>
+                  <span className="date-short">
+                    {`${selectedDay.short}, ${selectedDay.month.slice(0, 3)} ${selectedDay.date}`}
+                  </span>
+                </>
+              )}
             </h1>
             {view === "day" && (
               <span className="date-range">{yearOf(selectedDate)}</span>
@@ -1072,125 +1089,158 @@ export default function App() {
               <Icon name="chevron-right" />
             </Button>
           </div>
-          <div className="filters" aria-label="Calendar layers">
-            <Button
-              className="filter-toggle location-button"
-              label={
-                location
-                  ? `Change location, currently ${location.name}`
-                  : "Set location"
-              }
-              onClick={() => setLocationDialogOpen(true)}
-            >
-              <Icon name="pin" size={16} />
-              <span>{location ? location.name : "Set location"}</span>
-            </Button>
-            <Toggle
-              checked={showWeather}
-              onChange={() => setShowWeather((value) => !value)}
-            >
-              <Icon name="sun" size={16} /> Weather
-            </Toggle>
-            <Toggle
-              checked={showPrices}
-              onChange={() => setShowPrices((value) => !value)}
-            >
-              <Icon name="bolt" size={16} /> Electricity
-            </Toggle>
-            <Toggle
-              checked={showAurora}
-              onChange={() => setShowAurora((value) => !value)}
-            >
-              <Icon name="aurora" size={16} /> Northern lights
-            </Toggle>
-            <Button
-              className="filter-toggle location-button"
-              label={
-                googleConnected
-                  ? `Google Calendar settings, showing ${calendarSummary}`
-                  : "Connect Google Calendar"
-              }
-              onClick={() => setCalendarDialogOpen(true)}
-            >
-              <Icon name="calendar" size={16} />
-              <span>
-                {googleConnected ? calendarSummary : "Connect calendar"}
-              </span>
-            </Button>
-          </div>
+          <button
+            type="button"
+            className={`filter-toggle filters-button ${filtersOpen ? "filters-button--open" : ""}`}
+            aria-label="Filters"
+            aria-expanded={filtersOpen}
+            aria-controls="filters-panel"
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            <Icon name="sliders" size={16} />
+            <span className="filters-button-label">Filters</span>
+            <span className="chevron">
+              <Icon name="chevron-down" size={14} />
+            </span>
+          </button>
         </div>
       </section>
 
-      <section className="legend-bar">
-        <div className="calendar-legend">
-          {legendCalendars.map((calendar) => (
-            <span className="legend-item" key={calendar.id}>
-              <i style={{ background: calendar.color }} />
-              {calendar.name}
+      {filtersOpen && (
+        <div className="filters filters-panel" id="filters-panel">
+          <Button
+            className="filter-toggle location-button"
+            label={
+              location
+                ? `Change location, currently ${location.name}`
+                : "Set location"
+            }
+            onClick={() => setLocationDialogOpen(true)}
+          >
+            <Icon name="pin" size={16} />
+            <span>{location ? location.name : "Set location"}</span>
+          </Button>
+          <Toggle
+            checked={showWeather}
+            onChange={() => setShowWeather((value) => !value)}
+          >
+            <Icon name="sun" size={16} /> Weather
+          </Toggle>
+          <Toggle
+            checked={showPrices}
+            onChange={() => setShowPrices((value) => !value)}
+          >
+            <Icon name="bolt" size={16} /> Electricity
+          </Toggle>
+          <Toggle
+            checked={showAurora}
+            onChange={() => setShowAurora((value) => !value)}
+          >
+            <Icon name="aurora" size={16} /> Northern lights
+          </Toggle>
+          <Button
+            className="filter-toggle location-button"
+            label={
+              googleConnected
+                ? `Google Calendar settings, showing ${calendarSummary}`
+                : "Connect Google Calendar"
+            }
+            onClick={() => setCalendarDialogOpen(true)}
+          >
+            <Icon name="calendar" size={16} />
+            <span>
+              {googleConnected ? calendarSummary : "Connect calendar"}
             </span>
-          ))}
+          </Button>
         </div>
-        <div className="data-legend">
-          {showWeather && (
-            <span className="weather-legend">
-              <span className="weather-key weather-key--sunny">
-                <WeatherIcon kind="sunny" size={14} />
-                Sunny
-              </span>
-              <span className="weather-key weather-key--cloudy">
-                <WeatherIcon kind="cloudy" size={14} />
-                Cloudy
-              </span>
-              <span className="weather-key weather-key--rain">
-                <WeatherIcon kind="rain" size={14} />
-                Rain
-              </span>
-              {hasSnow && (
-                <span className="weather-key weather-key--snow">
-                  <WeatherIcon kind="snow" size={14} />
-                  Snow
-                </span>
-              )}
-            </span>
-          )}
-          {showPrices && (
-            <>
-              <span className="price-legend-label">
-                <Icon name="bolt" size={12} />
-                Price c/kWh incl. VAT
-              </span>
-              <b className="price-low">
-                {`< ${LOW_PRICE}`}
-                <span className="price-trend price-trend--low">
-                  <Icon name="arrow-down" size={10} />
-                </span>
-              </b>
-              <b className="price-high">
-                {`${HIGH_PRICE}<`}
-                <span className="price-trend price-trend--high">
-                  <Icon name="arrow-up" size={10} />
-                </span>
-              </b>
-            </>
-          )}
-          {showAurora && neededKp !== null && (
-            <span className="aurora-legend">
-              <span className="aurora-key">
-                <Icon name="aurora" size={12} />
-                Aurora level
-              </span>
-              {levelsInView.length === 0 && <span>None</span>}
-              {levelsInView.map((level) => (
-                <span
-                  className={`aurora-reading aurora-reading--${level}`}
-                  key={level}
-                >
-                  {AURORA_LEVEL_NAMES[level]}
+      )}
+
+      <section className="legend-bar">
+        <button
+          type="button"
+          className={`legend-toggle ${legendOpen ? "legend-toggle--open" : ""}`}
+          aria-expanded={legendOpen}
+          aria-controls="legend-content"
+          onClick={() => setLegendOpen((open) => !open)}
+        >
+          Legend
+          <span className="chevron">
+            <Icon name="chevron-down" size={14} />
+          </span>
+        </button>
+        {legendOpen && (
+          <div className="legend-content" id="legend-content">
+            <div className="calendar-legend">
+              {legendCalendars.map((calendar) => (
+                <span className="legend-item" key={calendar.id}>
+                  <i style={{ background: calendar.color }} />
+                  {calendar.name}
                 </span>
               ))}
-            </span>
-          )}
-        </div>
+            </div>
+            <div className="data-legend">
+              {showWeather && (
+                <span className="weather-legend">
+                  <span className="weather-key weather-key--sunny">
+                    <WeatherIcon kind="sunny" size={14} />
+                    Sunny
+                  </span>
+                  <span className="weather-key weather-key--cloudy">
+                    <WeatherIcon kind="cloudy" size={14} />
+                    Cloudy
+                  </span>
+                  <span className="weather-key weather-key--rain">
+                    <WeatherIcon kind="rain" size={14} />
+                    Rain
+                  </span>
+                  {hasSnow && (
+                    <span className="weather-key weather-key--snow">
+                      <WeatherIcon kind="snow" size={14} />
+                      Snow
+                    </span>
+                  )}
+                </span>
+              )}
+              {showPrices && (
+                <>
+                  <span className="price-legend-label">
+                    <Icon name="bolt" size={12} />
+                    Price c/kWh incl. VAT
+                  </span>
+                  <b className="price-low">
+                    {`< ${LOW_PRICE}`}
+                    <span className="price-trend price-trend--low">
+                      <Icon name="arrow-down" size={10} />
+                    </span>
+                  </b>
+                  <b className="price-high">
+                    {`${HIGH_PRICE}<`}
+                    <span className="price-trend price-trend--high">
+                      <Icon name="arrow-up" size={10} />
+                    </span>
+                  </b>
+                </>
+              )}
+              {showAurora && neededKp !== null && (
+                <span className="aurora-legend">
+                  <span className="aurora-key">
+                    <Icon name="aurora" size={12} />
+                    Aurora level
+                  </span>
+                  {levelsInView.length === 0 && <span>None</span>}
+                  {levelsInView.map((level) => (
+                    <span
+                      className={`aurora-reading aurora-reading--${level}`}
+                      key={level}
+                    >
+                      {AURORA_LEVEL_NAMES[level]}
+                    </span>
+                  ))}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       <section

@@ -4,6 +4,8 @@ export type IconName =
   | "calendar"
   | "chevron-left"
   | "chevron-right"
+  | "chevron-down"
+  | "sliders"
   | "cloud"
   | "sun"
   | "moon"
@@ -26,6 +28,16 @@ const SHAPES: Record<IconName, ReactNode> = {
   ),
   "chevron-left": <path d="m15 18-6-6 6-6" />,
   "chevron-right": <path d="m9 18 6-6-6-6" />,
+  "chevron-down": <path d="m6 9 6 6 6-6" />,
+  // Three slider tracks with knobs, for the Filters button.
+  sliders: (
+    <>
+      <path d="M4 6h3M11 6h9M4 12h9M17 12h3M4 18h1M9 18h11" />
+      <circle cx="9" cy="6" r="2" />
+      <circle cx="15" cy="12" r="2" />
+      <circle cx="7" cy="18" r="2" />
+    </>
+  ),
   cloud: <path d="M7 17h10a4 4 0 0 0 .5-7.97A6 6 0 0 0 6.2 8.5 4.5 4.5 0 0 0 7 17Z" />,
   sun: (
     <>
