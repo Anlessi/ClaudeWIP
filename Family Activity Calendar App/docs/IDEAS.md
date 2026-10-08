@@ -78,6 +78,11 @@ Minor UI changes to give the app a finished look. The details aren't decided yet
 with the owner first (for example spacing, fonts, colours, dialogs, phone layout), then do them as one or a few
 small pull requests.
 Done so far: event tiles with 4px corners, a darker edge in the calendar colour and a small shadow (2026-10-08).
+Items so far:
+- **No location chosen (added 2026-10-08):** when the user hasn't chosen a location, show the message "Choose
+  location to see the weather". The weather is not loaded then (`useForecast.ts` skips the download when the
+  location is empty), so today the weather simply doesn't appear. Open: where the message goes (probably the
+  status line under the calendar, with a link to the location dialog) and whether it also shows for the aurora.
 
 ## Set for later version
 Not in the first release (owner's decision, 2026-10-07).
