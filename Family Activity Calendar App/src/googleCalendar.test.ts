@@ -7,6 +7,7 @@ import {
   loadSavedCalendars,
   mergeWeeks,
   parseEvents,
+  refreshCalendars,
   saveCalendars,
 } from "./googleCalendar.ts"
 
@@ -315,6 +316,15 @@ test("fetchCalendarList names calendars, adds Google's colours and puts the main
     { id: "family", name: "Our family", color: "#9fe1e7", textColor: "#000000", primary: false },
     { id: "holidays", name: "Holidays", color: "#16a765", textColor: "#ffffff", primary: false },
   ])
+})
+
+test("refreshCalendars brings saved colours and names up to date, and keeps the array if nothing changed", () => {
+  const saved = [FAMILY, MIA]
+  assert.equal(refreshCalendars(saved, [FAMILY, MIA]), saved)
+  assert.equal(refreshCalendars(saved, []), saved)
+
+  const recoloured = { ...FAMILY, name: "Our family", color: "#123456", textColor: "#000000" }
+  assert.deepEqual(refreshCalendars(saved, [recoloured]), [recoloured, MIA])
 })
 
 function memoryStorage(initial: Record<string, string> = {}) {

@@ -209,6 +209,32 @@ export async function fetchCalendarList(
     .sort((a, b) => Number(b.primary) - Number(a.primary))
 }
 
+/**
+ * The saved calendars with their name and colours brought up to date from Google's list, so a colour changed
+ * in Google shows here too. Calendars Google no longer lists are kept as saved. Returns the same array when
+ * nothing changed.
+ */
+export function refreshCalendars(
+  saved: CalendarSource[],
+  fromGoogle: CalendarSource[],
+): CalendarSource[] {
+  let changed = false
+  const next = saved.map((calendar) => {
+    const latest = fromGoogle.find((item) => item.id === calendar.id)
+    if (
+      !latest ||
+      (latest.name === calendar.name &&
+        latest.color === calendar.color &&
+        latest.textColor === calendar.textColor)
+    ) {
+      return calendar
+    }
+    changed = true
+    return { ...calendar, name: latest.name, color: latest.color, textColor: latest.textColor }
+  })
+  return changed ? next : saved
+}
+
 /** Loads one calendar's events for the given consecutive dates and turns them into calendar events. */
 async function fetchWeek(
   accessToken: string,
