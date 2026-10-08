@@ -814,7 +814,7 @@ function DayColumn({
                           : ""
                     }`}
                   >
-                    <Icon name="bolt" size={11} />
+                    <Icon name="plug" size={11} />
                     {formatPrice(price)}
                     {level === "high" && (
                       <span className="price-trend price-trend--high">
@@ -1130,7 +1130,7 @@ export default function App() {
             checked={showPrices}
             onChange={() => setShowPrices((value) => !value)}
           >
-            <Icon name="bolt" size={16} /> Electricity
+            <Icon name="plug" size={16} /> Electricity
           </Toggle>
           <Toggle
             checked={showAurora}
@@ -1204,7 +1204,7 @@ export default function App() {
               {showPrices && (
                 <>
                   <span className="price-legend-label">
-                    <Icon name="bolt" size={12} />
+                    <Icon name="plug" size={12} />
                     Price c/kWh incl. VAT
                   </span>
                   <b className="price-low">
