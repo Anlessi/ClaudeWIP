@@ -67,10 +67,10 @@ export function forecastWindow(today: string) {
   return Array.from({ length: 14 }, (_, index) => addDays(monday, index))
 }
 
-/** "5–11 October 2026", "28 September – 4 October 2026" or "28 December 2026 – 3 January 2027". */
 /**
- * The week as a heading. `short` fits a phone on one line: a week across two months uses
- * three-letter month names and only the last year ("29 Dec – 4 Jan 2026").
+ * "5–11 October 2026", "28 September – 4 October 2026" or "28 December 2026 – 3 January 2027".
+ * `short` fits a phone on one line: a week across two months uses three-letter month names and
+ * only the last year ("28 Dec – 3 Jan 2027").
  */
 export function formatWeekRange(weekDates: string[], short = false) {
   const first = parts(weekDates[0])
