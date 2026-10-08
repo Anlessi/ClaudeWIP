@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-08, after the pull request that shows overlapping events as one card with "+N" and a details window._
+_Last updated: 2026-10-08, after the pull request that restyles the event tiles (smaller corners, border, subtle shadow)._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -24,6 +24,8 @@ renamed "Week at a Glance" (0010).
   saved, so after every reload), a notice at the top asks to sign in, with a button.
 - Overlapping events show as one card: the earliest event, a "+N" chip, covering the whole group's time (0019).
   Every card opens a read-only details window (`EventDialog.tsx`) listing the group's events.
+  Cards have 4px corners, a 1px edge in a darker shade of the calendar colour (`--event-edge-tint`) and a small
+  shadow. The edge is an inset shadow, so it takes no room and doesn't affect `cardLayout`.
 - Event titles wrap over up to 4 rows, but only the whole rows that fit above the time (`cardLayout` in
   `events.ts`, which mirrors the card sizes in `index.css`; keep them in step). The price legend reads "< 3" and "15<" (`LOW_PRICE`, `HIGH_PRICE`)
 - A dark theme that follows the device setting until the sun/moon button in the top bar is used (0012, 0014), the design system contrast fixes and the transparent WG logo (0012)
