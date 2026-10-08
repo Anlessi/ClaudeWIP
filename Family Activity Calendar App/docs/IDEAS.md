@@ -53,8 +53,8 @@ Donations aren't mentioned, so email info@open-meteo.com. The limit is under 10,
 because browsers call it. Ask sahkotin.fi about their terms too.
 
 ### 5. Usage monitoring
-Vercel Web Analytics is done (0016). Still to do, with no personal data and no tracking cookies, so no consent
-banner: Vercel Speed Insights (included in Hobby), Sentry for errors (free tier, with tokens removed from reports), UptimeRobot or Better Stack
+Vercel Web Analytics (0016) and Speed Insights (0017) are done. Still to do, with no personal data and no tracking
+cookies, so no consent banner: Sentry for errors (free tier, with tokens removed from reports), UptimeRobot or Better Stack
 checking `/` and an `/api/health` endpoint, and the Google Cloud Console API dashboard. Don't use the Google
 Analytics option in `.figma/make/site.json`: in the EU it needs a cookie banner.
 

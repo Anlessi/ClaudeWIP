@@ -111,6 +111,9 @@ The project is set up in the Vercel dashboard (there is no `vercel.json`):
 - **Web Analytics** (visitor and page-view counts) must be switched on once in the project's **Analytics** tab
   → **Enable**. The app already loads the script (`inject()` in `src/main.tsx`); until it is enabled, the
   script's request returns a harmless 404. The dev server only logs page views to the console.
+- **Speed Insights** (how fast the page loads for visitors) must also be switched on once in the project's
+  **Speed Insights** tab → **Enable**. The app already loads the script (`injectSpeedInsights()` in
+  `src/main.tsx`); until it is enabled, nothing is collected.
 - **The site is public.** Anyone with the address sees the PIN screen, and the PIN can be read from the app's
   JavaScript. Calendar events only appear after a Google sign-in with one of the app's test users.
 - Search engines are told not to list the site (`robots` in `.figma/make/site.json`).
