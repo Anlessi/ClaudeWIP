@@ -101,6 +101,21 @@ test("cardLayout shows the note only when the title keeps at least 2 rows", () =
   })
 })
 
+test("cardLayout gives a 1-hour event two title rows on phones", () => {
+  // 48 px per hour minus the 4 px gap: 1 hour is 44 px, 2 hours 92 px.
+  assert.deepEqual(cardLayout(44, "phone"), {
+    titleRows: 2,
+    inline: false,
+    showNote: false,
+  })
+  assert.equal(cardLayout(44, "phone", { hasMore: true }).titleRows, 1)
+  assert.deepEqual(cardLayout(92, "phone", { hasNote: true }), {
+    titleRows: 4,
+    inline: false,
+    showNote: true,
+  })
+})
+
 test("formatTime writes hours as hh:mm", () => {
   assert.equal(formatTime(7), "07:00")
   assert.equal(formatTime(17.25), "17:15")

@@ -1490,13 +1490,48 @@ h1 {
     flex-basis: 3.6rem;
   }
 
+  /* Shorter hours on phones, so empty hours take less of the screen. Also in HOUR_HEIGHT in events.ts. */
+  .hour-cell,
+  .time-label {
+    height: 3rem;
+  }
+
+  .time-label {
+    padding-top: 0.35rem;
+  }
+
+  .cell-data {
+    top: 0.3rem;
+    row-gap: 0.05rem;
+  }
+
+  /* Smaller cards, so a 1-hour event still has two title rows. Sizes are also in CARD_SIZES.phone in events.ts. */
+  .event-card,
+  .days-grid--day .event-card {
+    padding: 0.3rem 0.45rem;
+  }
+
+  .event-card strong,
+  .days-grid--day .event-card strong {
+    font-size: 0.6rem;
+  }
+
+  .event-card .event-time,
+  .event-card small {
+    margin-top: 0.1rem;
+  }
+
+  .event-card--inline .event-time {
+    margin-top: 0;
+  }
+
   .days-grid--day {
     grid-template-columns: minmax(0, 1fr);
     min-width: calc(100vw - 6rem);
   }
 
   .days-grid--week {
-    min-width: 70rem;
+    min-width: 60rem;
   }
 
   .event-editor {

@@ -26,6 +26,8 @@ import { HIGH_PRICE, LOW_PRICE, formatPrice, priceLevel } from "./electricity"
 import CalendarDialog from "./CalendarDialog"
 import EventDialog from "./EventDialog"
 import {
+  CARD_INSET,
+  HOUR_HEIGHT,
   cardLayout,
   formatTime,
   groupOverlaps,
@@ -36,6 +38,7 @@ import {
 import useAurora from "./useAurora"
 import useForecast from "./useForecast"
 import useGoogleCalendar from "./useGoogleCalendar"
+import useIsPhone from "./useIsPhone"
 import usePrices from "./usePrices"
 import useToday from "./useToday"
 import {
@@ -609,13 +612,16 @@ function EventCard({
 }) {
   const [event, ...others] = events
   const calendar = calendarOf(event)
-  const height = (end - start) * 64 - 8
-  const layout = cardLayout(height, view, {
+  const size = useIsPhone() ? "phone" : "regular"
+  const hourHeight = HOUR_HEIGHT[size]
+  const inset = CARD_INSET[size]
+  const height = (end - start) * hourHeight - 2 * inset
+  const layout = cardLayout(height, size === "phone" ? "phone" : view, {
     hasNote: !!event.note,
     hasMore: others.length > 0,
   })
   const style = {
-    "--event-top": `${(start - START_HOUR) * 64 + 4}px`,
+    "--event-top": `${(start - START_HOUR) * hourHeight + inset}px`,
     "--event-height": `${height}px`,
     "--event-color": calendar.color,
     "--event-text": calendar.textColor,

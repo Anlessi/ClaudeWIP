@@ -27,3 +27,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0020](0020-compact-header-collapsible-filters-and-legend.md) | A compact header: one-line date (short months on phones when needed), Filters panel and legend collapsed by default | Accepted; location moved to the top bar by 0021 |
 | [0021](0021-location-button-in-the-top-bar.md) | The location button is in the top bar; on phones only the logo shows and the switch is smaller | Accepted |
 | [0022](0022-refresh-calendar-colours-from-google.md) | Calendar names and colours are refreshed from Google on every load | Accepted |
+| [0023](0023-compact-hour-rows-on-phones.md) | On phones: 48px hour rows, smaller event cards (two title rows in an hour) and a 60rem-wide Week view | Accepted |

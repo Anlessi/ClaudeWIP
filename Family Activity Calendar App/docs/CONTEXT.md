@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-08, after the pull request that changes the price icon to a plug._
+_Last updated: 2026-10-08, after the pull request that makes hour rows shorter on phones._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -20,7 +20,10 @@ renamed "Week at a Glance" (0010).
   button, which opens a panel with the layer toggles and the calendar button. The legend is a "Legend"
   line that expands. Both start closed on every load. On phones a week across two months shows short months
   ("28 Sep – 4 Oct 2026") so the date never wraps.
-- The day grid runs 07:00–24:00 (`START_HOUR` and `END_HOUR` in `App.tsx`); weather, prices and Google events follow it
+- The day grid runs 07:00–24:00 (`START_HOUR` and `END_HOUR` in `App.tsx`); weather, prices and Google events follow it.
+  Hour rows are 64px, and 48px on phones (≤600px), where event cards are also smaller (two title rows fit in an hour)
+  and the Week view is narrower, 60rem (0023).
+  The sizes are in the phone block of `index.css` and in `events.ts` (`HOUR_HEIGHT`, `CARD_INSET`, `CARD_SIZES`); keep them in step.
 - Hourly weather from Open-Meteo for a searched place (0005). Each hour cell shows a 20px icon and the
   temperature at 0.8rem in the main text colour (`--ink`), so it stands out; the day headings keep a 15px icon
 - Hourly Finnish electricity spot prices including VAT, from sahkotin.fi (0007), marked with a plug icon (a bolt looked like a thunderstorm next to the weather)
@@ -65,7 +68,7 @@ renamed "Week at a Glance" (0010).
 - `App.tsx` is the main UI (large, with sample data). Dialogs: `CalendarDialog.tsx`, `LocationDialog.tsx`,
   `EventDialog.tsx`. Others: `dates.ts` (week and window helpers), `useToday.ts`, `events.ts` (event types,
   overlap groups, card text layout, `formatTime`),
-  `Icon.tsx`, `PinLock.tsx`, `index.css` (all styles, including phone and tablet layouts).
+  `Icon.tsx`, `PinLock.tsx`, `useIsPhone.ts` (phone-size check), `index.css` (all styles, including phone and tablet layouts).
 - Images are ordinary Git files, not Git LFS, because Vercel does not fetch LFS files (0018).
 - **Settings** go in `.env.local` (not committed): `VITE_ACCESS_PIN`, `VITE_GOOGLE_CLIENT_ID`. See `.env.example`.
   The same variables are set in Vercel, and changing one there needs a redeploy.
@@ -86,7 +89,7 @@ renamed "Week at a Glance" (0010).
 - Colours are CSS variables with a light and a dark value in `index.css`, dark under `:root[data-theme="dark"]` (0012, 0014). Do not write colours directly in rules.
 
 ## In progress
-Shorter hour rows (48px instead of 64px) and a narrower Week view on phones (600px and below), on its own branch.
+Nothing.
 
 ## Not wanted
 The owner decided these will not be done: colouring events by a name in the title, adding events to Google
