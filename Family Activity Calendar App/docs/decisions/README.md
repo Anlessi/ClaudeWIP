@@ -20,3 +20,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0013](0013-aurora-from-noaa-kp-forecast.md) | Northern lights from NOAA's 3-day Kp forecast, shown in dark, clear hours as Low/Mid/High | Accepted |
 | [0014](0014-theme-switch-button.md) | A light/dark switch button in the top bar; follows the device until used | Accepted |
 | [0015](0015-host-on-vercel.md) | Hosted on Vercel's free Hobby plan, set up in the dashboard; address kept out of the public repository | Accepted |
+| [0016](0016-vercel-web-analytics.md) | Count visits with Vercel Web Analytics (no cookies, no banner); enabled in the Vercel dashboard | Accepted |
