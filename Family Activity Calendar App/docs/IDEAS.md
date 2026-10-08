@@ -62,6 +62,7 @@ Analytics option in `.figma/make/site.json`: in the EU it needs a cookie banner.
 Minor UI changes to give the app a finished look. The details aren't decided yet: collect the specific items
 with the owner first (for example spacing, fonts, colours, dialogs, phone layout), then do them as one or a few
 small pull requests.
+Done so far: event tiles with 4px corners, a darker edge in the calendar colour and a small shadow (2026-10-08).
 
 ## Set for later version
 Not in the first release (owner's decision, 2026-10-07).
