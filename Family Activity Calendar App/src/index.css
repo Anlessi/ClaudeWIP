@@ -738,9 +738,10 @@ h1 {
   top: 0.45rem;
   left: 0.45rem;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.15rem 0.45rem;
+  /* One reading per line on every screen, so a wider temperature never moves the price to another line. */
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
   /* Stay clear of the event cards, which start at 47% of the column (38% in the day view). */
   max-width: calc(47% - 0.7rem);
 }
@@ -791,6 +792,15 @@ h1 {
 .aurora-reading--high {
   color: var(--surface);
   background: var(--aurora);
+}
+
+/* In an hour cell the badge sits in the top-right corner, in front of any event card (z-index 5), so the
+   weather and price keep their two lines. Aurora hours are at night, when there are seldom events. */
+.cell-aurora {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  z-index: 6;
 }
 
 .aurora-legend {
@@ -1503,6 +1513,10 @@ h1 {
   .cell-data {
     top: 0.3rem;
     row-gap: 0.05rem;
+  }
+
+  .cell-aurora {
+    top: 0.3rem;
   }
 
   /* Smaller cards, so a 1-hour event still has two title rows. Sizes are also in CARD_SIZES.phone in events.ts. */
