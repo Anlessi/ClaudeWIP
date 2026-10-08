@@ -521,6 +521,21 @@ h1 {
   color: var(--on-ink);
 }
 
+/* Today's column in the week view gets a frame in the heading's colour. It is drawn on top, so it takes
+   no room, and sits under the sticky time column when scrolling sideways. */
+.days-grid--week .day-column--today {
+  position: relative;
+}
+
+.days-grid--week .day-column--today::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border: 2px solid var(--ink);
+  pointer-events: none;
+}
+
 /* The day picked in the week view, when it is not today. */
 .day-column--selected:not(.day-column--today) .day-heading {
   background: var(--accent-soft);
