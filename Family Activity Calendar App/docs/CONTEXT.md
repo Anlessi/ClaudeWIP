@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-08, after the pull request that added Vercel Speed Insights._
+_Last updated: 2026-10-08, after the pull request that moved the images out of Git LFS so the logo shows on Vercel._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -51,6 +51,7 @@ renamed "Week at a Glance" (0010).
 - `App.tsx` is the main UI (large, with sample data). Dialogs: `CalendarDialog.tsx`, `LocationDialog.tsx`.
   Others: `dates.ts` (week and window helpers), `useToday.ts`, `events.ts` (event types and overlap layout),
   `Icon.tsx`, `PinLock.tsx`, `index.css` (all styles, including phone and tablet layouts).
+- Images are ordinary Git files, not Git LFS, because Vercel does not fetch LFS files (0018).
 - **Settings** go in `.env.local` (not committed): `VITE_ACCESS_PIN`, `VITE_GOOGLE_CLIENT_ID`. See `.env.example`.
   The same variables are set in Vercel, and changing one there needs a redeploy.
 - **Tests:** Node's built-in test runner (`npx pnpm@10.34.3 run test`), files `src/*.test.ts`. Logic is tested,
