@@ -24,12 +24,14 @@ import {
 } from "./aurora"
 import { HIGH_PRICE, LOW_PRICE, formatPrice, priceLevel } from "./electricity"
 import CalendarDialog from "./CalendarDialog"
+import EventDialog from "./EventDialog"
 import {
-  layoutLanes,
+  cardLayout,
+  formatTime,
+  groupOverlaps,
   type AllDayEvent,
   type CalendarSource,
   type Event,
-  type Lane,
 } from "./events"
 import useAurora from "./useAurora"
 import useForecast from "./useForecast"
@@ -108,7 +110,12 @@ const SAMPLE_CALENDAR: CalendarSource = {
 const SAMPLE_WEEK_EVENTS: Event[][] = [
   [
     { title: "Dentist", start: 8, duration: 1, calendarId: SAMPLE_CALENDAR.id },
-    { title: "Team meeting", start: 9, duration: 1, calendarId: SAMPLE_CALENDAR.id },
+    {
+      title: "Team meeting about the spring trip",
+      start: 9,
+      duration: 1,
+      calendarId: SAMPLE_CALENDAR.id,
+    },
     { title: "Piano", start: 16, duration: 1, calendarId: SAMPLE_CALENDAR.id },
     {
       title: "Football",
@@ -119,12 +126,13 @@ const SAMPLE_WEEK_EVENTS: Event[][] = [
     },
   ],
   [
-    { title: "Pick up Leo", start: 15, duration: 1, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Pick up Leo", start: 15, duration: 0.5, calendarId: SAMPLE_CALENDAR.id },
     { title: "Late shift", start: 17, duration: 3, calendarId: SAMPLE_CALENDAR.id },
   ],
   [
     { title: "Dentist", start: 9, duration: 1, calendarId: SAMPLE_CALENDAR.id },
     { title: "Swim", start: 17, duration: 1, calendarId: SAMPLE_CALENDAR.id },
+    { title: "Call grandma", start: 17.5, duration: 0.5, calendarId: SAMPLE_CALENDAR.id },
     { title: "Yoga", start: 18, duration: 1, calendarId: SAMPLE_CALENDAR.id },
   ],
   [
@@ -573,51 +581,76 @@ function SampleNotice({
   )
 }
 
-/** An hour such as 17.25 as "17:15". */
-function formatTime(hour: number) {
-  const totalMinutes = Math.round(hour * 60)
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
+/** "17:00–18:30" */
+function timeRange(event: Event) {
+  return `${formatTime(event.start)}–${formatTime(event.start + event.duration)}`
 }
 
+/**
+ * One card for a group of overlapping events: it shows the earliest one, says how many more there are
+ * ("+1") and covers the time of the whole group. Clicking it opens the details of every event in it.
+ */
 function EventCard({
-  event,
-  calendar,
-  lane,
+  events,
+  start,
+  end,
+  view,
+  calendarOf,
+  onOpen,
 }: {
-  event: Event
-  calendar: CalendarSource
-  lane: Lane
+  /** Earliest first; the first one is shown. */
+  events: Event[]
+  /** Start and end of the whole group, in hours. */
+  start: number
+  end: number
+  view: ViewMode
+  calendarOf: (event: Event) => CalendarSource
+  onOpen: () => void
 }) {
+  const [event, ...others] = events
+  const calendar = calendarOf(event)
+  const height = (end - start) * 64 - 8
+  const layout = cardLayout(height, view, {
+    hasNote: !!event.note,
+    hasMore: others.length > 0,
+  })
   const style = {
-    "--event-top": `${(event.start - START_HOUR) * 64 + 4}px`,
-    "--event-height": `${event.duration * 64 - 8}px`,
+    "--event-top": `${(start - START_HOUR) * 64 + 4}px`,
+    "--event-height": `${height}px`,
     "--event-color": calendar.color,
     "--event-text": calendar.textColor,
-    "--event-lane": lane.lane,
-    "--event-lanes": lane.lanes,
-    // Events that share the width take more of the column (over the weather and price readings),
-    // otherwise each one is too narrow to read.
-    ...(lane.lanes > 1 && { "--lane-left": lane.lanes === 2 ? "30%" : "10%" }),
+    "--title-lines": layout.titleRows,
   } as React.CSSProperties
+  const more = others.length > 0 && (
+    <span className="event-more">+{others.length}</span>
+  )
 
   return (
-    <div
-      className="event-card"
+    <button
+      type="button"
+      className={`event-card ${layout.inline ? "event-card--inline" : ""}`}
       style={style}
-      title={[
-        `${event.title} (${calendar.name})`,
-        `${formatTime(event.start)}–${formatTime(event.start + event.duration)}`,
-        event.note,
-      ]
-        .filter(Boolean)
-        .join("\n")}
+      onClick={onOpen}
+      aria-label={`${event.title}, ${timeRange(event)}${
+        others.length > 0
+          ? `, and ${others.length} more ${others.length === 1 ? "event" : "events"}`
+          : ""
+      }. Show details`}
+      title={events
+        .map((item) =>
+          [`${item.title} (${calendarOf(item).name})`, timeRange(item), item.note]
+            .filter(Boolean)
+            .join("\n"),
+        )
+        .join("\n\n")}
     >
       <strong>{event.title}</strong>
-      <span>{formatTime(event.start)}</span>
-      {event.note && <small>{event.note}</small>}
-    </div>
+      <span className="event-time">
+        {formatTime(event.start)}
+        {more}
+      </span>
+      {layout.showNote && <small>{event.note}</small>}
+    </button>
   )
 }
 
@@ -677,6 +710,8 @@ function DayColumn({
   isToday,
   selected,
   onSelect,
+  view,
+  onOpenEvents,
 }: {
   day: CalendarDay
   events: Event[]
@@ -696,8 +731,13 @@ function DayColumn({
   isToday: boolean
   selected: boolean
   onSelect: () => void
+  view: ViewMode
+  /** Opens the details of a card's events. */
+  onOpenEvents: (events: Event[]) => void
 }) {
-  const lanes = layoutLanes(events)
+  const groups = groupOverlaps(events)
+  const calendarOf = (event: Event) =>
+    calendars.get(event.calendarId) ?? SAMPLE_CALENDAR
 
   return (
     <section
@@ -805,14 +845,20 @@ function DayColumn({
           )
         })}
         <div className="events-layer">
-          {events.map((event, eventIndex) => (
-            <EventCard
-              event={event}
-              calendar={calendars.get(event.calendarId) ?? SAMPLE_CALENDAR}
-              lane={lanes[eventIndex]}
-              key={`${event.title}-${event.start}-${eventIndex}`}
-            />
-          ))}
+          {groups.map((group) => {
+            const groupEvents = group.events.map((index) => events[index])
+            return (
+              <EventCard
+                events={groupEvents}
+                start={group.start}
+                end={group.end}
+                view={view}
+                calendarOf={calendarOf}
+                onOpen={() => onOpenEvents(groupEvents)}
+                key={`${groupEvents[0].title}-${group.start}-${group.events[0]}`}
+              />
+            )
+          })}
         </div>
       </div>
     </section>
@@ -831,6 +877,11 @@ export default function App() {
   // The sample events are only shown until Google Calendar is connected.
   const calendarEvents = useMemo(() => sampleEvents(today), [today])
   const [calendarDialogOpen, setCalendarDialogOpen] = useState(false)
+  // The event card whose details are open, if any.
+  const [openEvents, setOpenEvents] = useState<{
+    day: CalendarDay
+    events: Event[]
+  } | null>(null)
   const [location, setLocation] = useState<SavedLocation | null>(
     loadSavedLocation,
   )
@@ -1179,6 +1230,8 @@ export default function App() {
               selected={view === "week" && day.iso === selectedDate}
               showPrices={showPrices}
               showWeather={showWeather}
+              view={view}
+              onOpenEvents={(events) => setOpenEvents({ day, events })}
             />
           ))}
         </div>
@@ -1249,6 +1302,17 @@ export default function App() {
           onSelect={google.selectCalendars}
           onDisconnect={google.disconnect}
           onClose={() => setCalendarDialogOpen(false)}
+        />
+      )}
+
+      {openEvents && (
+        <EventDialog
+          dayLabel={`${openEvents.day.short} ${openEvents.day.date} ${openEvents.day.month}`}
+          events={openEvents.events}
+          calendarOf={(event) =>
+            calendarsById.get(event.calendarId) ?? SAMPLE_CALENDAR
+          }
+          onClose={() => setOpenEvents(null)}
         />
       )}
     </main>

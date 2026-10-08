@@ -729,7 +729,7 @@ h1 {
 }
 
 .events-layer {
-  /* The cards use the right part of the day; overlapping events share it side by side. */
+  /* The cards use the right part of the day. Overlapping events share one card ("+1"). */
   --lane-left: 47%;
   --lane-right: 0%;
   position: absolute;
@@ -737,52 +737,99 @@ h1 {
   pointer-events: none;
 }
 
+/* Sizes here are also in CARD_SIZES in events.ts, which works out how many title rows fit. */
 .event-card {
   position: absolute;
   top: var(--event-top);
-  left: calc(
-    var(--lane-left) + (100% - var(--lane-left) - var(--lane-right)) *
-      var(--event-lane, 0) / var(--event-lanes, 1)
-  );
-  width: calc(
-    (100% - var(--lane-left) - var(--lane-right)) / var(--event-lanes, 1) -
-      0.15rem
-  );
+  left: var(--lane-left);
+  width: calc(100% - var(--lane-left) - var(--lane-right) - 0.15rem);
   z-index: 5;
   min-height: 2.3rem;
   height: var(--event-height);
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   padding: 0.4rem 0.48rem;
   color: var(--event-text, white);
+  font: inherit;
   text-align: left;
   border: 0;
   border-radius: 0.48rem;
   background: var(--event-color);
   box-shadow: var(--shadow-event);
   overflow: hidden;
-  cursor: default;
+  cursor: pointer;
   pointer-events: auto;
 }
 
+.event-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .event-card strong {
+  /* Only whole rows: --title-lines is the number that fit above the time, so none is cut or covered. */
+  flex: none;
   overflow: hidden;
   font-size: 0.68rem;
   line-height: 1.15;
-  /* The title wraps over several rows; the card clips whatever does not fit. */
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
+  -webkit-line-clamp: var(--title-lines, 4);
+  line-clamp: var(--title-lines, 4);
   overflow-wrap: anywhere;
 }
 
-.event-card span,
+.event-card .event-time,
 .event-card small {
+  flex: none;
   margin-top: 0.15rem;
   font-size: 0.58rem;
   line-height: 1.15;
   opacity: 0.92;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-time {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* How many more events overlap the one shown. The card's colours swapped, so it can't be missed. */
+.event-more {
+  flex: none;
+  /* Sizes are also in MORE_ROW in events.ts. */
+  padding: 0.1rem 0.38rem;
+  border-radius: 999px;
+  color: var(--event-color);
+  background: var(--event-text, white);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* The time row dims its text a little; the chip stays at full strength. */
+.event-card .event-time:has(.event-more) {
+  opacity: 1;
+}
+
+/* Too short for the time on its own row: title and time share one row. */
+.event-card--inline {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.event-card--inline strong {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.event-card--inline .event-time {
+  margin-top: 0;
 }
 
 .days-grid--day .day-heading {
@@ -1150,6 +1197,54 @@ h1 {
 .location-result small {
   color: var(--muted);
   font-size: 0.74rem;
+}
+
+.event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 1.25rem 0;
+  list-style: none;
+}
+
+.event-details li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+}
+
+.event-details li > span:last-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.event-details strong {
+  overflow-wrap: anywhere;
+}
+
+.event-details-swatch {
+  flex: none;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-top: 0.2rem;
+  border-radius: 0.3rem;
+}
+
+.event-details-time {
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.event-details small,
+.event-details-note {
+  color: var(--muted);
+  font-size: 0.76rem;
 }
 
 @media (max-width: 900px) {

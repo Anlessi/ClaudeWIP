@@ -9,7 +9,8 @@ decided the app will only use the read-only Google calendar, so events are manag
 
 ## Decision
 - Removed the "Add event" button, the event dialog and the edit and delete handling.
-- Event cards are plain, non-clickable cards (hover for details).
+- Event cards are plain, non-clickable cards (hover for details). Since 0019, a card opens a read-only details
+  window; still nothing can be added or edited.
 - The sample events stay, read-only, so the app still shows something before Google is connected.
 
 ## Alternatives considered
