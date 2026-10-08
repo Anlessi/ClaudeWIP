@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-08, after the pull request that keeps weather and price on two lines in every hour._
+_Last updated: 2026-10-08, after the pull request that adds security headers in `vercel.json`._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -53,6 +53,9 @@ renamed "Week at a Glance" (0010).
   (Analytics → Enable); until then nothing is counted.
 - Vercel Speed Insights measures load speed for real visitors, also with no cookies (0017). The owner switches
   it on in the dashboard (Speed Insights → Enable); until then nothing is collected.
+- Security headers from `vercel.json` (0025): a strict Content-Security-Policy that allows only our own site and the
+  services in the table below, frame blocking, a referrer policy, a permissions policy and nosniff. **Any new
+  outside service must be added to the CSP.** The theme script is `public/theme.js` (no inline scripts).
 
 ## How it's built
 - React 19, TypeScript, Vite 8, Tailwind CSS v4, from a Figma Make export (0001). Node 22, pnpm 10.34.3 via
@@ -79,7 +82,9 @@ renamed "Week at a Glance" (0010).
   `npx tsc --noEmit` and `vite build` before a pull request. Don't run oxfmt over `App.tsx` or `Icon.tsx`
   as they are: on 2026-10-08 it added blank lines and broke `App.tsx` (these files aren't oxfmt-formatted).
 - **Running:** the `family-calendar` configuration in `.claude/launch.json` (dev server, port 8443), or
-  `family-calendar-installable` (production preview with service worker, port 4173). Google sign-in works at
+  `family-calendar-installable` (production preview with service worker and the security headers, port 4173), or
+  `family-calendar-installable-google` (the same on port 8443, so Google sign-in works with the headers on; stop the
+  dev server first). Both serve the last `vite build`, so build first. Google sign-in works at
   `http://localhost:8443` (and on the Vercel address once it is added to Google), not at `192.168.x.x` (0008).
   On a phone, use the Vercel address.
 

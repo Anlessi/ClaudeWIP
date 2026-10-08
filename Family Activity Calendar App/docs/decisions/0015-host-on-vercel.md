@@ -1,6 +1,6 @@
 # 0015: Host the app on Vercel (free Hobby plan)
 
-- **Status:** Accepted (2026-10-07)
+- **Status:** Accepted (2026-10-07); the `vercel.json` part is updated by 0025 (2026-10-08)
 - **Links:** Anlessi/ClaudeWIP#31, 0002, 0003, 0004, 0008; README "Hosting on Vercel"
 
 ## Context

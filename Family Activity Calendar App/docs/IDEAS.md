@@ -30,7 +30,13 @@ Sponsors), (3) whether Stripe and paid access are dropped for good. Paid access 
   `googleCalendar.ts` barely changes, and `useGoogleCalendar.ts` gets its token from `/api/auth/token`.
   Changes 0002 (a small server, for sign-in only) and replaces 0008.
 - **Security:** the client secret and the cookie key are Vercel variables, never `VITE_*`. Tokens are never logged.
-  Add a rate limit on `/api/auth/token` and security headers (CSP, frame blocking) in a `vercel.json`.
+  Add a rate limit on `/api/auth/token`. The security headers are done (0025); check the CSP still allows
+  everything once the functions exist.
+- **Hiding the PIN until then (discussed 2026-10-08, parked by the owner):** the PIN is in the JavaScript, so anyone
+  can read it from the live site. To really hide it: a Vercel function checks the PIN against a server-only
+  variable and sets a signed `HttpOnly` cookie, and Vercel Routing Middleware serves nothing without that cookie.
+  It needs a longer passphrase or a limit on wrong tries (6 digits can be guessed). A hashed PIN in the app was
+  rejected: 6 digits crack in under a second. Not worth it if the PIN is removed soon.
 - **PWA catch:** the service worker sends every page request to `index.html`. Add
   `navigateFallbackDenylist: [/^\/api\//]` in `vite.config.ts`, or the OAuth callback is broken.
 - **Watch out:** in Testing mode Google refresh tokens expire after 7 days, so this only works fully after item 3.
@@ -57,6 +63,15 @@ Vercel Web Analytics (0016) and Speed Insights (0017) are done. Still to do, wit
 cookies, so no consent banner: Sentry for errors (free tier, with tokens removed from reports), UptimeRobot or Better Stack
 checking `/` and an `/api/health` endpoint, and the Google Cloud Console API dashboard. Don't use the Google
 Analytics option in `.figma/make/site.json`: in the EU it needs a cookie banner.
+Plan agreed on 2026-10-08:
+- **Owner, in dashboards:** switch on Analytics and Speed Insights in the Vercel project if not done yet (watch
+  visitors, countries and referrers for strangers; it counts PIN-screen visits too). Know the Firewall tab
+  (block a country or address, Attack Challenge Mode). An UptimeRobot "Keyword" monitor on the Vercel address
+  for `Week at a Glance`, every 5 minutes, alerts by email. Check Vercel Usage monthly (Hobby pauses, never bills).
+- **Sentry (needs the owner's OK for `@sentry/react`):** EU data region, started in `main.tsx` only on the live
+  site, DSN in `VITE_SENTRY_DSN` (not secret), no session replay, `sendDefaultPii: false`, a filter that removes
+  tokens and event titles from reports, low or no performance sampling. Add `https://*.ingest.de.sentry.io` to
+  `connect-src` in the CSP (0025).
 
 ### 6. Final polish of the look and feel (added 2026-10-07)
 Minor UI changes to give the app a finished look. The details aren't decided yet: collect the specific items

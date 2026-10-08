@@ -5,15 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><!-- figma:title --></title>
-    <script>
-      // Set the theme before the first paint so there is no flash.
-      try {
-        var t = localStorage.getItem("familyflow.theme")
-        if (t !== "light" && t !== "dark")
-          t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-        document.documentElement.dataset.theme = t
-      } catch (e) {}
-    </script>
+    <!-- Sets the theme before the first paint so there is no flash (a file, because the CSP blocks inline scripts). -->
+    <script src="/theme.js"></script>
     <!-- figma:head-end -->
   </head>
   <body>
