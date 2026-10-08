@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-08, after the pull request that restyles the event tiles (smaller corners, border, subtle shadow)._
+_Last updated: 2026-10-08, after the pull request that frames today's column in the Week view._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -11,7 +11,9 @@ hourly weather and electricity prices. The owner designed it in Figma and uses i
 renamed "Week at a Glance" (0010).
 
 ## What's built (on `main`)
-- Week and Day views that follow the real date, with weeks running Monday to Sunday (0006)
+- Week and Day views that follow the real date, with weeks running Monday to Sunday (0006).
+  Today has a dark heading, and in the Week view a 2px frame in the same colour (`--ink`) around the whole
+  column, drawn as an overlay (`::after`) so it takes no room. The Day view has no frame.
 - The day grid runs 07:00–24:00 (`START_HOUR` and `END_HOUR` in `App.tsx`); weather, prices and Google events follow it
 - Hourly weather from Open-Meteo for a searched place (0005)
 - Hourly Finnish electricity spot prices including VAT, from sahkotin.fi (0007)
