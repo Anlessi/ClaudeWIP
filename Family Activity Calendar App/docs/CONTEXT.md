@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-08, after the pull request that compacts the calendar header._
+_Last updated: 2026-10-08, after the pull request that moves the location button to the top bar._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -14,8 +14,10 @@ renamed "Week at a Glance" (0010).
 - Week and Day views that follow the real date, with weeks running Monday to Sunday (0006).
   Today has a dark heading, and in the Week view a 2px frame in the same colour (`--ink`) around the whole
   column, drawn as an overlay (`::after`) so it takes no room. The Day view has no frame.
+- The top bar holds the logo and title, Day/Week, a **location** button (pin + place name) and the theme button
+  (0021). On phones the title text is hidden and the switch is smaller, so the row fits at 360px.
 - A compact header on every screen size (0020): the date stays on one line next to ‹ Today › and a **Filters**
-  button, which opens a panel with the location, layer toggles and calendar buttons. The legend is a "Legend"
+  button, which opens a panel with the layer toggles and the calendar button. The legend is a "Legend"
   line that expands. Both start closed on every load. On phones a week across two months shows short months
   ("28 Sep – 4 Oct 2026") so the date never wraps.
 - The day grid runs 07:00–24:00 (`START_HOUR` and `END_HOUR` in `App.tsx`); weather, prices and Google events follow it
