@@ -11,7 +11,7 @@ export type IconName =
   | "moon"
   | "rain"
   | "snow"
-  | "bolt"
+  | "plug"
   | "check"
   | "arrow-up"
   | "arrow-down"
@@ -53,7 +53,8 @@ const SHAPES: Record<IconName, ReactNode> = {
     </>
   ),
   snow: <path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9" />,
-  bolt: <path d="m13 2-8 12h7l-1 8 8-12h-7l1-8Z" />,
+  // A power plug with its cord, for electricity prices (a bolt looked like a thunderstorm next to the weather).
+  plug: <path d="M9 2v5M15 2v5M6 7h12v3a6 6 0 0 1-12 0V7ZM12 16v6" />,
   check: <path d="m5 12 4 4L19 6" />,
   "arrow-up": <path d="M12 19V5M6.5 10.5 12 5l5.5 5.5" />,
   "arrow-down": <path d="M12 5v14M17.5 13.5 12 19l-5.5-5.5" />,
