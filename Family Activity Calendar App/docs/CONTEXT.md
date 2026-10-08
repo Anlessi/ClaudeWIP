@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-08, after the pull request that refreshes Google calendar colours._
+_Last updated: 2026-10-08, after the pull request that changes the price icon to a plug._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -23,7 +23,7 @@ renamed "Week at a Glance" (0010).
 - The day grid runs 07:00–24:00 (`START_HOUR` and `END_HOUR` in `App.tsx`); weather, prices and Google events follow it
 - Hourly weather from Open-Meteo for a searched place (0005). Each hour cell shows a 20px icon and the
   temperature at 0.8rem in the main text colour (`--ink`), so it stands out; the day headings keep a 15px icon
-- Hourly Finnish electricity spot prices including VAT, from sahkotin.fi (0007)
+- Hourly Finnish electricity spot prices including VAT, from sahkotin.fi (0007), marked with a plug icon (a bolt looked like a thunderstorm next to the weather)
 - Northern lights for the next 3 days from NOAA's Kp forecast (0013): a Low/Mid/High chip in dark hours with
   at most 60 % cloud when Kp reaches the level needed at the place, an icon in the day heading, an "Aurora level"
   legend and a "tonight" banner at the top. "Northern lights" toggle, on by default
@@ -86,7 +86,7 @@ renamed "Week at a Glance" (0010).
 - Colours are CSS variables with a light and a dark value in `index.css`, dark under `:root[data-theme="dark"]` (0012, 0014). Do not write colours directly in rules.
 
 ## In progress
-Nothing.
+Shorter hour rows (48px instead of 64px) and a narrower Week view on phones (600px and below), on its own branch.
 
 ## Not wanted
 The owner decided these will not be done: colouring events by a name in the title, adding events to Google
