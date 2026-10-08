@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-07, after the pull request that documented hosting on Vercel._
+_Last updated: 2026-10-08, after the pull request that added Vercel Web Analytics._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -30,6 +30,8 @@ renamed "Week at a Glance" (0010).
   dashboard (table in the README), and the address is there too, kept out of this public repository. The Vercel
   address is not yet in Google's Authorized JavaScript origins, so Google sign-in on the hosted site doesn't
   work until the owner adds it.
+- Vercel Web Analytics counts visits, with no cookies (0016). The owner switches it on in the dashboard
+  (Analytics → Enable); until then nothing is counted.
 
 ## How it's built
 - React 19, TypeScript, Vite 8, Tailwind CSS v4, from a Figma Make export (0001). Node 22, pnpm 10.34.3 via
@@ -80,7 +82,7 @@ monitored. Hosting is done (0015). The proposed order (details in `IDEAS.md`):
 2. Stay signed in to Google with small Vercel functions and an encrypted cookie, and remove the PIN.
 3. Publish and verify the Google app (start early).
 4. A donation link (replaces the Stripe idea).
-5. Usage monitoring.
+5. Usage monitoring: Web Analytics is done (0016); Speed Insights, error reports and uptime checks remain.
 6. Final polish of the look and feel.
 
 Open questions: custom domain or not, which donation platform, and whether paid access is dropped for good.
