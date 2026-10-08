@@ -26,3 +26,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0019](0019-one-card-per-overlap-with-details.md) | Overlapping events show as one card with "+N"; every card opens a read-only details window | Accepted |
 | [0020](0020-compact-header-collapsible-filters-and-legend.md) | A compact header: one-line date (short months on phones when needed), Filters panel and legend collapsed by default | Accepted; location moved to the top bar by 0021 |
 | [0021](0021-location-button-in-the-top-bar.md) | The location button is in the top bar; on phones only the logo shows and the switch is smaller | Accepted |
+| [0022](0022-refresh-calendar-colours-from-google.md) | Calendar names and colours are refreshed from Google on every load | Accepted |
