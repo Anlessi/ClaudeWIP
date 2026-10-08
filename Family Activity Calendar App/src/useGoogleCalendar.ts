@@ -9,8 +9,10 @@ import {
 import type { CalendarSource } from "./events"
 import {
   GoogleAccessError,
+  fetchCalendarList,
   fetchWeeks,
   loadSavedCalendars,
+  refreshCalendars,
   saveCalendars,
   type GoogleWeek,
 } from "./googleCalendar"
@@ -89,6 +91,21 @@ export default function useGoogleCalendar(
       }
 
       try {
+        // Pick up colour and name changes made in Google. Best effort: if it fails, keep what is saved.
+        // A change updates `calendars`, which restarts this effect once with the new colours.
+        try {
+          const latest = await fetchCalendarList(accessToken, controller.signal)
+          const refreshed = refreshCalendars(calendars, latest)
+          if (refreshed !== calendars) {
+            saveCalendars(refreshed)
+            setCalendars(refreshed)
+            return
+          }
+        } catch (failure: unknown) {
+          if (failure instanceof GoogleAccessError) throw failure
+          if (controller.signal.aborted) return
+        }
+
         const week = await fetchWeeks(
           accessToken,
           calendars,

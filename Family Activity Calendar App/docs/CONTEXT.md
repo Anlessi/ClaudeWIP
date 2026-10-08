@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-08, after the pull request that moves the location button to the top bar._
+_Last updated: 2026-10-08, after the pull request that refreshes Google calendar colours._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -28,7 +28,7 @@ renamed "Week at a Glance" (0010).
   at most 60 % cloud when Kp reaches the level needed at the place, an icon in the day heading, an "Aurora level"
   legend and a "tonight" banner at the top. "Northern lights" toggle, on by default
 - Real events from one or more Google calendars, read-only. The legend lists the calendars in their Google
-  colours (0008, 0009). Before connecting, read-only sample events are shown. There is no add, edit or delete (0011). A green notice at the top
+  colours (0008, 0009), which are refreshed from Google on every load, so a colour changed in Google follows (0022). Before connecting, read-only sample events are shown. There is no add, edit or delete (0011). A green notice at the top
   of the page says so and links to "Connect Google Calendar". When calendars are saved but Google needs a new sign-in (the token is never
   saved, so after every reload), a notice at the top asks to sign in, with a button.
 - Overlapping events show as one card: the earliest event, a "+N" chip, covering the whole group's time (0019).
