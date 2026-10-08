@@ -1003,30 +1003,42 @@ export default function App() {
       <header className="topbar">
         <div className="brand">
           <img className="brand-logo" src={logo} alt="" />
-          <span>Week at a Glance</span>
+          <span className="brand-name">Week at a Glance</span>
         </div>
         <div className="topbar-actions">
-        <nav className="view-switcher" aria-label="Calendar view">
+          <nav className="view-switcher" aria-label="Calendar view">
+            <Button
+              className={
+                view === "day" ? "view-option view-option--active" : "view-option"
+              }
+              onClick={() => setView("day")}
+            >
+              Day
+            </Button>
+            <Button
+              className={
+                view === "week"
+                  ? "view-option view-option--active"
+                  : "view-option"
+              }
+              onClick={() => setView("week")}
+            >
+              Week
+            </Button>
+          </nav>
           <Button
-            className={
-              view === "day" ? "view-option view-option--active" : "view-option"
+            className="topbar-location"
+            label={
+              location
+                ? `Change location, currently ${location.name}`
+                : "Set location"
             }
-            onClick={() => setView("day")}
+            onClick={() => setLocationDialogOpen(true)}
           >
-            Day
+            <Icon name="pin" size={16} />
+            <span>{location ? location.name : "Set location"}</span>
           </Button>
-          <Button
-            className={
-              view === "week"
-                ? "view-option view-option--active"
-                : "view-option"
-            }
-            onClick={() => setView("week")}
-          >
-            Week
-          </Button>
-        </nav>
-        <ThemeToggle />
+          <ThemeToggle />
         </div>
       </header>
 
@@ -1108,18 +1120,6 @@ export default function App() {
 
       {filtersOpen && (
         <div className="filters filters-panel" id="filters-panel">
-          <Button
-            className="filter-toggle location-button"
-            label={
-              location
-                ? `Change location, currently ${location.name}`
-                : "Set location"
-            }
-            onClick={() => setLocationDialogOpen(true)}
-          >
-            <Icon name="pin" size={16} />
-            <span>{location ? location.name : "Set location"}</span>
-          </Button>
           <Toggle
             checked={showWeather}
             onChange={() => setShowWeather((value) => !value)}

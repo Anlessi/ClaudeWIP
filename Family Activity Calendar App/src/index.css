@@ -164,6 +164,40 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0;
+}
+
+/* Shrinks before anything else in the top bar; a long place name ends with "…". */
+.topbar-location {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 1 auto;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 13rem;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  color: var(--ink);
+  background: var(--switcher-track);
+  font-size: 0.86rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.topbar-location:hover {
+  background: var(--hover);
+}
+
+.topbar-location svg {
+  flex: none;
+}
+
+.topbar-location span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .theme-toggle {
@@ -1340,6 +1374,49 @@ h1 {
 
   .brand {
     font-size: 0.92rem;
+  }
+
+  /* On a phone the top bar shows only the logo so the location fits; the name stays for screen readers. */
+  .brand-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .brand-logo {
+    height: 2rem;
+  }
+
+  .topbar-actions {
+    gap: 0.4rem;
+  }
+
+  .view-switcher {
+    gap: 0.15rem;
+    padding: 0.2rem;
+    border-radius: 0.6rem;
+  }
+
+  .view-option {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  .theme-toggle {
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 0.6rem;
+  }
+
+  .topbar-location {
+    max-width: 9.5rem;
+    height: 2.15rem;
+    padding: 0 0.55rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
   }
 
   .calendar-header {
