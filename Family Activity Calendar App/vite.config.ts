@@ -5,6 +5,13 @@ import { VitePWA } from "vite-plugin-pwa"
 import path from "node:path"
 
 import siteConfiguration from "./.figma/make/site.json"
+import vercelConfiguration from "./vercel.json"
+
+// The security headers Vercel sends (vercel.json), also sent by `vite preview` so the installable
+// test version behaves like the live site. The dev server leaves them out: it needs inline scripts.
+const securityHeaders = Object.fromEntries(
+  vercelConfiguration.headers[0].headers.map(({ key, value }) => [key, value]),
+)
 
 // Vite config — https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -65,6 +72,7 @@ export default defineConfig(({ mode }) => {
     preview: {
       host: process.env.FIGMA_DEV_SERVER_HOST || "0.0.0.0",
       port: parseInt(process.env.PORT || "8443"),
+      headers: securityHeaders,
     },
   }
 })
