@@ -792,7 +792,7 @@ function DayColumn({
                     <WeatherIcon
                       kind={hourWeather.kind}
                       night={hourWeather.night}
-                      size={15}
+                      size={20}
                     />
                     {hourWeather.temp}°
                   </span>
