@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-08, after the pull request that makes the hour-cell weather bigger._
+_Last updated: 2026-10-08, after the pull request that compacts the calendar header._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -14,6 +14,10 @@ renamed "Week at a Glance" (0010).
 - Week and Day views that follow the real date, with weeks running Monday to Sunday (0006).
   Today has a dark heading, and in the Week view a 2px frame in the same colour (`--ink`) around the whole
   column, drawn as an overlay (`::after`) so it takes no room. The Day view has no frame.
+- A compact header on every screen size (0020): the date stays on one line next to ‹ Today › and a **Filters**
+  button, which opens a panel with the location, layer toggles and calendar buttons. The legend is a "Legend"
+  line that expands. Both start closed on every load. On phones a week across two months shows short months
+  ("28 Sep – 4 Oct 2026") so the date never wraps.
 - The day grid runs 07:00–24:00 (`START_HOUR` and `END_HOUR` in `App.tsx`); weather, prices and Google events follow it
 - Hourly weather from Open-Meteo for a searched place (0005). Each hour cell shows a 20px icon and the
   temperature at 0.8rem in the main text colour (`--ink`), so it stands out; the day headings keep a 15px icon
@@ -65,7 +69,8 @@ renamed "Week at a Glance" (0010).
   The same variables are set in Vercel, and changing one there needs a redeploy.
 - **Tests:** Node's built-in test runner (`npx pnpm@10.34.3 run test`), files `src/*.test.ts`. Logic is tested,
   and the UI is checked in the browser preview. Don't add test dependencies without asking. Also run
-  `npx tsc --noEmit` and `vite build` before a pull request.
+  `npx tsc --noEmit` and `vite build` before a pull request. Don't run oxfmt over `App.tsx` or `Icon.tsx`
+  as they are: on 2026-10-08 it added blank lines and broke `App.tsx` (these files aren't oxfmt-formatted).
 - **Running:** the `family-calendar` configuration in `.claude/launch.json` (dev server, port 8443), or
   `family-calendar-installable` (production preview with service worker, port 4173). Google sign-in works at
   `http://localhost:8443` (and on the Vercel address once it is added to Google), not at `192.168.x.x` (0008).

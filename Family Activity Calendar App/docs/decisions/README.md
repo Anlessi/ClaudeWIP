@@ -24,3 +24,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0017](0017-vercel-speed-insights.md) | Measure load speed with Vercel Speed Insights (no cookies); enabled in the Vercel dashboard | Accepted |
 | [0018](0018-images-in-git-not-lfs.md) | Images are ordinary Git files, not Git LFS (Vercel didn't deploy the LFS logo) | Accepted |
 | [0019](0019-one-card-per-overlap-with-details.md) | Overlapping events show as one card with "+N"; every card opens a read-only details window | Accepted |
+| [0020](0020-compact-header-collapsible-filters-and-legend.md) | A compact header: one-line date (short months on phones when needed), Filters panel and legend collapsed by default | Accepted |

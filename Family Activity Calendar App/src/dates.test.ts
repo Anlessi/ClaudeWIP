@@ -76,6 +76,13 @@ test("formatWeekRange", () => {
   )
 })
 
+test("formatWeekRange short", () => {
+  // A week within one month is already short enough.
+  assert.equal(formatWeekRange(weekOf("2026-10-14"), true), "12–18 October 2026")
+  assert.equal(formatWeekRange(weekOf("2026-09-30"), true), "28 Sep – 4 Oct 2026")
+  assert.equal(formatWeekRange(weekOf("2027-01-01"), true), "28 Dec – 3 Jan 2027")
+})
+
 test("msUntilNextMidnight points just past the next local midnight", () => {
   const evening = new Date(2026, 9, 6, 23, 59, 0)
   assert.equal(msUntilNextMidnight(evening), 61_000)
