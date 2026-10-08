@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-08, after the pull request that makes hour rows shorter on phones._
+_Last updated: 2026-10-08, after the pull request that keeps weather and price on two lines in every hour._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -25,10 +25,12 @@ renamed "Week at a Glance" (0010).
   and the Week view is narrower, 60rem (0023).
   The sizes are in the phone block of `index.css` and in `events.ts` (`HOUR_HEIGHT`, `CARD_INSET`, `CARD_SIZES`); keep them in step.
 - Hourly weather from Open-Meteo for a searched place (0005). Each hour cell shows a 20px icon and the
-  temperature at 0.8rem in the main text colour (`--ink`), so it stands out; the day headings keep a 15px icon
+  temperature at 0.8rem in the main text colour (`--ink`), so it stands out; the day headings keep a 15px icon.
+  In every hour the weather and the price are always on two lines, on any screen size (0024)
 - Hourly Finnish electricity spot prices including VAT, from sahkotin.fi (0007), marked with a plug icon (a bolt looked like a thunderstorm next to the weather)
 - Northern lights for the next 3 days from NOAA's Kp forecast (0013): a Low/Mid/High chip in dark hours with
-  at most 60 % cloud when Kp reaches the level needed at the place, an icon in the day heading, an "Aurora level"
+  at most 60 % cloud when Kp reaches the level needed at the place (in the hour's top-right corner, in front of
+  any event, 0024), an icon in the day heading, an "Aurora level"
   legend and a "tonight" banner at the top. "Northern lights" toggle, on by default
 - Real events from one or more Google calendars, read-only. The legend lists the calendars in their Google
   colours (0008, 0009), which are refreshed from Google on every load, so a colour changed in Google follows (0022). Before connecting, read-only sample events are shown. There is no add, edit or delete (0011). A green notice at the top
