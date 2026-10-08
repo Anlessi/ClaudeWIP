@@ -92,7 +92,8 @@ an `https://…vercel.app` address. The address is in the Vercel dashboard; it i
 public repository. Every merge into `main` updates the site automatically. Other branches get a "preview" address
 that only the Vercel account owner can open.
 
-The project is set up in the Vercel dashboard (there is no `vercel.json`):
+The project is set up in the Vercel dashboard. The only file setting is `vercel.json`, which sends the security
+headers (CSP and others, see decision 0025):
 
 | Setting | Value |
 |---|---|

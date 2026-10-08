@@ -19,7 +19,7 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0012](0012-dark-theme-follows-the-device.md) | Dark theme follows the device setting; the install icon is dark | Accepted |
 | [0013](0013-aurora-from-noaa-kp-forecast.md) | Northern lights from NOAA's 3-day Kp forecast, shown in dark, clear hours as Low/Mid/High | Accepted |
 | [0014](0014-theme-switch-button.md) | A light/dark switch button in the top bar; follows the device until used | Accepted |
-| [0015](0015-host-on-vercel.md) | Hosted on Vercel's free Hobby plan, set up in the dashboard; address kept out of the public repository | Accepted |
+| [0015](0015-host-on-vercel.md) | Hosted on Vercel's free Hobby plan, set up in the dashboard; address kept out of the public repository | Accepted; `vercel.json` added by 0025 |
 | [0016](0016-vercel-web-analytics.md) | Count visits with Vercel Web Analytics (no cookies, no banner); enabled in the Vercel dashboard | Accepted |
 | [0017](0017-vercel-speed-insights.md) | Measure load speed with Vercel Speed Insights (no cookies); enabled in the Vercel dashboard | Accepted |
 | [0018](0018-images-in-git-not-lfs.md) | Images are ordinary Git files, not Git LFS (Vercel didn't deploy the LFS logo) | Accepted |
@@ -29,3 +29,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0022](0022-refresh-calendar-colours-from-google.md) | Calendar names and colours are refreshed from Google on every load | Accepted |
 | [0023](0023-compact-hour-rows-on-phones.md) | On phones: 48px hour rows, smaller event cards (two title rows in an hour) and a 60rem-wide Week view | Accepted |
 | [0024](0024-hour-readings-stacked-aurora-in-corner.md) | Weather and price always on two lines in an hour; the aurora badge sits in the top-right corner, in front of events | Accepted |
+| [0025](0025-security-headers-in-vercel-json.md) | Security headers (strict CSP, frame blocking and three more) in `vercel.json`; the theme script is a file | Accepted |
