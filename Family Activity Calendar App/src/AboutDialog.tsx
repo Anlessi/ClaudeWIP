@@ -50,7 +50,7 @@ export default function AboutDialog({ onClose }: { onClose: () => void }) {
           <h3>How to support the developer</h3>
           <p>
             Support my development on Ko-fi by buying my <em>Develop with AI</em>{" "}
-            guide, a PDF sent to you by email.
+            guide.
           </p>
           {/* Placeholder until the Ko-fi page exists; becomes a link then. */}
           <p className="about-placeholder">Ko-fi link coming soon</p>
