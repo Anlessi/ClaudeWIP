@@ -86,9 +86,7 @@ export default function AboutDialog({ onClose }: { onClose: () => void }) {
               <strong>Visit statistics:</strong> The app uses Vercel Web
               Analytics and Speed Insights. They count visits and measure
               loading speed without cookies and without identifying you.
-            </li>
-            <li>No ads, no tracking, and your data is never sold.</li>
-          </ul>
+            </li>          </ul>
         </div>
 
         <div className="editor-actions">

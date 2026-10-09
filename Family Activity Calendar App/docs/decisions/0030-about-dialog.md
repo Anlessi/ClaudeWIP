@@ -15,7 +15,7 @@ the app is, how to support the developer, and how data is handled.
   Three sections: **About** (what the app does; Google Calendar only, read-only), **How to support the
   developer** (buy the owner's *Develop with AI* PDF guide on Ko-fi) and **Your data and privacy** (no server,
   read-only Google access with a token kept only while the page is open, what is saved in the browser, which
-  outside services are called and that they can see the IP address, cookie-free Vercel statistics, no ads).
+  outside services are called and that they can see the IP address, cookie-free Vercel statistics).
 - The Ko-fi link is **placeholder text** ("Ko-fi link coming soon"), not a link, until the owner's Ko-fi page exists.
 - On phones the location button is narrower (`max-width` 7rem instead of 9.5rem) so the top bar still fits at 360px.
 
