@@ -21,6 +21,7 @@ export type IconName =
   | "pin"
   | "search"
   | "aurora"
+  | "info"
 
 const SHAPES: Record<IconName, ReactNode> = {
   calendar: (
@@ -78,6 +79,13 @@ const SHAPES: Record<IconName, ReactNode> = {
     <>
       <path d="M5 17c0-4 2-6 1-11M12 17c0-5 2-7 1-13M19 17c0-4-2-6-1-10" />
       <path d="M3 20h18" />
+    </>
+  ),
+  // An "i" in a rounded box, for the About button.
+  info: (
+    <>
+      <rect x="4" y="4" width="16" height="16" rx="3" />
+      <path d="M12 11v5M12 8h.01" />
     </>
   ),
 }
