@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-09, after the pull request that slims the Day heading on phones and softens today in dark mode._
+_Last updated: 2026-10-09, after the pull request that adds the About dialog._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -19,8 +19,11 @@ renamed "Week at a Glance" (0010).
   the Day heading is one 2.75rem row, with the hour column's heading the same height (0029).
 - In the Day view, swiping left or right on the calendar goes to the next or previous day, and the new day slides
   in briefly (also with the arrows; off with reduced motion). The rule is `swipeDirection` in `swipe.ts` (0028).
-- The top bar holds the logo and title, Day/Week, a **location** button (pin + place name) and the theme button
-  (0021). On phones the title text is hidden and the switch is smaller, so the row fits at 360px.
+- The top bar holds the logo and title, Day/Week, a **location** button (pin + place name), the theme button
+  (0021) and an **About** button (0030). On phones the title text is hidden, the switch is smaller and the location
+  button is at most 7rem, so the row fits at 360px.
+- The About dialog (`AboutDialog.tsx`) has three sections: about the app, how to support the developer (Ko-fi,
+  still placeholder text, not a link) and data and privacy. **Keep the privacy text true** when data handling changes.
 - A compact header on every screen size (0020): the date stays on one line next to ‹ Today › and a **Filters**
   button, which opens a panel with the layer toggles and the calendar button. The legend is a "Legend"
   line that expands. Both start closed on every load. On phones a week across two months shows short months
@@ -82,7 +85,7 @@ renamed "Week at a Glance" (0010).
   | Google Calendar | `googleCalendar.ts`, `googleAuth.ts` | `useGoogleCalendar.ts` | `familyflow.googleCalendars` |
 
 - `App.tsx` is the main UI (large, with sample data). Dialogs: `CalendarDialog.tsx`, `LocationDialog.tsx`,
-  `EventDialog.tsx`. Others: `dates.ts` (week and window helpers), `useToday.ts`, `events.ts` (event types,
+  `EventDialog.tsx`, `AboutDialog.tsx`. Others: `dates.ts` (week and window helpers), `useToday.ts`, `events.ts` (event types,
   overlap groups, card text layout, `formatTime`),
   `Icon.tsx`, `PinLock.tsx`, `useIsPhone.ts` (phone-size check), `index.css` (all styles, including phone and tablet layouts).
 - Images are ordinary Git files, not Git LFS, because Vercel does not fetch LFS files (0018).
@@ -121,11 +124,12 @@ monitored. Hosting is done (0015). The proposed order (details in `IDEAS.md`):
 1. Add the Vercel address to Google's Authorized JavaScript origins (owner).
 2. Stay signed in to Google with small Vercel functions and an encrypted cookie, and remove the PIN.
 3. Publish and verify the Google app (start early).
-4. A donation link (replaces the Stripe idea).
+4. Support link: the About dialog is done (0030); the real Ko-fi link replaces the placeholder text once the page exists.
 5. Usage monitoring: Web Analytics (0016) and Speed Insights (0017) are done; error reports and uptime checks remain.
 6. Final polish of the look and feel.
 
-Open questions: custom domain or not, which donation platform, and whether paid access is dropped for good.
+Open questions: custom domain or not, and whether paid access is dropped for good. Support is on Ko-fi by selling
+the owner's *Develop with AI* PDF guide (a sale, not a donation; see `IDEAS.md` step 4).
 
 **Set for a later version:** nearby events and electricity prices for other countries or price areas. They are
 kept in `IDEAS.md`. The owner dropped the northern lights follow-ups (phone notification, days 4-7).
