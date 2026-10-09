@@ -582,6 +582,31 @@ h1 {
   border-right: 0;
 }
 
+/* In the Day view the new day slides in from the side it comes from (a swipe or an arrow). */
+@media (prefers-reduced-motion: no-preference) {
+  .day-column--from-next {
+    animation: day-from-next 200ms ease-out;
+  }
+
+  .day-column--from-prev {
+    animation: day-from-prev 200ms ease-out;
+  }
+}
+
+@keyframes day-from-next {
+  from {
+    opacity: 0;
+    transform: translateX(25%);
+  }
+}
+
+@keyframes day-from-prev {
+  from {
+    opacity: 0;
+    transform: translateX(-25%);
+  }
+}
+
 .day-heading {
   width: 100%;
   height: 4.5rem;

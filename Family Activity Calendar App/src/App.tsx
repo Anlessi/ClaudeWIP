@@ -35,6 +35,7 @@ import {
   type CalendarSource,
   type Event,
 } from "./events"
+import { SWIPE_EDGE, swipeDirection } from "./swipe"
 import useAurora from "./useAurora"
 import useForecast from "./useForecast"
 import useGoogleCalendar from "./useGoogleCalendar"
@@ -58,6 +59,8 @@ import {
 } from "./weather"
 
 type ViewMode = "day" | "week"
+/** The side a new day slides in from in the Day view: "next" from the right, "prev" from the left. */
+type SlideFrom = "next" | "prev" | null
 
 type CalendarDay = {
   /** ISO date, e.g. "2026-10-06". */
@@ -761,6 +764,7 @@ function DayColumn({
   selected,
   onSelect,
   view,
+  slideFrom,
   onOpenEvents,
 }: {
   day: CalendarDay
@@ -782,6 +786,8 @@ function DayColumn({
   selected: boolean
   onSelect: () => void
   view: ViewMode
+  /** In the Day view, the side the day slides in from after a swipe or an arrow, or null for no slide. */
+  slideFrom: SlideFrom
   /** Opens the details of a card's events. */
   onOpenEvents: (events: Event[]) => void
 }) {
@@ -793,7 +799,7 @@ function DayColumn({
     <section
       className={`day-column ${isToday ? "day-column--today" : ""} ${
         selected ? "day-column--selected" : ""
-      }`}
+      } ${slideFrom ? `day-column--from-${slideFrom}` : ""}`}
     >
       <Button
         className="day-heading"
@@ -1045,8 +1051,50 @@ export default function App() {
 
   // Arrows move by a week in the week view and by a day in the day view.
   const step = view === "week" ? 7 : 1
-  const moveDate = (direction: number) =>
+  // In the Day view the new day slides in from the side it comes from; other date changes don't slide.
+  const [slideFrom, setSlideFrom] = useState<SlideFrom>(null)
+  const moveDate = (direction: number) => {
     setPickedDate(addDays(selectedDate, direction * step))
+    setSlideFrom(direction > 0 ? "next" : "prev")
+  }
+
+  // In the Day view a sideways swipe on the calendar moves to the next or previous day.
+  // When the day is wider than the screen, the frame scrolls sideways first and the day changes at its end.
+  const swipeStart = useRef<{
+    x: number
+    y: number
+    canScrollBack: boolean
+    canScrollOn: boolean
+  } | null>(null)
+  const startSwipe = (event: React.TouchEvent<HTMLElement>) => {
+    const touch = event.touches[0]
+    const frame = event.currentTarget
+    swipeStart.current =
+      view === "day" &&
+      event.touches.length === 1 &&
+      touch.clientX > SWIPE_EDGE &&
+      touch.clientX < window.innerWidth - SWIPE_EDGE
+        ? {
+            x: touch.clientX,
+            y: touch.clientY,
+            canScrollBack: frame.scrollLeft > 0,
+            canScrollOn:
+              frame.scrollLeft + frame.clientWidth < frame.scrollWidth - 1,
+          }
+        : null
+  }
+  const endSwipe = (event: React.TouchEvent) => {
+    const start = swipeStart.current
+    swipeStart.current = null
+    if (!start || event.touches.length > 0) return
+    const touch = event.changedTouches[0]
+    const direction = swipeDirection(
+      touch.clientX - start.x,
+      touch.clientY - start.y,
+    )
+    if (direction === 1 && !start.canScrollOn) moveDate(1)
+    if (direction === -1 && !start.canScrollBack) moveDate(-1)
+  }
 
   // When the week is wider than the screen (phones, upright tablets), bring today's column into view:
   // on first load, on "Today" and on switching to the week. Each request bumps `count`.
@@ -1086,7 +1134,10 @@ export default function App() {
               className={
                 view === "day" ? "view-option view-option--active" : "view-option"
               }
-              onClick={() => setView("day")}
+              onClick={() => {
+                setView("day")
+                setSlideFrom(null)
+              }}
             >
               Day
             </Button>
@@ -1181,6 +1232,7 @@ export default function App() {
               className="today-button"
               onClick={() => {
                 setPickedDate(null)
+                setSlideFrom(null)
                 requestTodayScroll(true)
               }}
             >
@@ -1340,6 +1392,11 @@ export default function App() {
         className="schedule-frame"
         ref={scheduleRef}
         style={{ "--allday-rows": allDayRows } as React.CSSProperties}
+        onTouchStart={startSwipe}
+        onTouchEnd={endSwipe}
+        onTouchCancel={() => {
+          swipeStart.current = null
+        }}
       >
         <div className="time-column">
           <div className="time-heading">{timeZoneLabel}</div>
@@ -1368,6 +1425,7 @@ export default function App() {
               key={day.iso}
               onSelect={() => {
                 setPickedDate(day.iso)
+                setSlideFrom(null)
                 if (window.innerWidth < 700) setView("day")
               }}
               isToday={day.iso === today}
@@ -1375,6 +1433,7 @@ export default function App() {
               showPrices={showPrices}
               showWeather={showWeather}
               view={view}
+              slideFrom={view === "day" ? slideFrom : null}
               onOpenEvents={(events) => setOpenEvents({ day, events })}
             />
           ))}

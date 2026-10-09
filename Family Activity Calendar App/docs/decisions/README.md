@@ -32,3 +32,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0025](0025-security-headers-in-vercel-json.md) | Security headers (strict CSP, frame blocking and three more) in `vercel.json`; the theme script is a file | Accepted |
 | [0026](0026-week-fits-the-screen.md) | The week fits the screen on landscape tablets and laptops (days at least 8.75rem); a 3rem, left-aligned hour column | Accepted |
 | [0027](0027-week-scrolls-to-today.md) | When the week is wider than the screen, it scrolls sideways to today on load, on Today and on switching to Week | Accepted |
+| [0028](0028-swipe-between-days.md) | In the Day view, swipe left or right to change the day (arrows kept); the new day slides in briefly | Accepted |
