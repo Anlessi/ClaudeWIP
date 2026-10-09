@@ -124,12 +124,12 @@ monitored. Hosting is done (0015). The proposed order (details in `IDEAS.md`):
 1. Add the Vercel address to Google's Authorized JavaScript origins (owner).
 2. Stay signed in to Google with small Vercel functions and an encrypted cookie, and remove the PIN.
 3. Publish and verify the Google app (start early).
-4. Support link: the About dialog is done (0030); the real Ko-fi link replaces the placeholder text once the page exists.
+4. Support link: the About dialog is done (0030); a real Ko-fi or Stan Store link replaces the placeholder text later.
 5. Usage monitoring: Web Analytics (0016) and Speed Insights (0017) are done; error reports and uptime checks remain.
 6. Final polish of the look and feel.
 
-Open questions: custom domain or not, and whether paid access is dropped for good. Support is on Ko-fi by selling
-the owner's *Develop with AI* PDF guide (a sale, not a donation; see `IDEAS.md` step 4).
+Open questions: custom domain or not, whether paid access is dropped for good, and Ko-fi or Stan Store. Support is
+by selling the owner's *Develop with AI* PDF guide (a sale, not a donation; see `IDEAS.md` step 4).
 
 **Set for a later version:** nearby events and electricity prices for other countries or price areas. They are
 kept in `IDEAS.md`. The owner dropped the northern lights follow-ups (phone notification, days 4-7).
