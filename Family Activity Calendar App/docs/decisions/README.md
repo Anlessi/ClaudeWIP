@@ -30,3 +30,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0023](0023-compact-hour-rows-on-phones.md) | On phones: 48px hour rows, smaller event cards (two title rows in an hour) and a 60rem-wide Week view | Accepted |
 | [0024](0024-hour-readings-stacked-aurora-in-corner.md) | Weather and price always on two lines in an hour; the aurora badge sits in the top-right corner, in front of events | Accepted |
 | [0025](0025-security-headers-in-vercel-json.md) | Security headers (strict CSP, frame blocking and three more) in `vercel.json`; the theme script is a file | Accepted |
+| [0026](0026-week-fits-the-screen.md) | The week fits the screen on landscape tablets and laptops (days at least 8.75rem); a 3rem, left-aligned hour column | Accepted |
