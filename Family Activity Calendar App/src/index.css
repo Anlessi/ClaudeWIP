@@ -23,6 +23,12 @@
   --field: #fbfcfb;
   --field-border: #80988a;
   --today-badge: #cce4d6;
+  /* Today's day heading, its text, the Week view frame and the "Today" pill inside the heading. */
+  --today: #17221d;
+  --on-today: #ffffff;
+  --on-today-muted: #cbd3ce;
+  --today-frame: #17221d;
+  --today-pill: #cce4d6;
   --label: #56625b;
   --time-heading: #6c7771;
   --on-ink: #ffffff;
@@ -76,6 +82,12 @@
   --field: #121a16;
   --field-border: #64766c;
   --today-badge: #1f4d39;
+  /* A deep green rather than the near-white ink, which glared in the dark. */
+  --today: #1f4d39;
+  --on-today: #e6ede8;
+  --on-today-muted: #9fb8aa;
+  --today-frame: #3f7058;
+  --today-pill: #18211d;
   --label: #aab6af;
   --time-heading: #93a099;
   --on-ink: #0f1613;
@@ -626,8 +638,8 @@ h1 {
 }
 
 .day-column--today .day-heading {
-  background: var(--ink);
-  color: var(--on-ink);
+  background: var(--today);
+  color: var(--on-today);
 }
 
 /* Today's column in the week view gets a frame in the heading's colour. It is drawn on top, so it takes
@@ -641,7 +653,7 @@ h1 {
   position: absolute;
   inset: 0;
   z-index: 6;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--today-frame);
   pointer-events: none;
 }
 
@@ -663,7 +675,11 @@ h1 {
 
 .day-column--today .day-date,
 .day-column--today .day-summary {
-  color: var(--on-ink-muted);
+  color: var(--on-today-muted);
+}
+
+.day-column--today .today-label {
+  background: var(--today-pill);
 }
 
 .today-label {
@@ -1568,6 +1584,30 @@ h1 {
   .days-grid--day {
     grid-template-columns: minmax(0, 1fr);
     min-width: calc(100vw - 6rem);
+  }
+
+  /* The Day view heading is one row on phones (name, date, Today, weather), so the hours get more room.
+     The hour column's heading keeps the same height so the hours line up. */
+  .days-grid--day .day-heading {
+    height: 2.75rem;
+    grid-template-columns: auto auto auto minmax(0, 1fr);
+    grid-template-rows: auto;
+    align-items: center;
+    padding-right: 0.9rem;
+    padding-left: 0.9rem;
+  }
+
+  .days-grid--day .day-summary {
+    grid-column: auto;
+    justify-content: flex-end;
+    margin-top: 0;
+    margin-left: 0.3rem;
+  }
+
+  .schedule-frame--day .time-heading {
+    height: 2.75rem;
+    align-items: center;
+    padding-bottom: 0;
   }
 
   /* Phones keep wider days and scroll sideways through the week. */
