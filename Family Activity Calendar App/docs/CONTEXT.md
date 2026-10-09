@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-09, after the pull request that fits the week to the screen._
+_Last updated: 2026-10-09, after the pull request that adds the location notice at the top._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -39,6 +39,8 @@ renamed "Week at a Glance" (0010).
   colours (0008, 0009), which are refreshed from Google on every load, so a colour changed in Google follows (0022). Before connecting, read-only sample events are shown. There is no add, edit or delete (0011). A green notice at the top
   of the page says so and links to "Connect Google Calendar". When calendars are saved but Google needs a new sign-in (the token is never
   saved, so after every reload), a notice at the top asks to sign in, with a button.
+- When no location is chosen, the notice at the top also asks for one, with a "Set location" button. There is only
+  ever one box: the location request joins the sample or sign-in notice, or stands alone (`App.tsx`).
 - Overlapping events show as one card: the earliest event, a "+N" chip, covering the whole group's time (0019).
   Every card opens a read-only details window (`EventDialog.tsx`) listing the group's events.
   Cards have 4px corners, a 1px edge in a darker shade of the calendar colour (`--event-edge-tint`) and a small
