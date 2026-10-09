@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-09, after the pull request that adds the location notice at the top._
+_Last updated: 2026-10-09, after the pull request that scrolls the week to today._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -25,7 +25,8 @@ renamed "Week at a Glance" (0010).
   and the Week view is narrower, 60rem (0023).
   Above phone size the seven days share the width (each at least 8.75rem), so the whole week fits on screens about
   1110px or wider (landscape tablets, laptops); narrower screens scroll sideways (0026). The hour column is 3rem with
-  left-aligned times.
+  left-aligned times. When it scrolls, the week moves so today's column is right after the hours: on first load, on
+  **Today** and on switching to Week (0027).
   The sizes are in the phone block of `index.css` and in `events.ts` (`HOUR_HEIGHT`, `CARD_INSET`, `CARD_SIZES`); keep them in step.
 - Hourly weather from Open-Meteo for a searched place (0005). Each hour cell shows a 20px icon and the
   temperature at 0.8rem in the main text colour (`--ink`), so it stands out; the day headings keep a 15px icon.
