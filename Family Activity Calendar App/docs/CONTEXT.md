@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-09, after the pull request that scrolls the week to today._
+_Last updated: 2026-10-09, after the pull request that adds swiping between days._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -14,6 +14,8 @@ renamed "Week at a Glance" (0010).
 - Week and Day views that follow the real date, with weeks running Monday to Sunday (0006).
   Today has a dark heading, and in the Week view a 2px frame in the same colour (`--ink`) around the whole
   column, drawn as an overlay (`::after`) so it takes no room. The Day view has no frame.
+- In the Day view, swiping left or right on the calendar goes to the next or previous day, and the new day slides
+  in briefly (also with the arrows; off with reduced motion). The rule is `swipeDirection` in `swipe.ts` (0028).
 - The top bar holds the logo and title, Day/Week, a **location** button (pin + place name) and the theme button
   (0021). On phones the title text is hidden and the switch is smaller, so the row fits at 360px.
 - A compact header on every screen size (0020): the date stays on one line next to ‹ Today › and a **Filters**
