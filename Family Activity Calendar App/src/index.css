@@ -528,7 +528,7 @@ h1 {
 }
 
 .time-column {
-  flex: 0 0 4.4rem;
+  flex: 0 0 3rem;
   position: sticky;
   left: 0;
   z-index: 20;
@@ -541,8 +541,8 @@ h1 {
   height: 4.5rem;
   display: flex;
   align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 0.7rem;
+  justify-content: flex-start;
+  padding: 0 0 0.7rem 0.5rem;
   color: var(--time-heading);
   font-size: 0.58rem;
   font-weight: 700;
@@ -550,8 +550,8 @@ h1 {
 
 .time-label {
   height: 4rem;
-  padding: 0.52rem 0.65rem 0 0;
-  text-align: right;
+  padding: 0.52rem 0 0 0.5rem;
+  text-align: left;
   border-top: 1px solid var(--line);
   font-size: 0.68rem;
   font-weight: 600;
@@ -562,9 +562,10 @@ h1 {
   flex: 1;
 }
 
+/* The days share the width, so the whole week fits on laptops and tablets in landscape. Narrower screens scroll.
+   Below 8.75rem a day has no room for a reading like "−12°" or "−0.3" before the event cards start (47%). */
 .days-grid--week {
-  grid-template-columns: repeat(7, minmax(10.7rem, 1fr));
-  min-width: 74.9rem;
+  grid-template-columns: repeat(7, minmax(8.75rem, 1fr));
 }
 
 .days-grid--day {
@@ -704,8 +705,8 @@ h1 {
 }
 
 .time-allday {
-  padding: 0.35rem 0.65rem 0 0;
-  text-align: right;
+  padding: 0.35rem 0 0 0.5rem;
+  text-align: left;
   font-size: 0.58rem;
   font-weight: 700;
 }
@@ -1497,7 +1498,7 @@ h1 {
   }
 
   .time-column {
-    flex-basis: 3.6rem;
+    flex-basis: 3rem;
   }
 
   /* Shorter hours on phones, so empty hours take less of the screen. Also in HOUR_HEIGHT in events.ts. */
@@ -1544,7 +1545,9 @@ h1 {
     min-width: calc(100vw - 6rem);
   }
 
+  /* Phones keep wider days and scroll sideways through the week. */
   .days-grid--week {
+    grid-template-columns: repeat(7, minmax(10.7rem, 1fr));
     min-width: 60rem;
   }
 
