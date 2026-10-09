@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Icon from "./Icon"
 import logo from "./assets/logo-transparent.png"
 import LocationDialog from "./LocationDialog"
@@ -1048,6 +1048,31 @@ export default function App() {
   const moveDate = (direction: number) =>
     setPickedDate(addDays(selectedDate, direction * step))
 
+  // When the week is wider than the screen (phones, upright tablets), bring today's column into view:
+  // on first load, on "Today" and on switching to the week. Each request bumps `count`.
+  const scheduleRef = useRef<HTMLElement>(null)
+  const [todayScroll, setTodayScroll] = useState({ count: 0, smooth: false })
+  const requestTodayScroll = (smooth: boolean) =>
+    setTodayScroll((request) => ({ count: request.count + 1, smooth }))
+  useEffect(() => {
+    const frame = scheduleRef.current
+    if (view !== "week" || !frame) return
+    const column = frame.querySelector<HTMLElement>(".day-column--today")
+    const hours = frame.querySelector<HTMLElement>(".time-column")
+    if (!column || !hours) return
+    // Today goes right after the sticky hour column (rounded down, so its frame never slips under it);
+    // the browser stops at the ends of the week.
+    const left = Math.floor(
+      frame.scrollLeft +
+        column.getBoundingClientRect().left -
+        hours.getBoundingClientRect().right,
+    )
+    const smooth =
+      todayScroll.smooth &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    frame.scrollTo({ left, behavior: smooth ? "smooth" : "auto" })
+  }, [todayScroll, view])
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -1071,7 +1096,10 @@ export default function App() {
                   ? "view-option view-option--active"
                   : "view-option"
               }
-              onClick={() => setView("week")}
+              onClick={() => {
+                setView("week")
+                requestTodayScroll(false)
+              }}
             >
               Week
             </Button>
@@ -1149,7 +1177,13 @@ export default function App() {
             >
               <Icon name="chevron-left" />
             </Button>
-            <Button className="today-button" onClick={() => setPickedDate(null)}>
+            <Button
+              className="today-button"
+              onClick={() => {
+                setPickedDate(null)
+                requestTodayScroll(true)
+              }}
+            >
               Today
             </Button>
             <Button
@@ -1304,6 +1338,7 @@ export default function App() {
 
       <section
         className="schedule-frame"
+        ref={scheduleRef}
         style={{ "--allday-rows": allDayRows } as React.CSSProperties}
       >
         <div className="time-column">
