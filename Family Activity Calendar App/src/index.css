@@ -1404,6 +1404,36 @@ h1 {
   font-size: 0.76rem;
 }
 
+.about-body {
+  padding: 1.25rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.about-body p {
+  margin: 0;
+}
+
+.about-body h3 {
+  margin: 1.25rem 0 0.4rem;
+  font-size: 1.05rem;
+}
+
+.about-body ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0;
+  padding-left: 1.2rem;
+  list-style: disc;
+}
+
+.about-body .about-placeholder {
+  margin-top: 0.6rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
 @media (max-width: 900px) {
   .app-shell {
     padding: 0 1.15rem 2rem;
@@ -1464,7 +1494,7 @@ h1 {
   }
 
   .topbar-location {
-    max-width: 9.5rem;
+    max-width: 7rem;
     height: 2.15rem;
     padding: 0 0.55rem;
     border-radius: 0.6rem;

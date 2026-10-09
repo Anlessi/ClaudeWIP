@@ -34,3 +34,4 @@ One file per decision. Open a record when a task touches its area. The format is
 | [0027](0027-week-scrolls-to-today.md) | When the week is wider than the screen, it scrolls sideways to today on load, on Today and on switching to Week | Accepted |
 | [0028](0028-swipe-between-days.md) | In the Day view, swipe left or right to change the day (arrows kept); the new day slides in briefly | Accepted |
 | [0029](0029-day-heading-and-dark-today.md) | One-row Day heading on phones, a deep green "today" in dark mode (both views), full weekday names in the Day view | Accepted |
+| [0030](0030-about-dialog.md) | An About button right of the theme button opens a dialog: about the app, support (Ko-fi placeholder text) and data and privacy | Accepted |

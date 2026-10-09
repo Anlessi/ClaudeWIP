@@ -11,13 +11,13 @@ proposed in that session and is not built yet. Order:
 1. Add the Vercel address to Google's Authorized JavaScript origins (owner, a dashboard step; 0015)
 2. Stay signed in to Google, and remove the PIN
 3. Publish and verify the Google app (start early: Google's review can take days to weeks)
-4. Donation link (replaces the earlier Stripe idea)
+4. Support link (the About dialog is built, 0030; the real Ko-fi or Stan Store link is still to add)
 5. Usage monitoring
 6. Final polish of the look and feel
 
 **Open questions for the owner:** (1) a custom domain (about €10–15 a year, recommended for Google
-verification) or the free `*.vercel.app` address, (2) which donation platform (Ko-fi, Buy Me a Coffee or GitHub
-Sponsors), (3) whether Stripe and paid access are dropped for good. Paid access would need Vercel Pro.
+verification) or the free `*.vercel.app` address, (2) whether Stripe and paid access are dropped for good, (3) Ko-fi or
+Stan Store for selling the guide (see step 4). Paid access would need Vercel Pro.
 
 ### 2. Stay signed in to Google, and remove the PIN
 - **Why the PIN can go:** the app holds no data of its own. Weather, prices and aurora are public. Calendar events
@@ -49,11 +49,18 @@ paid security audit (that is only for "restricted" scopes). Needed: domain owner
 Console, a home page, a **privacy policy** and terms (static pages in the app), and a short demo video of the
 sign-in. Until it is verified, there is a 100-user cap and an "unverified app" warning.
 
-### 4. Donation link (replaces Stripe, 2026-10-07)
-A "Support the developer" link in a small About dialog, with the data credits and the privacy policy link. No
-server and no Stripe code. Vercel Hobby allows donations ("does not fall under commercial usage"). **Check
-before launch (Finland):** the Money Collection Act (*rahankeräyslaki*) may apply when a private person asks the
-public for money, and donations may be taxable. Check the Police's and Vero's guidance.
+### 4. Support link (replaces Stripe, 2026-10-07; About dialog built 2026-10-09, 0030)
+The About dialog exists, with "How to support the developer" and "Your data and privacy". Still to do:
+- **Add the real store link (owner's idea, 2026-10-09):** replace the "Ko-fi link coming soon" placeholder text in
+  `AboutDialog.tsx` with a link to the owner's Ko-fi page or Stan Store page, whichever the owner chooses. If it
+  is Stan Store, change the "on Ko-fi" wording in the support paragraph too. Links the user follows need no CSP
+  change (0025); only things the page loads do.
+- Add the data credits (Open-Meteo, sahkotin.fi, NOAA) to the dialog if wanted. Google verification needs a privacy
+  policy at its own address, so the privacy text may also need to become a page.
+- **Check before launch (Finland):** support is now a sale of the owner's *Develop with AI* PDF guide, not a
+  donation. That likely takes it outside the Money Collection Act (*rahankeräyslaki*), but the income may be
+  taxable (check Vero's guidance), and Vercel Hobby is for non-commercial use: it allows donations ("does not fall
+  under commercial usage"), but a sale linked from the app may count as commercial. Check Vercel's fair-use terms.
 Also before going public: Open-Meteo's free use covers sites "that do not have subscriptions or advertising".
 Donations aren't mentioned, so email info@open-meteo.com. The limit is under 10,000 calls a day, counted per user
 because browsers call it. Ask sahkotin.fi about their terms too.

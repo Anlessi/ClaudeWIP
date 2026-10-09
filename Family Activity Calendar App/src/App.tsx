@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Icon from "./Icon"
 import logo from "./assets/logo-transparent.png"
 import LocationDialog from "./LocationDialog"
+import AboutDialog from "./AboutDialog"
 import {
   WEEKDAY_FULL_NAMES,
   WEEKDAY_NAMES,
@@ -954,6 +955,7 @@ export default function App() {
   const [locationDialogOpen, setLocationDialogOpen] = useState(
     location === null,
   )
+  const [aboutOpen, setAboutOpen] = useState(false)
 
   // The forecast covers the current week and the next one, counted from today.
   const windowStart = mondayOf(today)
@@ -1174,6 +1176,15 @@ export default function App() {
             <span>{location ? location.name : "Set location"}</span>
           </Button>
           <ThemeToggle />
+          <button
+            type="button"
+            className="theme-toggle"
+            aria-label="About this app"
+            title="About"
+            onClick={() => setAboutOpen(true)}
+          >
+            <Icon name="info" size={18} />
+          </button>
         </div>
       </header>
 
@@ -1524,6 +1535,8 @@ export default function App() {
           onClose={() => setOpenEvents(null)}
         />
       )}
+
+      {aboutOpen && <AboutDialog onClose={() => setAboutOpen(false)} />}
     </main>
   )
 }
