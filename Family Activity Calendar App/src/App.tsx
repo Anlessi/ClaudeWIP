@@ -3,6 +3,7 @@ import Icon from "./Icon"
 import logo from "./assets/logo-transparent.png"
 import LocationDialog from "./LocationDialog"
 import {
+  WEEKDAY_FULL_NAMES,
   WEEKDAY_NAMES,
   addDays,
   dayNumber,
@@ -66,6 +67,8 @@ type CalendarDay = {
   /** ISO date, e.g. "2026-10-06". */
   iso: string
   short: string
+  /** The full weekday name, e.g. "Friday", for the Day view. */
+  long: string
   date: number
   month: string
   /** 0 for Monday up to 6 for Sunday. */
@@ -80,6 +83,7 @@ function calendarDay(iso: string): CalendarDay {
   return {
     iso,
     short: WEEKDAY_NAMES[index],
+    long: WEEKDAY_FULL_NAMES[index],
     date: dayNumber(iso),
     month: monthName(iso),
     index,
@@ -794,6 +798,8 @@ function DayColumn({
   const groups = groupOverlaps(events)
   const calendarOf = (event: Event) =>
     calendars.get(event.calendarId) ?? SAMPLE_CALENDAR
+  // The Day view has room for the full name; the Week view's columns keep the short one.
+  const dayName = view === "day" ? day.long : day.short
 
   return (
     <section
@@ -804,11 +810,11 @@ function DayColumn({
       <Button
         className="day-heading"
         onClick={onSelect}
-        label={`Show ${day.short} ${day.date}${isToday ? " (today)" : ""}${
+        label={`Show ${dayName} ${day.date}${isToday ? " (today)" : ""}${
           aurora.size > 0 ? ", northern lights possible" : ""
         }`}
       >
-        <span className="day-name">{day.short}</span>
+        <span className="day-name">{dayName}</span>
         <span className="day-date">{day.date}</span>
         {isToday && <span className="today-label">Today</span>}
         <span className="day-summary">
@@ -1205,10 +1211,10 @@ export default function App() {
               ) : (
                 <>
                   <span className="date-long">
-                    {`${selectedDay.short}, ${selectedDay.month} ${selectedDay.date}`}
+                    {`${selectedDay.long}, ${selectedDay.month} ${selectedDay.date}`}
                   </span>
                   <span className="date-short">
-                    {`${selectedDay.short}, ${selectedDay.month.slice(0, 3)} ${selectedDay.date}`}
+                    {`${selectedDay.long}, ${selectedDay.month.slice(0, 3)} ${selectedDay.date}`}
                   </span>
                 </>
               )}
@@ -1389,7 +1395,7 @@ export default function App() {
       </section>
 
       <section
-        className="schedule-frame"
+        className={`schedule-frame schedule-frame--${view}`}
         ref={scheduleRef}
         style={{ "--allday-rows": allDayRows } as React.CSSProperties}
         onTouchStart={startSwipe}

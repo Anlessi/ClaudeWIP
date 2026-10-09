@@ -1,6 +1,6 @@
 # Context: Week at a Glance (Family Activity Calendar App)
 
-_Last updated: 2026-10-09, after the pull request that adds swiping between days._
+_Last updated: 2026-10-09, after the pull request that slims the Day heading on phones and softens today in dark mode._
 
 A briefing for a new session: what exists, how it's built and what's next. Details and reasons are in the
 decision records (`decisions/README.md`, loaded automatically) and setup in `../README.md`.
@@ -12,8 +12,11 @@ renamed "Week at a Glance" (0010).
 
 ## What's built (on `main`)
 - Week and Day views that follow the real date, with weeks running Monday to Sunday (0006).
-  Today has a dark heading, and in the Week view a 2px frame in the same colour (`--ink`) around the whole
-  column, drawn as an overlay (`::after`) so it takes no room. The Day view has no frame.
+  Today has its own heading colour (`--today` tokens): dark ink in light mode, a deep green in dark mode. In the
+  Week view a 2px frame (`--today-frame`) goes around the whole column, drawn as an overlay (`::after`) so it
+  takes no room. The Day view has no frame (0029).
+- The Day view shows full weekday names ("Friday", also in the date line); the Week view keeps "Fri". On phones
+  the Day heading is one 2.75rem row, with the hour column's heading the same height (0029).
 - In the Day view, swiping left or right on the calendar goes to the next or previous day, and the new day slides
   in briefly (also with the arrows; off with reduced motion). The rule is `swipeDirection` in `swipe.ts` (0028).
 - The top bar holds the logo and title, Day/Week, a **location** button (pin + place name) and the theme button
