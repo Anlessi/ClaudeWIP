@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import Icon from "./Icon"
 
-/** What the app is and how to support the developer, opened from the top bar's About button (0030). */
+/** What the app is, how to support the developer and how data is handled; opened from the top bar's About button (0030). */
 export default function AboutDialog({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -72,8 +72,8 @@ export default function AboutDialog({ onClose }: { onClose: () => void }) {
             <li>
               <strong>Saved on your device:</strong> Your chosen place, the
               names and colours of your calendars, your theme, and recent
-              weather, price and northern lights data are saved in your browser so the app loads
-              quickly. Clearing your browser’s site data removes them.
+              weather, price and northern lights data are saved in your browser
+              so the app loads quickly. Clearing your browser’s site data removes them.
             </li>
             <li>
               <strong>Outside services:</strong> To get the weather, the app
@@ -86,7 +86,8 @@ export default function AboutDialog({ onClose }: { onClose: () => void }) {
               <strong>Visit statistics:</strong> The app uses Vercel Web
               Analytics and Speed Insights. They count visits and measure
               loading speed without cookies and without identifying you.
-            </li>          </ul>
+            </li>
+          </ul>
         </div>
 
         <div className="editor-actions">
