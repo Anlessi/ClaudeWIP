@@ -461,12 +461,45 @@ function AuroraNotice({ from, kp }: { from: number; kp: number }) {
   )
 }
 
-/** At the top of the page when calendars are chosen but Google needs a new sign-in (it is not kept after a reload). */
-function SignInNotice({ onReconnect }: { onReconnect: () => Promise<void> }) {
+/** The "Set location" button in the notices at the top of the page. */
+function SetLocationButton({ onSetLocation }: { onSetLocation: () => void }) {
+  return (
+    <button type="button" className="weather-link" onClick={onSetLocation}>
+      Set location
+    </button>
+  )
+}
+
+/** At the top of the page when no location is chosen and no other notice is showing. */
+function LocationNotice({ onSetLocation }: { onSetLocation: () => void }) {
+  return (
+    <p className="sample-notice" role="status">
+      Set your location to see the weather.
+      <SetLocationButton onSetLocation={onSetLocation} />
+    </p>
+  )
+}
+
+/**
+ * At the top of the page when calendars are chosen but Google needs a new sign-in (it is not kept after a
+ * reload). When no location is chosen either, it asks for that too, so there is only one box.
+ */
+function SignInNotice({
+  onReconnect,
+  needsLocation,
+  onSetLocation,
+}: {
+  onReconnect: () => Promise<void>
+  needsLocation: boolean
+  onSetLocation: () => void
+}) {
   const [message, setMessage] = useState("")
   return (
     <p className="sample-notice" role="status">
-      {message || "Sign in to Google to see your calendar events."}
+      {message ||
+        (needsLocation
+          ? "Sign in to Google to see your calendar events, and set your location to see the weather."
+          : "Sign in to Google to see your calendar events.")}
       <button
         type="button"
         className="weather-link"
@@ -479,6 +512,7 @@ function SignInNotice({ onReconnect }: { onReconnect: () => Promise<void> }) {
       >
         Sign in
       </button>
+      {needsLocation && <SetLocationButton onSetLocation={onSetLocation} />}
     </p>
   )
 }
@@ -564,22 +598,32 @@ function GoogleStatus({
   )
 }
 
-/** Tells that the events on screen are samples, at the top of the page where it is easy to find. */
+/**
+ * Tells that the events on screen are samples, at the top of the page where it is easy to find. When no
+ * location is chosen, it asks for that too, so there is only one box.
+ */
 function SampleNotice({
   configured,
   onOpenSettings,
+  needsLocation,
+  onSetLocation,
 }: {
   configured: boolean
   onOpenSettings: () => void
+  needsLocation: boolean
+  onSetLocation: () => void
 }) {
   return (
     <p className="sample-notice" role="status">
-      These are sample events.
+      {needsLocation
+        ? "These are sample events. Set your location to see the weather."
+        : "These are sample events."}
       {configured && (
         <button type="button" className="weather-link" onClick={onOpenSettings}>
           Connect Google Calendar
         </button>
       )}
+      {needsLocation && <SetLocationButton onSetLocation={onSetLocation} />}
     </p>
   )
 }
@@ -1052,10 +1096,19 @@ export default function App() {
         <SampleNotice
           configured={google.configured}
           onOpenSettings={() => setCalendarDialogOpen(true)}
+          needsLocation={location === null}
+          onSetLocation={() => setLocationDialogOpen(true)}
         />
       )}
       {googleConnected && google.needsSignIn && (
-        <SignInNotice onReconnect={google.reconnect} />
+        <SignInNotice
+          onReconnect={google.reconnect}
+          needsLocation={location === null}
+          onSetLocation={() => setLocationDialogOpen(true)}
+        />
+      )}
+      {googleConnected && !google.needsSignIn && location === null && (
+        <LocationNotice onSetLocation={() => setLocationDialogOpen(true)} />
       )}
       {tonight && <AuroraNotice from={tonight[0]} kp={tonight[1]} />}
 
